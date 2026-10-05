@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    {% if role == 'admin' %}
+      <a href="{{ url_for('admin') }}">Admin Panel</a>
+    {% endif %}
+    <a href="{{ url_for('logout') }}">Log Out</a>
+  </nav>
+  <hr>
+  <h3>Welcome, {{ username }}</h3>
+  <p><strong>Role:</strong> {{ role }}</p>
+  <p>Your session is active. You can now access your courses and study tools.</p>
+</div>
+{% endblock %}

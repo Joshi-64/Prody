@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h3>Create an Account</h3>
+  <form method="POST">
+    <label>Username</label>
+    <input type="text" name="username" required>
+    
+    <label>Email</label>
+    <input type="email" name="email" required>
+    
+    <label>Password</label>
+    <input type="password" id="password" name="password" required>
+    
+    <div style="margin: -8px 0 16px; display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="togglePw" onclick="togglePasswordVisibility()" style="width: auto; margin: 0;">
+      <label for="togglePw" style="font-size: 0.9em; cursor: pointer;">Show Password</label>
+    </div>
+
+    <label>Account Role</label>
+    <select name="role">
+      <option value="student">Student</option>
+      <option value="admin">Administrator</option>
+    </select>
+    
+    <button type="submit">Register</button>
+  </form>
+  <p>Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+</div>
+
+<script>
+function togglePasswordVisibility() {
+  const pwInput = document.getElementById("password");
+  pwInput.type = pwInput.type === "password" ? "text" : "password";
+}
+</script>
+{% endblock %}
