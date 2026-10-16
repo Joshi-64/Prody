@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+  <nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a>
+    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a>
+    {% if session.get('role') == 'admin' %}
+      <a href="{{ url_for('admin') }}">Admin Panel</a>
+    {% endif %}
+    <a href="{{ url_for('logout') }}">Log Out</a>
+  </nav>
+
+
+  <hr>
+
+  <!-- AUTOMATIC ICAL SYNC INPUT FORM -->
+  <h3>View/Add Schedule</h3>
+  <p style="font-size: 0.9em; color: #555;">
+    Add course deadlines and events yourself here.
+  </p>
+  <form action="{{ url_for('calendar_bp.add_manual') }}" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" name="event_name" placeholder="Dinner with Janice" style="margin: 0; flex-grow: 1;" required>
+        <input type="datetime-local" name="event_date" placeholder="10/12/2026" style="margin: 0; flex-grow: 1;" required>
+    <button type="submit" style="white-space: nowrap;">Add Schedule Manually</button>
+  </form>
+  <p style="font-size: 0.9em; color: #555;">
+    Paste your secret Google Calendar or Outlook iCal address (ending in <code>.ics</code>) below to securely auto-import your events.
+  </p>
+  <form action="{{ url_for('calendar_bp.automatic_add') }}" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <input type="url" name="calendar_url" placeholder="https://google.com" style="margin: 0; flex-grow: 1;" required>
+    <button type="submit" style="white-space: nowrap;">Add Schedule</button>
+  </form>
+  <p style="font-size: 0.9em; color: #555;">
+    Optionally, use AI to optimize your schedule here! This could take a while so don't close your browser!
+  </p>
+  <div style="margin-bottom: 20px;">
+ <details style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa;">
+    <summary style="cursor: pointer; font-weight: bold;">Optimize with AI Options</summary>
+    
+    <form action="{{ url_for('calendar_bp.ai_recomended_schedule') }}" method="POST" style="margin-top: 10px;">
+        <label>List any scheduling restrictions or preferences:</label>
+        <!-- Defaulting to N/A if left blank -->
+        <input type="text" name="user_constraints" value="N/A" required>
+        
+        <button type="submit">Analyze & Pitch Plan</button>
+    </form>
+     
+</details>
+{% if session.get('review_mode_active') %}
+<div class="alert" style="background-color: #fff3cd; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba;">
+    <strong>Review Pitched Schedule:</strong> Do you want to save these proposed slots?
+    <div style="margin-top: 10px; display: flex; gap: 10px;">
+        <a href="{{ url_for('calendar_bp.accept_route') }}" style="background-color: green; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px;">Keep Changes</a>
+        <a href="{{ url_for('calendar_bp.reject_route') }}" style="background-color: red; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px;">Discard Plan</a>
+    </div>
+</div>
+{% endif %}
+  <hr>
+
+  <!-- INTERACTIVE FULLCALENDAR CONTAINER -->
+<h3>My Schedule Grid</h3>
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<div id="calendar" style="margin-top: 20px;"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: 'auto', 
+            events: [
+                {% for ev in events %}
+                    {
+                        title: '{{ ev.event_name | replace("'", "\\'") }}',
+                        start: '{{ ev.event_date }}',
+                        color: {% if ev.is_ai_recommended %}'#800080'{% else %}'#0078D4'{% endif %},
+                        extendedProps: {
+                        recordId: '{{ ev.event_id }}' 
+                }
+                    },
+                {% endfor %}
+            ],
+            eventClick: function(info) {
+        // Access the primary key ID  bundled inside the extended properties
+        var uniqueRowId = info.event.extendedProps.recordId;
+        // Show a standard browser prompt confirm pop-up box
+        if (confirm("Are you sure you want to permanently delete: " + info.event.title + "?")) {
+            // Force the browser window to navigate straight to backend deletion route link
+            window.location.href = "/calendar/delete/" + uniqueRowId;
+        }}
+        });
+        calendar.render();
+    });
+</script>
+{% endblock %}

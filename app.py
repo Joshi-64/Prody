@@ -1,16 +1,21 @@
 import mysql.connector
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from calendar_routes import calendar_bp #adds calendar functionality
+from user_courses import user_courses_bp #adds course upload functionality
 app = Flask(__name__)
 # Session secret key
 app.secret_key = 'prody_dev_secret_key_2026'
+
+#Links seperate core functionality code to main app script
+app.register_blueprint(calendar_bp)
+app.register_blueprint(user_courses_bp)
 
 # Local MySQL connection config
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'your_local_mysql_password',  # Update with your local MySQL password
+    'password': "Your password here",  # Update with your local MySQL password
     'database': 'prody_dev',
 }
 
@@ -76,7 +81,7 @@ def login():
 
     # Verify user exists and password hash matches
     if user and check_password_hash(user['password_hash'], password):
-      session['user_id'] = user['id']
+      session['user_id'] = user['id'] 
       session['username'] = user['username']
       session['role'] = user['role']
       return redirect(url_for('dashboard'))
@@ -130,3 +135,4 @@ def logout():
 
 if __name__ == '__main__':
   app.run(debug=True, port=5000)
+  app.run(debug=True, use_reloader=False)

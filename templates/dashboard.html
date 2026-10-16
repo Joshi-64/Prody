@@ -3,6 +3,8 @@
 <div class="card">
   <nav>
     <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a>
+    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a>
     {% if role == 'admin' %}
       <a href="{{ url_for('admin') }}">Admin Panel</a>
     {% endif %}

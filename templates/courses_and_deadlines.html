@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a>
+    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a>
+    {% if role == 'admin' %}
+      <a href="{{ url_for('admin') }}">Admin Panel</a>
+    {% endif %}
+    <a href="{{ url_for('logout') }}">Log Out</a>
+  </nav>
+
+  <hr>
+
+  <h3>Choose Whether to Add Courses or Course Deadlines Here!</h3>
+  <p style="font-size: 0.9em; color: #555;">
+    Add Courses
+  </p>
+  <form action="{{ url_for('user_courses_bp.add_courses') }}" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <input type="text" name="course_name" placeholder="Algebra I" style="margin: 0; flex-grow: 1";required>
+    <button type="submit" style="white-space: nowrap;">Add Course</button>
+  </form>
+  <p style="font-size: 0.9em; color: #555;">
+    Add Course Deadlines
+  </p>
+  <form action="{{ url_for('user_courses_bp.add_course_deadlines') }}" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <input type="text" name="course_name" placeholder="Chem II" style="margin: 0; flex-grow: 1;"required>
+    <input type="text" name="deadline_name" placeholder="Exam 2" style="margin: 0; flex-grow: 1;"required>
+    <input type="datetime-local" name="deadline_date" placeholder="10/12/2026" style="margin: 0; flex-grow: 1;" required>
+    <button type="submit" style="white-space: nowrap;">Add Course Deadline</button>
+  </form>
+
+  <h3> View Your Courses</h3>
+  <ul style="padding-left: 20px; margin-bottom: 20px;">
+    {% for course in user_courses %}
+      <li style="margin-bottom: 5px;">
+        <strong>{{ course.course_name }}</strong> 
+        <span style="font-size: 0.8em; color: #777;">(ID: {{ course.course_id }})</span>
+      </li>
+    {% else %}
+      <li style="color: #777; list-style-type: none; margin-left: -20px;">
+        No courses tracked yet. Use the form above to register your first class!
+      </li>
+    {% endfor %}
+  </ul>
+  
+
+</div>
+{% endblock %}
