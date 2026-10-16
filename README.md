@@ -13,8 +13,12 @@ Prody is a web-based productivity application built for students. This repositor
 ---
 
 ## Getting Started
-
-### 1. Database Setup
+### 1. Download Relevant Libraries
+pip install Flask werkzeug mysql-connector-python 
+pip install ics requests   
+### 2. Create Config_ai file for API Key
+In project folder, create filed named exactly config_ai.py. Store given API key in variable named exactly prody_ai_key
+### 3. Database Setup
 Ensure your local MySQL Server is running. Create the database and user table using the schema below (or run `schema.sql`):
 
 ```sql
@@ -29,3 +33,32 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('student', 'admin') NOT NULL DEFAULT 'student',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+create table if not exists calendarevents(  
+
+    event_id INT AUTO_INCREMENT,  
+    id INT NOT NULL,  
+    event_name VARCHAR(255) NOT NULL,  
+    event_date DATETIME NOT NULL,  
+    is_ai_recommended BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (event_id),  
+    FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE 
+); 
+
+CREATE TABLE IF NOT EXISTS usercourses (  
+    course_id INT AUTO_INCREMENT, 
+    id INT NOT NULL, 
+    course_name VARCHAR(255),
+    PRIMARY KEY (course_id),  
+    FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
+ ); 
+
+CREATE TABLE IF NOT EXISTS coursedeadlines (  
+    deadline_id INT AUTO_INCREMENT,  
+    course_id INT NOT NULL,  
+    deadline_name VARCHAR(255) NOT NULL,  
+    deadline_date DATETIME NOT NULL,  
+    PRIMARY KEY (deadline_id)
+); 
+
+alter table calendarevents add column flag_status VARCHAR(20) not null;
