@@ -16,7 +16,9 @@ Prody is a web-based productivity application built for students. This repositor
 ### 1. Download Relevant Libraries
 pip install Flask werkzeug mysql-connector-python 
 pip install ics requests   
-### 1. Database Setup
+### 2. Create Config_ai file for API Key
+In project folder, create filed named exactly config_ai.py. Store given API key in variable named exactly prody_ai_key
+### 3. Database Setup
 Ensure your local MySQL Server is running. Create the database and user table using the schema below (or run `schema.sql`):
 
 ```sql
