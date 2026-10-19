@@ -43,7 +43,7 @@ def add_courses():
         except Exception as e:
             print(f"Error adding courses {e}")
             flash('Error adding courses', 'danger')
-    #Get all user courses a
+    #Get all user courses 
     user_courses_list = []
     try:
         cursor.execute("SELECT * FROM usercourses WHERE id = %s", (user_id,))
