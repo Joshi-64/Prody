@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 30px auto; font-family: sans-serif;">
+    <h2>My To-Do List & Concept Tracker</h2>
+    
+    <p>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a> | 
+      <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a> | 
+      <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a> | 
+      <a href="{{ url_for('tasks_bp.manage_tasks') }}">Tasks</a> | 
+      <a href="{{ url_for('logout') }}">Log Out</a>
+    </p>
+
+    <form method="POST" style="margin-bottom: 30px;">
+        <input type="text" name="task_name" placeholder="Enter task or concept..." required style="width: 60%; padding: 8px;">
+        <input type="date" name="due_date" style="padding: 8px;">
+        <button type="submit" style="padding: 8px 16px; background-color: #007bff; color: white; border: none; cursor: pointer;">Add</button>
+    </form>
+
+    <h3>Active Tasks</h3>
+    <ul>
+        {% for task in tasks %}
+            <li style="margin-bottom: 10px;">
+                {% if task.is_completed %}
+                    <strike>{{ task.task_name }} (Due: {{ task.due_date }})</strike> - <b>Completed</b>
+                {% else %}
+                    {{ task.task_name }} {% if task.due_date %}(Due: {{ task.due_date }}){% endif %}
+                    <form method="POST" action="{{ url_for('tasks_bp.complete_task', task_id=task.task_id) }}" style="display:inline; margin-left: 10px;">
+                        <button type="submit" style="background: green; color: white; border: none; padding: 4px 8px; cursor: pointer;">Mark Done</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% else %}
+            <li>No tasks logged yet. Add one above!</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

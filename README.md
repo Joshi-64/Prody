@@ -1,64 +1,57 @@
 # Prody - Student Productivity Platform
 
-Prody is a web-based productivity application built for students. This repository contains the core User Management and Database subsystems developed for Sprint 2.
+Prody is a Flask and MySQL app for student scheduling. Sprint 3 adds shared database access, automatic table setup, course deadlines, calendar sync, AI study planning, and a to-do tracker.
 
----
+## Prerequisites
 
-## Tech Stack
-* **Language:** Python
-* **Backend Framework:** Flask
-* **Database:** MySQL 8.0
-* **Security:** Werkzeug (Password hashing via `scrypt`)
+- Python 3.x
+- MySQL Server, with a database named `prody_dev`
 
----
+## Database setup
 
-## Getting Started
-### 1. Download Relevant Libraries
-pip install Flask werkzeug mysql-connector-python 
-pip install ics requests   
-### 2. Create Config_ai file for API Key
-In project folder, create filed named exactly config_ai.py. Store given API key in variable named exactly prody_ai_key
-### 3. Database Setup
-Ensure your local MySQL Server is running. Create the database and user table using the schema below (or run `schema.sql`):
+Create the database once:
 
 ```sql
 CREATE DATABASE IF NOT EXISTS prody_dev;
-USE prody_dev;
+```
 
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role ENUM('student', 'admin') NOT NULL DEFAULT 'student',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+Set the local MySQL host, user, password, and database in `DB_CONFIG` inside `db.py`. That file is the only place credentials are stored.
 
-create table if not exists calendarevents(  
+On startup, `init_db()` runs from `app.py` and creates any missing tables:
 
-    event_id INT AUTO_INCREMENT,  
-    id INT NOT NULL,  
-    event_name VARCHAR(255) NOT NULL,  
-    event_date DATETIME NOT NULL,  
-    is_ai_recommended BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (event_id),  
-    FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE 
-); 
+- `users`
+- `usercourses`
+- `coursedeadlines`
+- `calendarevents`
+- `todolist`
 
-CREATE TABLE IF NOT EXISTS usercourses (  
-    course_id INT AUTO_INCREMENT, 
-    id INT NOT NULL, 
-    course_name VARCHAR(255),
-    PRIMARY KEY (course_id),  
-    FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
- ); 
+Existing tables are left in place.
 
-CREATE TABLE IF NOT EXISTS coursedeadlines (  
-    deadline_id INT AUTO_INCREMENT,  
-    course_id INT NOT NULL,  
-    deadline_name VARCHAR(255) NOT NULL,  
-    deadline_date DATETIME NOT NULL,  
-    PRIMARY KEY (deadline_id)
-); 
+## Run the app
 
-alter table calendarevents add column flag_status VARCHAR(20) not null;
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+Open http://127.0.0.1:5000.
+
+For AI study planning, create `config_ai.py` in the project folder and set `prody_ai_key` to the OpenRouter API key. That file is gitignored. Without it, the calendar still loads and the AI action reports that the service is unavailable.
+
+## Implemented use cases
+
+### Use Case 1: User Management / Authentication
+
+Registration, login, and logout use Flask sessions and Werkzeug password hashes stored in the MySQL `users` table. Administrators can open `/admin` to list accounts.
+
+### Use Case 2: Course and Deadline Management
+
+Students add courses in `usercourses` and deadlines in `coursedeadlines`. Saving a deadline also adds it to `calendarevents`.
+
+### Use Cases 3 and 4: Calendar Integration and AI Study Planning
+
+`calendarevents` stores manual events, imported iCal events, and AI-suggested study blocks. Suggested blocks stay pending until the student keeps or discards them.
+
+### Use Case 6: To-Do List and Concept Tracker
+
+`todolist` supports adding a task, listing tasks for the signed-in user, and marking a task complete.

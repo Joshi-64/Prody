@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+config_ai.py
+.env
+*.env
+.vscode/
+.cursor/
+.DS_Store
+Thumbs.db
+desktop.ini

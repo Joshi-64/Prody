@@ -1,15 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="card" style="max-width: 800px; margin: 0 auto;">
-  <nav>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a>
-    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a>
-    {% if session.get('role') == 'admin' %}
-      <a href="{{ url_for('admin') }}">Admin Panel</a>
-    {% endif %}
+  <p>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a> | 
+    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a> | 
+    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a> | 
+    <a href="{{ url_for('tasks_bp.manage_tasks') }}">Tasks</a> | 
     <a href="{{ url_for('logout') }}">Log Out</a>
-  </nav>
+  </p>
 
 
   <hr>
@@ -78,19 +76,25 @@
                         start: '{{ ev.event_date }}',
                         color: {% if ev.is_ai_recommended %}'#800080'{% else %}'#0078D4'{% endif %},
                         extendedProps: {
-                        recordId: '{{ ev.event_id }}' 
-                }
+                            recordId: '{{ ev.event_id }}',
+                            is_ai_recommended: {{ 'true' if ev.is_ai_recommended else 'false' }}
+                        }
                     },
                 {% endfor %}
             ],
             eventClick: function(info) {
-        // Access the primary key ID  bundled inside the extended properties
-        var uniqueRowId = info.event.extendedProps.recordId;
-        // Show a standard browser prompt confirm pop-up box
-        if (confirm("Are you sure you want to permanently delete: " + info.event.title + "?")) {
-            // Force the browser window to navigate straight to backend deletion route link
-            window.location.href = "/calendar/delete/" + uniqueRowId;
-        }}
+                var scheduledTime = info.event.start ? info.event.start.toLocaleString() : 'N/A';
+                var aiRecommended = (info.event.extendedProps && info.event.extendedProps.is_ai_recommended ? 'Yes' : 'No');
+                alert(
+                    "Title / Event Name: " + info.event.title +
+                    "\nScheduled Time: " + scheduledTime +
+                    "\nAI Recommended: " + aiRecommended
+                );
+                if (confirm("Event: " + info.event.title + "\nTime: " + (info.event.start ? info.event.start.toLocaleString() : 'N/A') + "\n\nWould you like to delete this event?")) {
+                    var uniqueRowId = info.event.extendedProps.recordId;
+                    window.location.href = "/calendar/delete/" + uniqueRowId;
+                }
+            }
         });
         calendar.render();
     });

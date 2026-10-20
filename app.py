@@ -3,6 +3,8 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from werkzeug.security import check_password_hash, generate_password_hash
 from calendar_routes import calendar_bp #adds calendar functionality
 from user_courses import user_courses_bp #adds course upload functionality
+from tasks import tasks_bp
+from db import get_db_connection, init_db
 app = Flask(__name__)
 # Session secret key
 app.secret_key = 'prody_dev_secret_key_2026'
@@ -10,18 +12,6 @@ app.secret_key = 'prody_dev_secret_key_2026'
 #Links seperate core functionality code to main app script
 app.register_blueprint(calendar_bp)
 app.register_blueprint(user_courses_bp)
-
-# Local MySQL connection config
-db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': "Your password here",  # Update with your local MySQL password
-    'database': 'prody_dev',
-}
-
-
-def get_db():
-  return mysql.connector.connect(**db_config)
 
 
 @app.route('/')
@@ -46,7 +36,7 @@ def register():
     # Hash the password before storing
     hashed_pw = generate_password_hash(password)
 
-    conn = get_db()
+    conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
       sql = (
@@ -72,12 +62,14 @@ def login():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '')
 
-    conn = get_db()
+    conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    try:
+      cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+      user = cursor.fetchone()
+    finally:
+      cursor.close()
+      conn.close()
 
     # Verify user exists and password hash matches
     if user and check_password_hash(user['password_hash'], password):
@@ -113,15 +105,17 @@ def admin():
     flash('Access restricted to administrators.', 'danger')
     return redirect(url_for('dashboard'))
 
-  conn = get_db()
+  conn = get_db_connection()
   cursor = conn.cursor(dictionary=True)
-  cursor.execute(
-      'SELECT id, username, email, role, created_at FROM users ORDER BY'
-      ' created_at DESC'
-  )
-  users = cursor.fetchall()
-  cursor.close()
-  conn.close()
+  try:
+    cursor.execute(
+        'SELECT id, username, email, role, created_at FROM users ORDER BY'
+        ' created_at DESC'
+    )
+    users = cursor.fetchall()
+  finally:
+    cursor.close()
+    conn.close()
 
   return render_template('admin.html', users=users)
 
@@ -132,7 +126,12 @@ def logout():
   flash('You have been logged out.', 'info')
   return redirect(url_for('login'))
 
+app.register_blueprint(tasks_bp)
 
 if __name__ == '__main__':
+  try:
+    init_db()
+    print("Database schema initialized successfully.")
+  except Exception as e:
+    print(f"Database schema initialization failed: {e}")
   app.run(debug=True, port=5000)
-  app.run(debug=True, use_reloader=False)
