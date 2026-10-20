@@ -3,7 +3,7 @@ import mysql.connector
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'SQL5815!',
+    'password': 'YOUR_PASSWORD_HERE', #Enter your MYSQL Password
     'database': 'prody_dev',
 }
 
