@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% block title %}{{ 'Not found' if code == 404 else 'Something went wrong' }}{% endblock %}
+{% block content %}
+<div class="card" style="text-align:center;padding:48px 24px;max-width:640px;margin:20px auto">
+  <img class="err-oak" src="{{ url_for('static', filename='garden/scenes/tree-scene.webp') }}" alt="" width="160" height="107" style="display:block;width:160px;height:107px;object-fit:cover;object-position:center 32%;border-radius:18px;margin:0 auto 12px">
+  <span class="eyebrow">Error {{ code }}</span>
+  <h1>{% if code == 404 %}This page didn't take root.{% else %}Something went wrong on our end.{% endif %}</h1>
+  <p class="muted" style="font-size:16px;max-width:440px;margin:12px auto 26px">{{ message }}</p>
+  <a class="btn" href="{{ url_for('dashboard') if session.get('user_id') else url_for('login') }}"><span class="ms">arrow_back</span>Back to {{ 'your dashboard' if session.get('user_id') else 'log in' }}</a>
+</div>
+{% endblock %}

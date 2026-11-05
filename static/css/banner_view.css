@@ -1,0 +1,67 @@
+/* banner_view v2: park ids animated (.bv-*) + v1 (Coder): tap the profile banner -> large animated view. transform/opacity only. */
+.fp-banner{cursor:zoom-in}
+.bv-back{position:fixed;inset:0;z-index:200;background:rgba(10,12,10,.62);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity .25s ease}
+.bv-back.on{opacity:1}
+.bv-stage{position:relative;width:min(1100px,100%);transform:scale(.94);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.bv-back.on .bv-stage{transform:none}
+.bv-stage .fp-banner{position:relative;margin:0;width:100%;height:auto;aspect-ratio:3/1;min-height:140px;border-radius:16px;overflow:hidden;cursor:default;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+@media (max-width:600px){.bv-stage .fp-banner{aspect-ratio:16/9}}
+.bv-x{position:absolute;top:-14px;right:-6px;width:44px;height:44px;border-radius:50%;border:0;background:var(--surface,#fff);color:var(--text,#1F2420);font-size:24px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:2}
+.bv-x:focus-visible{outline:2px solid var(--accent,#4E9A4F);outline-offset:2px}
+html.bv-lock,html.bv-lock body{overflow:hidden}
+/* motion hooks: canopy sway, clouds drift, bench people breathe */
+.bv-back [data-layer=canopy],.bv-back .fp-banner-tree svg{transform-box:fill-box;transform-origin:50% 100%;animation:bv-sway 6s ease-in-out infinite}
+.bv-back [data-layer=clouds],.bv-back .fp-park-clouds,.bv-back .fp-cloud{animation:bv-drift 28s linear infinite alternate}
+.bv-back [data-layer=people],.bv-back .fp-park-people,.bv-back [data-layer=person]{transform-box:fill-box;transform-origin:50% 100%;animation:bv-breathe 4.5s ease-in-out infinite}
+.bv-back [data-layer=person]:nth-child(2n){animation-delay:-1.7s}
+.bv-back .fp-decor{transform-origin:50% 100%;animation:bv-sway 7s ease-in-out infinite}.bv-back .fp-decor:nth-child(2n){animation-delay:-2.3s}
+.bv-back.bv-paused *{animation-play-state:paused!important}
+@keyframes bv-sway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+@keyframes bv-drift{from{transform:translateX(-3%)}to{transform:translateX(3%)}}
+@keyframes bv-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1px) scale(1.012)}}
+@media (prefers-reduced-motion:reduce){.bv-back,.bv-stage{transition:none}.bv-back *{animation:none!important}}
+
+/* v2: inlined park art (README pivots set inline by JS) */
+.bv-back .bv-cloud{animation:bv-cloud 48s ease-in-out infinite alternate}
+.bv-back .bv-tree{animation:bv-tsway 6s ease-in-out infinite}
+.bv-back .bv-flower{animation:bv-fsway 4s ease-in-out infinite}
+.bv-back .bv-glow{animation:bv-glow 4s ease-in-out infinite}
+.bv-back .bv-bird{animation:bv-bird 10s ease-in-out infinite}
+.bv-back .bv-people{animation:bv-people 5s ease-in-out infinite}
+@keyframes bv-cloud{from{transform:translateX(-20px)}to{transform:translateX(20px)}}
+@keyframes bv-tsway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+@keyframes bv-fsway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes bv-glow{0%,100%{opacity:.7}50%{opacity:1}}
+@keyframes bv-bird{0%{transform:translate(0,0) scaleY(1)}12%{transform:translate(6px,-2px) scaleY(.6)}25%{transform:translate(12px,-3px) scaleY(1)}50%{transform:translate(24px,1px) scaleY(.7)}75%{transform:translate(12px,3px) scaleY(1)}100%{transform:translate(0,0) scaleY(1)}}
+@keyframes bv-people{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2px)}}
+
+/* v3: layered park items (data-park) — jogger bob, dog trot/tail wag, kids bounce, under-tree page turn + breathing */
+.bv-back .bv-jog{animation:bv-jog .7s ease-in-out infinite}
+.bv-back .bv-dog{animation:bv-dog .9s ease-in-out infinite}
+.bv-back .bv-wag{animation:bv-wag .45s ease-in-out infinite}
+.bv-back .bv-kids{animation:bv-kids 1.1s cubic-bezier(.3,0,.5,1) infinite}
+.bv-back .bv-page{animation:bv-page 6s ease-in-out infinite}
+.bv-back .bv-vut{animation:bv-people 5.5s ease-in-out infinite}
+@keyframes bv-jog{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
+@keyframes bv-dog{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-.8px) rotate(-.6deg)}75%{transform:translateY(-.4px) rotate(.6deg)}}
+@keyframes bv-wag{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
+@keyframes bv-kids{0%,100%{transform:translateY(0)}45%{transform:translateY(-4px)}55%{transform:translateY(-4px)}}
+@keyframes bv-page{0%,80%,100%{transform:rotate(0) scaleX(1)}86%{transform:rotate(-4deg) scaleX(.82)}92%{transform:rotate(2deg) scaleX(.94)}}
+/* v4 friends in the park: hit targets + name tag */
+.fp-banner .fp-park>svg.pf-hit{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none}
+.pf-hit .pf-v{fill:transparent;pointer-events:all;cursor:pointer;outline:none}
+.pf-hit .pf-v:focus-visible{stroke:var(--accent,#5b8c3a);stroke-width:2;stroke-dasharray:4 3}
+.pf-tag{position:absolute;z-index:6;padding:4px 11px 5px;border-radius:999px;background:var(--surface,#fff);border:1px solid var(--line,rgba(0,0,0,.08));color:var(--text,#1d2a1d);box-shadow:0 2px 10px rgba(0,0,0,.16);text-align:center;line-height:1.15;pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .18s,transform .18s;white-space:nowrap}
+.pf-tag.on{opacity:1;transform:none}
+.pf-tag b{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
+.pf-tag small{display:block;font-size:10.5px;color:var(--muted,#6b746b)}
+.pf-tag:after{content:"";position:absolute;width:8px;height:8px;background:inherit;border:1px solid var(--line,rgba(0,0,0,.08));transform:rotate(45deg)}
+.pf-tag[data-ptr=right]:after{right:-5px;top:calc(50% - 4px);border-left:0;border-bottom:0}
+.pf-tag[data-ptr=left]:after{left:-5px;top:calc(50% - 4px);border-right:0;border-top:0}
+.pf-tag[data-ptr^=down]:after{bottom:-4px;right:3px;width:7px;height:7px;border-left:0;border-top:0}
+.pf-tag[data-ptr^=up]:after{top:-4px;right:3px;width:7px;height:7px;border-right:0;border-bottom:0}
+.pf-tag[data-ptr$="-l"]:after{right:auto;left:3px}
+.pf-tag.pf-ph{padding:4px 8px;line-height:1.2}.pf-tag.pf-ph b{font-size:11px;gap:5px}.pf-tag.pf-ph small{display:none}.pf-tag.pf-ph .pf-dot{width:6px;height:6px}
+.pf-dot{width:7px;height:7px;border-radius:50%;background:#3fb950;flex:none}
+@media (prefers-reduced-motion:reduce){.pf-tag{transition:none;transform:none}}
+.pf-tag[data-ptr^=down]:after,.pf-tag[data-ptr^=up]:after{right:auto;left:calc(var(--pf-px,50%) - 4px)}

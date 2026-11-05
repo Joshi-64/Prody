@@ -1,0 +1,60 @@
+{% extends 'base.html' %}{% block title %}Study rooms{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">Study together</span><h1>Rooms</h1><p class="muted">Video, screen share and a shared whiteboard. Friends can join open rooms without a link.</p></div></div>
+
+<section class="rm-friends sec">
+  <h2 class="rm-h2"><span class="ms" style="color:var(--c-moss,#4E7A4C)">group</span> Friends studying now</h2>
+  {% if friend_rooms %}
+  <div class="card rm-fr-card">
+    {% for fr in friend_rooms %}
+    <div class="rm-fr">
+      <div class="rm-av">{{ (fr.host_display or fr.host_username)[:2]|upper }}{% if fr.host_online %}<i class="live"></i>{% endif %}</div>
+      <div class="rm-fr-t"><div class="rm-fr-n">{{ fr.host_display or fr.host_username }} · {{ fr.title }}</div>
+        <div class="rm-fr-m"><span class="ms">group</span>{{ fr.member_count }} studying</div></div>
+      <form method="post" action="{{ url_for('rooms_bp.join_friend_room', rid=fr.room_id) }}" style="margin:0">
+        <button class="btn rm-join" type="submit"><span class="ms">arrow_forward</span>Join</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card"><div class="rm-empty"><span class="ms">self_improvement</span>No friends studying right now</div></div>
+  {% endif %}
+</section>
+
+<div class="grid rm-grid">
+  <form class="card rm-new" method="post" action="{{ url_for('rooms_bp.create_room') }}">
+    <h3 style="margin:0 0 10px">Start a room</h3>
+    <div class="field"><label for="rmTitle">Name</label><input id="rmTitle" name="title" maxlength="120" placeholder="Bio 101 exam cram"></div>
+    <div class="field"><label for="rmCourse">Class</label><select id="rmCourse" name="course_id"><option value="">Open room</option>{% for c in courses %}<option value="{{ c.course_id }}">{{ c.course_name }}</option>{% endfor %}</select></div>
+    <button class="btn" type="submit" style="width:100%"><span class="ms">videocam</span>Start room</button>
+    <p class="muted" style="font-size:13px;margin:10px 0 0">Invite links always work. Turn off “Friends can join” in a room for a private session.</p>
+  </form>
+  <div class="card">
+    <h3 style="margin:0 0 10px">Your rooms</h3>
+    {% if rooms %}<ul class="rm-list">{% for r in rooms %}
+      <li><a href="{{ url_for('rooms_bp.room', rid=r.room_id) }}"><span class="ms">group</span><span><b>{{ r.title }}</b><small class="muted">{{ r.course_name or 'Open room' }}</small></span><span class="ms rm-go">arrow_forward</span></a></li>
+    {% endfor %}</ul>{% else %}<p class="muted">No rooms yet. Start one, or open an invite link a friend sent you.</p>{% endif %}
+  </div>
+</div>
+<style>
+.rm-h2{font:600 16px Fraunces,var(--display);margin:0 0 8px;display:flex;align-items:center;gap:6px}
+.rm-friends{margin-bottom:16px}
+.rm-fr-card{padding:4px 12px}
+.rm-fr{display:flex;align-items:center;gap:10px;padding:10px 0}.rm-fr+.rm-fr{border-top:1px solid var(--line)}
+.rm-av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--c-peach,#F2E2CB);color:var(--text);flex:none;position:relative}
+.rm-av .live,.rm-fr .live{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:var(--c-moss,#4E7A4C);border:2px solid var(--surface);display:block;margin:0}
+.rm-fr-t{flex:1;min-width:0}.rm-fr-n{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rm-fr-m{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}.rm-fr-m .ms{font-size:14px}
+.rm-join{background:var(--c-moss-soft,#DDE7D3);color:var(--c-moss-ink,#3D5E3B);border:0;border-radius:999px;padding:7px 14px;font-weight:800;min-height:44px;display:inline-flex;gap:4px;align-items:center}
+.rm-empty{color:var(--muted);font-size:13px;display:flex;gap:8px;align-items:center;padding:8px 2px}
+.rm-grid{grid-template-columns:minmax(0,360px) minmax(0,1fr);align-items:start}
+.rm-new .field{margin-bottom:12px}
+.rm-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.rm-list a{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;background:var(--bg);border:1px solid var(--line);color:inherit;text-decoration:none;min-height:44px}
+.rm-list a span:nth-child(2){display:flex;flex-direction:column;flex:1;min-width:0}
+.rm-go{opacity:.5}
+@media(max-width:760px){.rm-grid{grid-template-columns:1fr}}
+.main,.content{padding-bottom:calc(var(--tabbar-h,72px) + 24px + env(safe-area-inset-bottom))}
+</style>
+{% endblock %}

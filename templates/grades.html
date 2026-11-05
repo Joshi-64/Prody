@@ -1,0 +1,43 @@
+{% extends 'base.html' %}{% block title %}Grades{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
+{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
+{% block content %}
+<div class="page-head"><div class="fp-head"><span class="fp-icon">{{ spot('icon_grades',48,48) }}</span><div><span class="eyebrow">Grades</span><h1>Know where you stand.</h1><p class="muted">Log scores with their syllabus weights. Prody does the math.</p></div></div>
+  {% if overall is not none %}<div class="card tile tile-butter stat fp-stat" style="padding:16px 22px"><div class="stat-icon"><span class="ms">school</span></div><div><div class="stat-val">{{ overall }}% <span class="badge b-indigo">{{ overall_letter }}</span></div><div class="stat-label">Average across classes</div></div></div>{% endif %}</div>
+<div class="fp-soil" aria-hidden="true"></div>
+{% if courses %}<div style="margin:0 0 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+  <form method="POST" action="{{ url_for('grades_bp.analyze_grades') }}" style="margin:0"><button class="btn"><span class="ms">auto_awesome</span>Analyze my grades</button></form>
+</div>{% endif %}
+{% if analysis %}<div class="card" id="grade-analysis" style="margin-bottom:18px"><div class="card-head"><h2>Grade analysis</h2></div>
+  <p style="margin:0;white-space:pre-wrap;line-height:1.55">{{ analysis }}</p></div>{% endif %}
+{% if courses %}
+<div class="card fp-gform" style="margin-bottom:20px">
+  <form method="POST" class="row" novalidate>
+    <div class="field fp-class" style="margin:0"><label>Class</label><select name="course_id" required>{% for c in courses %}<option value="{{ c.course_id }}">{{ c.course_name }}</option>{% endfor %}</select></div>
+    <div class="field" style="flex:2;margin:0"><label>Assignment</label><input name="item_name" placeholder="Midterm exam" required></div>
+    <div class="field" style="margin:0"><label>Category</label><select name="category"><option>Assignment</option><option>Exam</option><option>Quiz</option><option>Project</option><option>Lab</option><option>Participation</option></select></div>
+    <div class="field" style="margin:0;max-width:120px"><label>Score %</label><input name="score" type="number" step="0.1" min="0" max="100" placeholder="0–100" required></div>
+    <div class="field" style="margin:0;max-width:120px"><label>Weight %</label><input name="weight" type="number" step="0.1" min="0.1" max="100" placeholder="e.g. 20" required></div>
+    <div class="field" style="margin:0"><label>Which deadline is this for? <span class="small muted">(optional)</span></label><select name="deadline_id" id="g-deadline"><option value="">— None —</option>{% for d in open_deadlines %}<option value="{{ d.deadline_id }}" data-course="{{ d.course_id }}">{{ d.deadline_name }}</option>{% endfor %}</select></div>
+    <button class="btn"><span class="ms">add</span>Save</button>
+  </form>
+  <script>(function(){var c=document.querySelector('.fp-gform select[name=course_id]'),d=document.getElementById('g-deadline');if(!c||!d)return;function f(){if(d.selectedOptions[0]&&d.selectedOptions[0].dataset.course&&d.selectedOptions[0].dataset.course!==c.value)d.value='';Array.prototype.forEach.call(d.options,function(o){if(o.value){var s=o.dataset.course===c.value;o.hidden=!s;o.disabled=!s;}});}c.addEventListener('change',f);f();})();</script>
+</div>
+<div class="grid g-2">
+{% for s in summary %}
+  <div class="card lift fp-branch" style="--fp-c:{{ s.course.color or '#CFDCC6' }}"><div class="fp-twig"></div>
+    <div class="card-head"><div><h2>{{ s.course.course_name }}</h2><span class="fp-tag">{{ s.course.course_code or s.course.subject or 'Class' }}</span> <span class="small muted">{{ s.weight_used }}% of grade logged</span></div>
+      <div style="text-align:right"><div class="stat-val" style="color:var(--red-ink)">{{ s.avg if s.avg is not none else '—' }}{% if s.avg is not none %}%{% endif %}</div><span class="badge {{ 'b-green' if s.letter.startswith('A') else 'b-indigo' if s.letter.startswith('B') else 'b-amber' if s.letter.startswith('C') else 'b-red' if s.avg is not none else 'b-gray' }}">{{ s.letter }}</span></div></div>
+    <div class="progress" style="margin-bottom:12px"><span style="width:{{ [s.weight_used,100]|min }}%"></span></div>
+    {% if s.rows %}<table class="table"><thead><tr><th>Item</th><th>Score</th><th>Weight</th><th></th></tr></thead><tbody>
+      {% for i in s.rows %}<tr><td><b>{{ i.item_name }}</b><div class="small muted">{{ i.category }}</div></td><td>{{ '%g'|format(i.score|float) }}%</td><td>{{ '%g'|format(i.weight|float) }}%</td>
+        <td style="text-align:right"><form class="inline" method="POST" action="{{ url_for('grades_bp.delete_grade', grade_id=i.grade_id) }}"><button class="btn-icon"><span class="ms" style="font-size:18px">delete</span></button></form></td></tr>{% endfor %}
+    </tbody></table>
+    {% else %}<div class="fp-empty" style="padding:8px 0 4px">{{ spot('empty_sprout',120,90) }}<p class="small" style="margin:4px auto 0">No scores yet. Log the first one above and this branch starts counting.</p></div>{% endif %}
+  </div>
+{% endfor %}
+</div>
+{% else %}
+<div class="card fp-empty">{{ spot('empty_seed_packet',160,120) }}<h3>Plant a class first</h3><p>Grades hang off your class branches. Add a class and you can start logging scores with their weights.</p><a class="btn" href="{{ url_for('user_courses_bp.add_courses') }}"><span class="ms">add</span>Add a class</a></div>
+{% endif %}
+{% endblock %}

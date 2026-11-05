@@ -1,0 +1,390 @@
+/* Garden home. The scene is the screen: no cards, no badges, no chrome over the tree.
+   Type: Fraunces for words that belong to the garden, Nunito for everything you act on.
+   Spacing on an 8pt grid; sheets and tags are warm paper, never white boxes. */
+:root{
+  --g-paper:#FBF6EF;           /* tag + sheet paper */
+  --g-paper-edge:rgba(120,88,70,.16);
+  --g-ink:#3F3240;             /* plum-brown ink: readable on paper, kind on the eye */
+  --g-ink-soft:#7B6A78;
+  --g-moss:#4E7A4C;            /* harvest */
+  --g-moss-ink:#FBF8F1;
+  --g-care:#8C7FA3;            /* overdue = withered lilac. Shape + word carry it too, never colour alone */
+  --g-ripe:#B7864A;            /* due soon = warm amber */
+  --g-glass:rgba(251,246,239,.62);
+  --g-glass-line:rgba(255,255,255,.55);
+  --g-serif:'Fraunces',ui-serif,Georgia,serif;
+  --g-sans:'Nunito',ui-rounded,system-ui,-apple-system,sans-serif;
+  --g-ease:cubic-bezier(.22,.8,.24,1);
+  --g-spring:cubic-bezier(.34,1.56,.64,1);
+}
+[data-theme="dark"]{
+  --g-paper:#2A2430;--g-paper-edge:rgba(255,255,255,.08);--g-ink:#F1E8EE;--g-ink-soft:#BBAAB8;
+  --g-moss:#8DBB86;--g-moss-ink:#1A2018;--g-glass:rgba(42,36,48,.62);--g-glass-line:rgba(255,255,255,.12);
+}
+
+/* ---- the page becomes the garden: hide the utility header, let the scene run edge to edge */
+html.is-garden .topnav{display:none}
+html.is-garden body{background:#E9D7E3}
+html.is-garden .content{padding:0!important;max-width:none!important}
+html.is-garden body:has(.tabbar) .frame{padding-bottom:0!important}
+.garden{position:fixed;inset:0;overflow:hidden;color:var(--g-ink);font-family:var(--g-sans)}
+/* perf: no fallback JPG as a placeholder; TreeScene inserts the per-scene fallback JPG itself only when WebGL is missing or the scene fails */
+.g-stage{position:absolute;inset:0;background:#E9D7E3}
+/* night: a dusk wash over the day art until the night renders land */
+[data-theme="dark"] .g-stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:linear-gradient(180deg,rgba(38,30,74,.58),rgba(30,26,58,.42) 55%,rgba(20,18,40,.5));mix-blend-mode:multiply}
+
+/* ---- greeting: words in the sky, not a card */
+.g-sky{position:absolute;z-index:3;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 18px) 76px 28px 24px;pointer-events:none;
+  text-shadow:0 1px 14px rgba(255,236,240,.85);
+  background:linear-gradient(180deg,rgba(214,190,226,.55),rgba(214,190,226,.32) 60%,rgba(214,190,226,0))}
+[data-theme="dark"] .g-sky{background:linear-gradient(180deg,rgba(30,24,52,.6),rgba(30,24,52,0))}
+.g-hello{transition:opacity .6s var(--g-ease),max-height .7s var(--g-ease),margin .7s var(--g-ease);max-height:4em;overflow:hidden}
+.g-settled .g-hello{opacity:0;max-height:0;margin:0}
+.g-summary{transition:margin .7s var(--g-ease)}
+[data-theme="dark"] .g-sky{text-shadow:0 1px 16px rgba(20,16,36,.8)}
+.g-eyebrow{font:700 11px/1.3 var(--g-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--g-ink-soft)}
+.g-hello{margin:6px 0 0;font:400 26px/1.15 var(--g-serif);letter-spacing:-.01em;color:var(--g-ink);max-width:16em;text-wrap:balance}
+.g-summary{margin-top:8px;font:600 14px/1.35 var(--g-sans);color:var(--g-ink-soft);min-height:1.35em}
+.g-more{position:absolute;z-index:4;top:calc(env(safe-area-inset-top) + 14px);right:68px;pointer-events:auto;
+  width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:14px;display:grid;place-items:center;
+  background:var(--g-glass);border:1px solid var(--g-glass-line);color:var(--g-ink);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 4px 18px rgba(80,50,70,.12);cursor:pointer}
+.g-more .ms{font-size:22px;line-height:1}
+.g-more:focus-visible{outline:2px solid var(--g-ink);outline-offset:3px}
+.g-me{position:absolute;z-index:4;top:calc(env(safe-area-inset-top) + 14px);right:16px;pointer-events:auto;
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--g-glass);border:1px solid var(--g-glass-line);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 4px 18px rgba(80,50,70,.12)}
+.g-me img,.g-me .avatar{width:34px;height:34px;border-radius:50%}
+.g-me:focus-visible{outline:2px solid var(--g-ink);outline-offset:3px}
+
+/* ---- elements on the branches */
+.g-items{position:absolute;inset:0;z-index:2;pointer-events:none;will-change:transform}
+.g-el{position:absolute;left:0;top:0;width:var(--g-el,36px);height:var(--g-el,36px);padding:0;border:0;background:none;cursor:pointer;
+  pointer-events:auto;-webkit-tap-highlight-color:transparent;transition:opacity .35s var(--g-ease),filter .35s var(--g-ease)}
+.g-el::before{content:"";position:absolute;inset:-9px;border-radius:50%}           /* 44pt+ touch target */
+.g-sway{display:block;width:100%;height:100%;transform-origin:50% 15%;animation:g-sway var(--sw,4.4s) ease-in-out var(--sd,0s) infinite alternate}
+.g-el img{display:block;width:100%;height:100%;filter:drop-shadow(0 3px 3px rgba(70,40,40,.22))}
+.g-due_soon .g-sway::after{content:"";position:absolute;inset:-22%;z-index:-1;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,214,150,.55),rgba(255,214,150,0) 68%)}  /* warm, still glow. No pulse */
+.g-overdue .g-sway{animation-name:g-droop}
+.g-el:focus-visible{outline:none}
+.g-el:focus-visible img{filter:drop-shadow(0 0 0 #fff) drop-shadow(0 0 3px #fff) drop-shadow(0 0 2px var(--g-ink))}
+@keyframes g-sway{from{transform:rotate(-2.6deg)}to{transform:rotate(2.6deg)}}
+@keyframes g-droop{from{transform:rotate(9deg)}to{transform:rotate(13deg)}}
+.g-appear .g-sway{animation:g-grow .7s var(--g-spring) var(--d,0ms) both,g-sway var(--sw,4.4s) ease-in-out calc(var(--d,0ms) + .7s) infinite alternate}
+@keyframes g-grow{from{transform:scale(0) rotate(-12deg)}to{transform:scale(1) rotate(0)}}
+.g-nudge .g-sway{animation:g-nudge .5s var(--g-spring)}
+@keyframes g-nudge{0%{transform:rotate(0) scale(1)}40%{transform:rotate(-9deg) scale(1.12)}100%{transform:rotate(0) scale(1)}}
+.g-ripen .g-sway{animation:g-ripen .5s var(--g-spring) both}
+@keyframes g-ripen{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(1.08)}}
+/* branch focus: the chosen branch stays lit, the rest of the tree rests */
+.g-focus .g-el:not(.g-lit),.g-focus .g-bundle{opacity:.28;filter:saturate(.5)}
+
+/* +N: a small bunch of buds, not a notification badge */
+.g-bundle{position:absolute;left:0;top:0;display:flex;align-items:center;gap:4px;height:28px;padding:0 10px 0 6px;margin-left:calc(var(--g-el,36px)/2 - 22px);
+  border-radius:14px;border:1px solid var(--g-glass-line);background:var(--g-glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  font:700 12px/1 var(--g-sans);color:var(--g-ink);pointer-events:auto;cursor:pointer;box-shadow:0 3px 12px rgba(80,50,70,.12)}
+.g-bundle::before{content:"";position:absolute;inset:-8px}
+.g-bundle-dots{width:16px;height:12px;background:
+  radial-gradient(circle at 4px 8px,#9DB572 3.4px,transparent 3.8px),radial-gradient(circle at 10px 4px,#B7C98E 3.4px,transparent 3.8px),
+  radial-gradient(circle at 13px 9px,#8BA663 3px,transparent 3.4px)}
+.garden[data-scene="cherry"] .g-bundle-dots{background:
+  radial-gradient(circle at 4px 8px,#EFAFC2 3.4px,transparent 3.8px),radial-gradient(circle at 10px 4px,#F6C9D6 3.4px,transparent 3.8px),
+  radial-gradient(circle at 13px 9px,#E59AB1 3px,transparent 3.4px)}
+
+
+/* ---- sheets: warm paper rising from the grass */
+.g-sheet{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center;background:rgba(40,26,44,0);transition:background .32s var(--g-ease)}
+.g-sheet.on{background:rgba(40,26,44,.22)}
+.g-sheet[hidden],.g-toast[hidden],.g-badge[hidden],.g-branches[hidden]{display:none!important}   /* never let a closed layer swallow taps */
+.g-sheet-card{position:relative;width:min(560px,100%);max-height:78vh;overflow:auto;overscroll-behavior:contain;
+  padding:10px 24px calc(env(safe-area-inset-bottom) + 24px);border-radius:28px 28px 0 0;background:var(--g-paper);color:var(--g-ink);
+  box-shadow:0 -10px 40px rgba(60,30,50,.18);transform:translateY(104%);transition:transform .38s var(--g-ease)}
+.g-sheet.on .g-sheet-card{transform:none}
+.g-grip{display:block;width:40px;height:5px;margin:0 auto 14px;border-radius:3px;background:var(--g-paper-edge);border:0;padding:0;cursor:pointer}
+.g-card-head{display:flex;gap:16px;align-items:center}
+.g-card-pic{width:72px;height:72px;flex:none;margin:-4px -4px -4px -8px}
+.g-card-tx{min-width:0}
+.g-card-state{font:800 11px/1.3 var(--g-sans);letter-spacing:.1em;text-transform:uppercase;color:var(--g-ink-soft)}
+.g-s-overdue{color:var(--g-care)}.g-s-due_soon{color:var(--g-ripe)}.g-s-done{color:var(--g-moss)}
+.g-card-title{margin:4px 0 0;font:500 24px/1.2 var(--g-serif);letter-spacing:-.01em;text-wrap:balance;overflow-wrap:anywhere}
+.g-card-meta{display:flex;align-items:center;gap:8px;margin-top:6px;font:600 14px/1.3 var(--g-sans);color:var(--g-ink-soft)}
+.g-dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.g-card-note{margin:16px 0 0;font:500 15px/1.45 var(--g-serif);color:var(--g-ink-soft)}
+.g-card-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.g-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:24px;border:1px solid var(--g-paper-edge);
+  background:transparent;color:var(--g-ink);font:800 15px/1 var(--g-sans);cursor:pointer;text-decoration:none!important;-webkit-tap-highlight-color:transparent;
+  transition:transform .18s var(--g-spring),background .2s}
+.g-btn:active{transform:scale(.97)}
+.g-btn:focus-visible{outline:2px solid var(--g-ink);outline-offset:2px}
+.g-btn-main{flex:1 1 100%;background:var(--g-moss);border-color:transparent;color:var(--g-moss-ink)}
+.g-btn-quiet{border-color:transparent;color:var(--g-ink-soft)}
+.g-branch-head{display:flex;align-items:center;gap:10px}
+.g-branch-head .g-card-title{margin:0}
+.g-group{margin-top:20px}
+.g-group-h{margin:0 0 4px;font:800 11px/1.3 var(--g-sans);letter-spacing:.1em;text-transform:uppercase;color:var(--g-ink-soft);cursor:default}
+details.g-group>summary{list-style:none;cursor:pointer}details.g-group>summary::-webkit-details-marker{display:none}
+.g-rows{list-style:none;margin:0;padding:0}
+.g-row{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:6px 0;border:0;border-bottom:1px solid var(--g-paper-edge);background:none;
+  color:var(--g-ink);text-align:left;cursor:pointer;font:inherit}
+.g-row img{width:36px;height:36px;flex:none}
+.g-row-t{flex:1;min-width:0;font:500 17px/1.25 var(--g-serif);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-row-w{flex:none;font:700 12px/1 var(--g-sans);color:var(--g-ink-soft)}
+
+/* ---- almanac: the old dashboard lists, folded away under the tree */
+.g-almanac-btn{position:absolute;z-index:4;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h,66px) + var(--nav-inset,16px) + env(safe-area-inset-bottom) + 12px);
+  display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:18px;border:1px solid var(--g-glass-line);
+  background:var(--g-glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:var(--g-ink);font:700 13px/1 var(--g-sans);cursor:pointer;
+  box-shadow:0 4px 18px rgba(80,50,70,.12)}
+.g-almanac-btn:focus-visible{outline:2px solid var(--g-ink);outline-offset:2px}
+.g-alm h2{margin:0 0 4px;font:500 24px/1.2 var(--g-serif)}
+.g-alm h3{margin:22px 0 6px;font:800 11px/1.3 var(--g-sans);letter-spacing:.1em;text-transform:uppercase;color:var(--g-ink-soft)}
+.g-alm ul{list-style:none;margin:0;padding:0}
+.g-alm li{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--g-paper-edge)}
+.g-alm .t{flex:1;min-width:0;font:500 16px/1.3 var(--g-serif)}
+.g-alm .w{flex:none;font:700 12px/1 var(--g-sans);color:var(--g-ink-soft)}
+.g-alm .muted{font:500 15px/1.4 var(--g-serif);color:var(--g-ink-soft)}
+.g-alm-links{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+
+.g-toast{position:fixed;z-index:90;left:50%;top:auto;bottom:calc(var(--nav-clear,88px) + 56px);transform:translate(-50%,6px);opacity:0;
+  padding:10px 16px;border-radius:16px;background:var(--g-paper);color:var(--g-ink);font:600 14px/1.3 var(--g-sans);box-shadow:0 6px 20px rgba(60,30,50,.16);
+  transition:opacity .3s var(--g-ease),transform .3s var(--g-ease)}
+.g-toast.on{opacity:1;transform:translate(-50%,0)}
+.g-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.g-sr button:focus{position:fixed;z-index:90;left:16px;top:16px;width:auto;height:auto;clip:auto;padding:12px;background:var(--g-paper);color:var(--g-ink)}
+
+/* ---- the tab bar floats as frosted glass over the grass on this page */
+@media (max-width:760px){
+  html.is-garden .tabbar{background:var(--g-glass);border-color:var(--g-glass-line);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2)}
+}
+
+/* ---- desktop: the garden as a framed diorama on a soft wash of itself */
+@media (min-width:761px){
+  html.is-garden body{background:#EADCE6}
+  .garden{position:fixed;inset:0;display:grid;place-items:center}
+  .g-wash{position:absolute;inset:-40px;background:inherit;filter:blur(36px) saturate(1.05);opacity:.9;
+    background:#EADCE6 center/cover}   /* the equipped scene's own plate (already loaded by TreeScene), only once data-scene is known */
+  .garden[data-scene="oak"] .g-wash{background-image:url('/static/garden/scenes/tree-plate.webp?v=2')}
+  .garden[data-scene="cherry"] .g-wash{background-image:url('/static/garden/scenes/cherry-plate.webp?v=2')}
+  .garden[data-scene="pine"] .g-wash{background-image:url('/static/garden/scenes/pine-plate.webp?v=2')}
+  .g-frame{position:relative;height:min(92vh,980px);aspect-ratio:9/16;border-radius:32px;overflow:hidden;
+    box-shadow:0 30px 80px rgba(70,40,70,.28),0 0 0 1px rgba(255,255,255,.4)}
+  .g-almanac-btn{bottom:24px}
+  .g-toast{top:auto;bottom:calc((100vh - min(92vh, 980px)) / 2 + 72px)}   /* 72px above the centred .g-frame's bottom edge, clear of Today */
+}
+@media (max-width:760px){.g-wash{display:none}.g-frame{position:absolute;inset:0}}
+
+@media (prefers-reduced-motion:reduce){
+  .g-sway,.g-appear .g-sway,.g-overdue .g-sway{animation:none!important}
+  .g-overdue .g-sway{transform:rotate(11deg)}
+  .g-sheet,.g-sheet-card,.g-toast,.g-el{transition:none!important;animation:none!important}
+}
+
+/* ---- clean mode: one soft badge floats above the crown. One badge, one meaning, gone at zero. */
+.g-badge{position:absolute;z-index:3;left:0;top:0;display:flex;align-items:center;gap:2px;height:52px;padding:0 12px 0 6px;border-radius:26px;
+  border:1px solid var(--g-glass-line);background:var(--g-glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);cursor:pointer;
+  box-shadow:0 0 0 6px rgba(255,236,206,.22),0 0 28px 6px rgba(255,226,180,.55),0 6px 18px rgba(80,50,70,.14);color:var(--g-ink);
+  animation:g-float 5.5s ease-in-out infinite alternate}
+.g-badge-overdue{box-shadow:0 0 0 6px rgba(226,214,240,.28),0 0 28px 6px rgba(214,200,236,.6),0 6px 18px rgba(80,50,70,.14)}
+.g-badge img{width:40px;height:40px;transform-origin:50% 8%;transform:rotate(-6deg)}
+.g-badge-n{font:700 15px/1 var(--g-sans);min-width:0}
+.g-badge-n:empty{display:none}
+.g-badge:not(:has(.g-badge-n:not(:empty))){padding-right:6px}
+.g-badge::before{content:"";position:absolute;inset:-6px}
+.g-badge:focus-visible{outline:2px solid var(--g-ink);outline-offset:4px}
+@keyframes g-float{from{translate:0 0}to{translate:0 -5px}}
+
+/* ---- Branches: its own place. The class's branch over the blurred tree, then a calm list on paper.
+   Opening plays once per visit (camera push into the canopy, the branch grows, its work sprouts).
+   Switching classes keeps the branch and only re-sprouts what grows on it. */
+.g-blur{position:absolute;inset:0;z-index:1;opacity:0;pointer-events:none;background:#E9D7E3 url('/static/garden/scenes/tree-blur.webp') 50% 47%/cover no-repeat}
+.garden[data-scene="cherry"] .g-blur{background-image:url('/static/garden/scenes/cherry-blur.webp')}
+.garden[data-scene="pine"] .g-blur{background-image:url('/static/garden/scenes/pine-blur.webp')}
+.g-stage,.g-blur{transform-origin:0 0}
+.g-fly{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden}
+.g-fly img{position:absolute;left:0;top:0;width:56px;height:auto;opacity:0;will-change:transform,opacity;filter:brightness(.82) saturate(1.1)}
+/* while the camera is inside the tree, the home chrome steps back */
+.g-sky,.g-me,.g-almanac-btn,.g-badge{transition:opacity .22s var(--g-ease)}
+html.g-diving .g-sky,html.g-diving .g-me,html.g-diving .g-more,html.g-diving .g-almanac-btn,html.g-diving .g-badge,html.g-diving .g-items{opacity:0;pointer-events:none}
+html.g-diving .tabbar,html.g-branches-open .tabbar{opacity:0;pointer-events:none;transition:opacity .22s var(--g-ease)}
+html.g-branches-open .g-almanac-btn{visibility:hidden}
+
+.g-branches{position:fixed;inset:0;z-index:70;overflow:auto;overscroll-behavior:contain;background:transparent;color:var(--g-ink);-webkit-overflow-scrolling:touch}
+.g-hero{position:relative;height:calc(env(safe-area-inset-top) + 40px + min(100vw,560px) * 1080 / 1170 * .84 + 36px)}
+.g-bh,.g-chips{position:relative;z-index:3}
+.g-bh{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 8px) 16px 0;min-height:48px}
+.g-back{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 10px 0 4px;border:0;background:none;color:var(--g-ink);font:700 15px/1 var(--g-sans);cursor:pointer;opacity:.82}
+.g-back:focus-visible{outline:2px solid var(--g-ink);border-radius:12px}
+.g-bh-title{margin:0;outline:none;font:500 24px/1 var(--g-serif);text-shadow:0 1px 12px rgba(255,240,244,.7)}
+[data-theme="dark"] .g-bh-title{text-shadow:0 1px 12px rgba(20,16,36,.8)}
+.g-chips{display:flex;gap:8px;overflow-x:auto;padding:10px 20px 14px;scrollbar-width:none;scroll-snap-type:x proximity}
+.g-chips::-webkit-scrollbar{display:none}
+.g-chip{position:relative;flex:none;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:20px;scroll-snap-align:center;
+  border:1px solid var(--g-glass-line);background:var(--g-glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  color:var(--g-ink);font:700 14px/1 var(--g-sans);cursor:pointer;transition:background .25s,border-color .25s,color .25s}
+.g-chip[aria-pressed="true"]{background:var(--g-ink);border-color:var(--g-ink);color:var(--g-paper)}
+.g-chip:focus-visible{outline:2px solid var(--g-ink);outline-offset:2px}
+.g-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.g-chip-mark{position:absolute;left:50%;bottom:-7px;width:6px;height:6px;margin-left:-3px;border-radius:50%}
+.g-chip-mark.is-care{background:var(--g-care)}.g-chip-mark.is-soon{background:var(--g-ripe)}
+
+/* the branch: wood and leaves are separate layers so it can grow, then leaf out; items sprout from its nodes */
+.g-twig{position:absolute;z-index:2;left:0;right:0;top:calc(env(safe-area-inset-top) + 40px);aspect-ratio:1170/1080;pointer-events:none}
+.g-twig-body{position:absolute;inset:0;transform-origin:0 46%}
+.g-grow{position:absolute;left:0;top:0;bottom:0;width:calc(100% + 64px);overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 64px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 64px),transparent)}
+.g-grow-in{position:absolute;left:0;top:0;bottom:0;width:calc(100% - 64px)}
+.g-grow,.g-grow-in{will-change:transform}
+.g-twig-art{display:block;width:100%;height:100%;-webkit-user-drag:none;user-select:none}
+.g-nodes{position:absolute;inset:0}
+.g-node{position:absolute;width:20%;aspect-ratio:1;padding:0;margin:0;border:0;background:none;cursor:pointer;pointer-events:auto;
+  transform:translate(-50%,-15%);-webkit-tap-highlight-color:transparent}
+.g-node::before{content:"";position:absolute;inset:8%}
+.g-twig[data-element="blossom"] .g-node{transform:translate(-50%,-89%)}
+.g-sprout{position:absolute;inset:0;transform-origin:50% 15%}
+.g-twig[data-element="blossom"] .g-sprout{transform-origin:50% 89%}
+.g-node img{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 4px rgba(60,34,30,.22));transform-origin:50% 15%;animation:g-sway 4.6s ease-in-out infinite alternate}
+.g-twig[data-element="blossom"] .g-node img{transform-origin:50% 89%;animation-duration:5.4s}
+.g-node:nth-child(odd) img{animation-delay:-2.2s}
+.g-node:focus-visible{outline:2px solid var(--g-ink);outline-offset:-6px;border-radius:18px}
+.g-node.is-picked img{filter:drop-shadow(0 0 10px rgba(255,248,230,.95)) drop-shadow(0 4px 4px rgba(60,34,30,.22))}
+
+/* name and progress sit where the scene melts into paper */
+.g-list::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:96px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(251,246,239,0),rgba(251,246,239,.6) 60%,var(--g-paper))}
+[data-theme="dark"] .g-list::before{background:linear-gradient(180deg,rgba(42,36,48,0),rgba(42,36,48,.6) 60%,var(--g-paper))}
+.g-meta{position:absolute;z-index:3;left:24px;right:20px;bottom:6px;display:flex;align-items:baseline;gap:12px}
+.g-branch-name{flex:1;min-width:0;margin:0;font:500 22px/1.2 var(--g-serif);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-harvested{flex:none;padding:6px 12px;border-radius:14px;background:rgba(201,186,232,.7);color:#3E3157;font:800 12px/1 var(--g-sans);letter-spacing:.01em}
+.g-harvested:empty{display:none}
+[data-theme="dark"] .g-harvested{background:rgba(140,127,163,.45);color:var(--g-ink)}
+
+.g-list{position:relative;z-index:2;min-height:calc(100vh - 360px);padding:14px 24px calc(var(--nav-h,66px) + env(safe-area-inset-bottom) + 24px);background:var(--g-paper)}
+.g-quiet{margin:18px 0;font:500 16px/1.45 var(--g-serif);color:var(--g-ink-soft)}
+.g-row.is-picked{background:linear-gradient(90deg,rgba(201,186,232,.28),transparent)}
+
+/* the mode switch in the Today sheet */
+.g-switch{display:flex;align-items:center;gap:16px;padding:10px 0;cursor:pointer}
+.g-switch span{flex:1;min-width:0}
+.g-switch b{display:block;font:700 15px/1.3 var(--g-sans)}
+.g-switch small{display:block;margin-top:2px;font:500 13px/1.35 var(--g-sans);color:var(--g-ink-soft)}
+.g-switch input{appearance:none;-webkit-appearance:none;flex:none;width:52px;height:32px;border-radius:16px;background:var(--g-paper-edge);position:relative;cursor:pointer;transition:background .25s}
+.g-switch input::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .25s var(--g-spring)}
+.g-switch input:checked{background:var(--g-moss)}
+.g-switch input:checked::after{transform:translateX(20px)}
+.g-switch input:focus-visible{outline:2px solid var(--g-ink);outline-offset:2px}
+@media (min-width:761px){.g-branches{left:50%;right:auto;width:min(560px,100%);transform:translateX(-50%)}
+  /* on desktop the diorama is a framed card, so the column carries its own out-of-focus canopy */
+  .g-hero{background:#E9D7E3 url('/static/garden/scenes/tree-blur.webp') 50% 34%/250% auto no-repeat}
+  .g-branches[data-scene="cherry"] .g-hero{background-image:url('/static/garden/scenes/cherry-blur.webp')}
+  .g-branches[data-scene="pine"] .g-hero{background-image:url('/static/garden/scenes/pine-blur.webp');background-position:50% 44%}
+  .g-list{min-height:calc(100vh - 520px)}}
+@media (prefers-reduced-motion:reduce){.g-badge{animation:none}}
+
+.garden[data-scene="cherry"] .g-sway{transform-origin:50% 89%}
+@media (prefers-reduced-motion:reduce){.g-node img{animation:none}}
+.g-toast{pointer-events:auto}
+.g-toast-act{margin-left:12px;padding:4px 10px;border:0;border-radius:10px;background:var(--g-ink);color:var(--g-paper);font:700 13px/1.2 var(--g-sans);cursor:pointer}
+button.g-twig-more{border:0;background:var(--g-paper);border-radius:999px;padding:4px 9px;cursor:pointer}
+.g-nodes>.g-twig-more{pointer-events:auto;position:absolute;right:4%;top:66%;bottom:auto;z-index:3;box-shadow:0 1px 4px rgba(0,0,0,.18)}   /* +N rides on the clay limb */
+
+/* Critic r3: limb drops 16px to clear the chips, tapers ~40% and ends on-screen (individual translate/scale compose with the grow animation's transform) */
+.g-twig-body{translate:0 16px;scale:.9 1}
+.g-grow-wood .g-twig-art{-webkit-mask-image:linear-gradient(90deg,#000 78%,rgba(0,0,0,.85) 90%,transparent 99%);mask-image:linear-gradient(90deg,#000 78%,rgba(0,0,0,.85) 90%,transparent 99%);
+  clip-path:polygon(0 0,78% 0,100% 30%,100% 70%,78% 100%,0 100%)}
+/* pine: its own cool sky instead of the pink cast, and a light scrim behind the header */
+.g-branches[data-scene="pine"] .g-hero{background-image:linear-gradient(180deg,rgba(196,214,224,.92),rgba(196,214,224,.35) 40%,rgba(196,214,224,0) 62%)}
+@media (min-width:761px){.g-branches[data-scene="pine"] .g-hero{background:linear-gradient(180deg,rgba(196,214,224,.92),rgba(196,214,224,.35) 40%,rgba(196,214,224,0) 62%),#DCE4E6 url('/static/garden/scenes/pine-blur.webp') 50% 44%/250% auto no-repeat}}
+.g-branches[data-scene="pine"] .g-bh{background:linear-gradient(180deg,rgba(246,248,250,.55),rgba(246,248,250,0));border-radius:0 0 16px 16px}
+
+/* QA r3b: back link legible on every sky: full opacity on a soft paper pill */
+.g-back{opacity:1;background:color-mix(in srgb,var(--g-paper) 78%,transparent);border-radius:12px;padding:0 12px 0 6px}
+/* pine dark: dusky sky + dark scrim instead of the light ones */
+[data-theme="dark"] .g-branches[data-scene="pine"] .g-hero{background-image:linear-gradient(180deg,rgba(28,36,44,.92),rgba(28,36,44,.4) 40%,rgba(28,36,44,0) 62%)}
+@media (min-width:761px){[data-theme="dark"] .g-branches[data-scene="pine"] .g-hero{background:linear-gradient(180deg,rgba(28,36,44,.92),rgba(28,36,44,.4) 40%,rgba(28,36,44,0) 62%),#2A3238 url('/static/garden/scenes/pine-blur.webp') 50% 44%/250% auto no-repeat}}
+[data-theme="dark"] .g-branches[data-scene="pine"] .g-bh{background:linear-gradient(180deg,rgba(20,26,32,.6),rgba(20,26,32,0))}
+/* cherry only: its top node sat 4px into the chip row at 390 */
+.g-branches[data-scene="cherry"] .g-twig-body{translate:0 24px}
+
+/* ================= Clay desktop home (Design clay_shell 6_home_desktop), >=1024px =================
+   The scene fills the screen beside the sidebar instead of sitting in a phone frame. Existing art only: the live
+   720x1280 scene sits in a 3:4 window (whole tree, nothing cropped that matters) placed right of centre, and the
+   equipped scene's own plate (the scene without its tree) continues the sky, hills, grass and fence out to the
+   edges, so the picture reads as one wide garden. Items, badge, fly and blur layers share the stage's box, so
+   garden.js coordinates (all relative to .g-stage) are untouched. */
+.g-pills,.g-next,.g-branch-pill,.g-wash i,.g-wash b{display:none}
+@media (min-width:1024px){.g-wash i,.g-wash b{display:block}}
+@media (min-width:1024px){
+  html.is-garden .topnav{display:block}
+  .garden{left:var(--side-w);display:block;
+    --gm:calc(100vw - var(--side-w));                                  /* main width */
+    --sw:min(75vh,var(--gm));                                          /* scene window width (3:4 of the height) */
+    --sl:clamp(0px,calc(var(--gm) * .58 - var(--sw) / 2),calc(var(--gm) - var(--sw)))}
+  html.is-garden body{background:var(--c-sky-mid)}
+  .g-frame{position:absolute;inset:0;height:auto;aspect-ratio:auto;border-radius:0;box-shadow:none;overflow:hidden}
+  .g-stage,.g-blur,.g-items,.g-fly{left:var(--sl);right:auto;width:var(--sw)}
+  .g-stage{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .g-badge{left:var(--sl)}
+  /* the plate, mapped exactly like the stage's cover crop (focus .47): scale = sw/720, top = 50vh - 601.6 * scale */
+  /* base layer: the plate exactly under the stage, so the stage's faded edges melt into its own background */
+  .g-wash{position:absolute;inset:0;filter:none;opacity:1;overflow:hidden;
+    background:var(--g-plate) no-repeat var(--sl) calc(50vh - var(--sw) * .83556)/var(--sw) calc(var(--sw) * 1.77778) !important}
+  .g-wash::before,.g-wash i,.g-wash b{content:"";position:absolute;top:calc(50vh - var(--sw) * .83556);height:calc(var(--sw) * 1.77778);
+    background-image:var(--g-plate);background-size:var(--sw) 100%;background-repeat:no-repeat}
+  /* both sides: copies of the plate's clean right-hand fifth (sky, hills, bushes, fence; no picnic, no tree hole),
+     mirrored every other copy so neighbours meet edge to edge. 1px overlap hides sub-pixel hairlines. */
+  .g-wash i,.g-wash b{--k:0;width:calc(var(--sw) * .2 + 1px);background-position:right 0}
+  .g-wash i{left:calc(var(--sl) - var(--sw) * .2 * (var(--k) + 1))}
+  .g-wash b{left:calc(var(--sl) + var(--sw) + var(--sw) * .2 * var(--k) - 1px)}
+  .g-wash i:nth-of-type(even),.g-wash b:nth-of-type(odd){transform:scaleX(-1)}
+  .g-wash :nth-of-type(2){--k:1}.g-wash :nth-of-type(3){--k:2}.g-wash :nth-of-type(4){--k:3}.g-wash :nth-of-type(5){--k:4}
+  .g-wash :nth-of-type(6){--k:5}.g-wash :nth-of-type(7){--k:6}.g-wash :nth-of-type(8){--k:7}.g-wash :nth-of-type(9){--k:8}.g-wash :nth-of-type(10){--k:9}
+  /* the seam: a short mirror of the stage's own left edge, fading into the strips */
+  .g-wash::before{z-index:1;left:calc(var(--sl) - var(--sw) * .09);width:calc(var(--sw) * .09 + 2px);background-position:0 0;transform:scaleX(-1);
+    -webkit-mask-image:linear-gradient(90deg,#000,transparent);mask-image:linear-gradient(90deg,#000,transparent)}
+  .garden[data-scene="oak"]{--g-plate:url('/static/garden/scenes/tree-plate.webp?v=2')}
+  .garden[data-scene="cherry"]{--g-plate:url('/static/garden/scenes/cherry-plate.webp?v=2')}
+  .garden[data-scene="pine"]{--g-plate:url('/static/garden/scenes/pine-plate.webp?v=2')}
+  .g-frame::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(246,237,230,.35),rgba(246,237,230,0) 40%)}
+  [data-theme="dark"] .g-wash{filter:brightness(.62) saturate(.8)}
+  [data-theme="dark"] .g-frame::after{background:linear-gradient(90deg,rgba(30,24,52,.55),rgba(30,24,52,.15) 45%,rgba(30,24,52,.25))}
+
+  /* greeting: a glass card over the sky, not words on a wash */
+  .g-sky{left:56px;top:56px;right:auto;width:min(440px,calc(100% - 112px));padding:28px 30px;border-radius:var(--c-r-lg);pointer-events:auto;text-shadow:none;
+    background:var(--c-glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--c-glass-line);box-shadow:var(--sh-soft)}
+  [data-theme="dark"] .g-sky{background:var(--c-glass);text-shadow:none}
+  .g-eyebrow{font:600 15px/1.3 var(--g-sans);letter-spacing:0;text-transform:none;color:#5B4A58}
+  [data-theme="dark"] .g-eyebrow{color:var(--g-ink-soft)}
+  .g-hello,.g-settled .g-hello{opacity:1;max-height:none;margin:6px 0;font:600 40px/1.15 var(--g-serif)}
+  .g-summary{font:600 15px/1.4 var(--g-sans);color:#5B4A58}
+  [data-theme="dark"] .g-summary{color:var(--g-ink-soft)}
+  .g-pills{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 0}
+  .g-pills[hidden],.g-next[hidden]{display:none}
+  .g-next{display:flex;align-items:center;gap:14px;width:100%;margin-top:18px;padding:14px 16px;border-radius:var(--c-r-lg);border:1px solid var(--c-edge);background:var(--c-glass);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:var(--sh-clay);color:var(--g-ink);font:inherit;text-align:left;cursor:pointer}
+  .g-next:focus-visible{outline:2px solid var(--g-ink);outline-offset:3px}
+  .g-next-ck{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--g-ripe)}
+  .g-next[data-state="overdue"] .g-next-ck{border-color:var(--g-care)}
+  .g-next-tx{flex:1;min-width:0}
+  .g-next-tx b{display:block;font:700 16px/1.3 var(--g-sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .g-next-tx small{display:block;font:600 13px/1.3 var(--g-sans);color:var(--g-ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .g-next-go{flex:none;padding:10px 18px;border-radius:var(--c-r-pill);background:var(--g-moss);color:var(--g-moss-ink);font:700 14px/1 var(--g-sans);box-shadow:var(--sh-soft)}
+  .g-me,.g-more{display:none}                          /* sidebar + topnav More cover these */
+  /* bottom-right: Today + Branches pills */
+  .g-almanac-btn{left:auto;right:28px;bottom:28px;transform:none;height:42px;padding:0 18px;border-radius:var(--c-r-pill);font-size:14px}
+  .g-branch-pill{display:inline-flex;position:absolute;z-index:4;right:28px;bottom:82px;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:var(--c-r-pill);
+    border:1px solid var(--g-glass-line);background:var(--g-glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:var(--g-ink);font:700 14px/1 var(--g-sans);cursor:pointer;
+    box-shadow:0 0 0 6px rgba(255,236,214,.35),var(--sh-soft)}
+  .g-branch-pill:focus-visible{outline:2px solid var(--g-ink);outline-offset:3px}
+  .g-branch-pill[hidden]{display:none}
+  html.g-diving .g-branch-pill,html.g-branches-open .g-branch-pill{opacity:0;pointer-events:none}
+  /* Branches: the scenery either side goes soft with the camera push, like the blurred twin over the stage */
+  .g-wash{transition:filter .5s var(--g-ease)}
+  html.g-diving .g-wash,html.g-branches-open .g-wash{filter:blur(18px) saturate(.92)}
+  [data-theme="dark"].g-diving .g-wash,[data-theme="dark"].g-branches-open .g-wash{filter:blur(18px) brightness(.62) saturate(.8)}
+  .g-toast{left:calc(var(--side-w) + (100vw - var(--side-w)) / 2);bottom:96px}
+  .g-branches{left:calc(var(--side-w) + (100vw - var(--side-w)) / 2)}
+}
+@media (min-width:1024px) and (max-height:620px){.g-sky{top:24px;padding:20px 24px}.g-hello,.g-settled .g-hello{font-size:30px}}
+@media (min-width:1024px) and (prefers-reduced-motion:reduce){.g-branch-pill,.g-next,.g-wash{transition:none}}

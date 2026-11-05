@@ -1,0 +1,54 @@
+{% extends 'base.html' %}{% block title %}Friends{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
+{% macro av(name) %}{% set pal = ['#F3D9CC','#DCE8D6','#E9DFC9','#D9E3EE','#EADCEB','#F2E4C2'] %}<span class="frx-av" aria-hidden="true" style="--av:{{ pal[(name|length) % 6] }}">{{ name[:1]|upper }}</span>{% endmacro %}
+{% block content %}
+<div class="frx">
+<div class="frx-head"><h1>Friends</h1><p class="muted">Friends who are online visit your park.</p></div>
+
+<section class="frx-add card" id="add">
+  <h2 class="frx-h">Add friend</h2>
+  <form method="GET" action="{{ url_for('friends_bp.friends') }}#add" class="frx-search-form" role="search">
+    <label for="fr-user" class="frx-hint">Enter their exact username.</label>
+    <div class="frx-search"><span class="frx-at" aria-hidden="true">@</span>
+      <input id="fr-user" name="u" value="{{ q }}" required maxlength="255" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="username">
+      <button class="frx-b frx-p" type="submit">Find</button></div>
+  </form>
+  {% if q %}<div class="frx-result" aria-live="polite">
+    {% if lookup %}<div class="frx-row">{{ av(lookup.display) }}<div class="frx-nm"><b>{{ lookup.display }}</b><small>@{{ lookup.username }}</small></div>
+      {% if lookup.rel == 'none' %}<form method="POST" action="{{ url_for('friends_bp.send_request') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="username" value="{{ lookup.username }}"><button class="frx-b frx-p">Add</button></form>
+      {% elif lookup.rel == 'incoming' %}<form method="POST" action="{{ url_for('friends_bp.accept', fid=lookup.fid) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="frx-b frx-p">Accept</button></form>
+      {% else %}<span class="frx-b frx-done">{{ {'self':'You','friends':'Friends','requested':'Requested'}[lookup.rel] }}</span>{% endif %}</div>
+    {% else %}<div class="frx-none"><b>No user found</b><small>Check the spelling. Usernames must match exactly.</small></div>{% endif %}
+  </div>{% endif %}
+</section>
+
+{% if incoming %}<h3 class="frx-sec">Requests <span class="frx-badge">{{ incoming|length }}</span></h3>
+<section class="card frx-list">{% for r in incoming %}<div class="frx-row">{{ av(r.display) }}<div class="frx-nm"><b>{{ r.display }}</b><small>@{{ r.username }} wants to be friends</small></div>
+  <div class="frx-acts"><form method="POST" action="{{ url_for('friends_bp.decline', fid=r.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="frx-b">Decline</button></form>
+  <form method="POST" action="{{ url_for('friends_bp.accept', fid=r.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="frx-b frx-p">Accept</button></form></div></div>{% endfor %}</section>{% endif %}
+
+{% if outgoing %}<h3 class="frx-sec">Waiting on them</h3>
+<section class="card frx-list">{% for r in outgoing %}<div class="frx-row">{{ av(r.username) }}<div class="frx-nm"><b>@{{ r.username }}</b><small>Request sent</small></div>
+  <form method="POST" action="{{ url_for('friends_bp.decline', fid=r.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="frx-b">Cancel</button></form></div>{% endfor %}</section>{% endif %}
+
+{% if friends %}<h3 class="frx-sec">Your friends · {{ friends|length }}</h3>
+<section class="card frx-list">{% for f in friends %}<div class="frx-row frx-fr">{{ av(f.display) }}
+  <a class="frx-nm" href="{{ url_for('profile_bp.public_profile', username=f.username) }}"><b>{{ f.display }} <span class="frx-dot{{ '' if f.online else ' frx-off' }}" role="img" aria-label="{{ 'Online' if f.online else 'Offline' }}"></span></b><small>{{ f.seen }}</small></a>
+  <form method="POST" action="{{ url_for('friends_bp.remove', username=f.username) }}" class="frx-rm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="button" class="frx-b frx-ask" hidden>Remove</button>
+    <span class="frx-confirm"><span class="frx-q">Remove {{ f.display }}?</span><button type="button" class="frx-b frx-cancel" hidden>Cancel</button><button type="submit" class="frx-b frx-red">Remove</button></span>
+  </form></div>{% endfor %}</section>
+{% else %}<section class="frx-empty"><div class="frx-empty-ic" aria-hidden="true">🌸</div><b>Your park fills up when friends are online</b>
+  <p>No friends yet. Add someone above and they'll join your park when they're online.</p>
+  <a class="frx-b frx-p" href="#add" onclick="setTimeout(function(){document.getElementById('fr-user').focus()},0)">+ Add friend</a></section>{% endif %}
+</div>
+<script>
+(function(){document.querySelectorAll('.frx-rm').forEach(function(f){
+  var ask=f.querySelector('.frx-ask'),c=f.querySelector('.frx-confirm'),x=f.querySelector('.frx-cancel'),row=f.closest('.frx-row');
+  ask.hidden=false;x.hidden=false;c.hidden=true;
+  ask.onclick=function(){ask.hidden=true;c.hidden=false;row.classList.add('frx-asking');f.querySelector('.frx-red').focus();};
+  x.onclick=function(){c.hidden=true;ask.hidden=false;row.classList.remove('frx-asking');ask.focus();};
+});})();
+</script>
+{% endblock %}

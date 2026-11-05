@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% block title %}Verify courses{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">Admin</span><h1>Verify courses</h1>
+<p class="muted">Mark a class as verified. Verified classes show a badge on boards.</p></div>
+<a class="btn btn-ghost" href="{{ url_for('admin') }}">← Console</a></div>
+<div class="card" style="overflow-x:auto">
+<table class="table"><thead><tr><th>Course</th><th>Code</th><th>Owner</th><th>Status</th><th></th></tr></thead><tbody>
+{% for c in courses %}<tr>
+  <td><b>{{ c.course_name }}</b><div class="small muted">{{ c.subject }}</div></td>
+  <td class="muted">{{ c.course_code or '—' }}</td>
+  <td>@{{ c.username }}</td>
+  <td>{% if c.verified %}<span class="badge b-green">Verified</span>{% else %}<span class="badge b-gray">Unverified</span>{% endif %}</td>
+  <td style="text-align:right">
+    <form class="inline" method="POST" action="{{ url_for('admin_mod_bp.verify_course', course_id=c.course_id) }}">
+      <input type="hidden" name="action" value="{{ 'unverify' if c.verified else 'verify' }}">
+      <button class="btn btn-sm {{ 'btn-ghost' if c.verified else '' }}">{{ 'Remove' if c.verified else 'Verify' }}</button>
+    </form>
+  </td>
+</tr>{% else %}<tr><td colspan="5" class="muted">No courses yet.</td></tr>{% endfor %}
+</tbody></table>
+</div>
+{% endblock %}

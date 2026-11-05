@@ -1,0 +1,42 @@
+{% extends 'base.html' %}{% block title %}Whiteboard · {{ r.title }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow"><a href="{{ url_for('rooms_bp.room', rid=r.room_id) }}" style="color:inherit">{{ r.title }}</a></span><h1>Shared whiteboard</h1><p class="muted">Everyone in this room sees what you draw within a second.</p></div></div>
+<div class="card wb-card">
+  <div class="wb-tools" role="toolbar" aria-label="Whiteboard tools">
+    {% for c in ['#3b3a36','#5a7d4f','#c0603a','#3d6fa8'] %}<button class="chip wb-ink{% if loop.first %} on{% endif %}" data-c="{{ c }}" aria-label="Ink {{ c }}"><span style="width:16px;height:16px;border-radius:50%;background:{{ c }};display:inline-block"></span></button>{% endfor %}
+    <button class="btn btn-ghost" id="wbClear" style="margin-left:auto"><span class="ms">delete</span>Clear</button>
+  </div>
+  <div class="wb-stage"><canvas id="wb"></canvas></div>
+</div>
+<style>
+.wb-card{padding:0;overflow:hidden}
+.wb-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--line)}
+.wb-tools .chip,.wb-tools .btn{min-height:44px;min-width:44px;justify-content:center}
+.wb-ink.on{outline:2px solid var(--green)}
+.wb-stage{position:relative;height:min(68vh,700px);background:var(--surface)}
+#wb{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.content{padding-bottom:calc(72px + env(safe-area-inset-bottom) + 24px)}
+@media(max-width:700px){.wb-stage{height:calc(100dvh - 300px - 72px - env(safe-area-inset-bottom));min-height:280px}}
+</style>
+<script>
+(function(){
+var URL_={{ url_for('rooms_bp.get_strokes', rid=r.room_id)|tojson }},cv=document.getElementById('wb'),cx=cv.getContext('2d'),dpr=devicePixelRatio||1,
+  all=[],pend=[],last=0,ink='#3b3a36',cur=null,busy=false;
+function size(){var b=cv.getBoundingClientRect();cv.width=b.width*dpr;cv.height=b.height*dpr;redraw();}
+function draw(s){if(!s.pts||!s.pts.length)return;var W=cv.width,H=cv.height;cx.strokeStyle=s.c;cx.lineWidth=s.w*dpr;cx.lineCap=cx.lineJoin='round';cx.beginPath();
+  cx.moveTo(s.pts[0][0]*W,s.pts[0][1]*H);s.pts.forEach(function(p){cx.lineTo(p[0]*W,p[1]*H);});if(s.pts.length==1)cx.lineTo(s.pts[0][0]*W+.1,s.pts[0][1]*H);cx.stroke();}
+function redraw(){cx.clearRect(0,0,cv.width,cv.height);all.forEach(draw);pend.forEach(draw);if(cur)draw(cur);}
+function add(list){list.forEach(function(x){last=Math.max(last,x.id);if(x.s.clear)all=[];else all.push(x.s);});if(list.length){pend=[];redraw();}}
+function poll(){if(busy)return;busy=true;fetch(URL_+'?since='+last,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){add(d.strokes||[]);}).catch(function(){}).finally(function(){busy=false;});}
+function send(o){return fetch(URL_,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).then(poll);}
+function pt(e){var b=cv.getBoundingClientRect();return[(e.clientX-b.left)/b.width,(e.clientY-b.top)/b.height];}
+cv.addEventListener('pointerdown',function(e){cv.setPointerCapture(e.pointerId);cur={pts:[pt(e)],c:ink,w:3};});
+cv.addEventListener('pointermove',function(e){if(!cur)return;cur.pts.push(pt(e));redraw();});
+function up(){if(!cur)return;var s=cur;cur=null;pend.push(s);redraw();if(s.pts.length>2000)s.pts=s.pts.filter(function(_,i){return i%2==0;});send(s);}
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+document.querySelectorAll('.wb-ink').forEach(function(b){b.onclick=function(){document.querySelectorAll('.wb-ink').forEach(function(x){x.classList.remove('on');});b.classList.add('on');ink=b.dataset.c;};});
+document.getElementById('wbClear').onclick=function(){if(!confirm('Clear the board for everyone?'))return;all=[];redraw();send({clear:true});};
+addEventListener('resize',size);size();poll();setInterval(poll,1000);
+})();
+</script>
+{% endblock %}

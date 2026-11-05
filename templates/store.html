@@ -1,0 +1,166 @@
+{% extends 'base.html' %}{% block title %}Store{% endblock %}
+{% block head %}
+<style>
+main.store-page{max-width:1180px}.store-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.store-seeds{background:var(--c-paper,var(--surface));border:1px solid var(--c-edge,var(--line));padding:8px 14px;font-size:14px;box-shadow:var(--sh-soft,var(--shadow));border-radius:999px;font-weight:700}
+.store-mine{display:flex;gap:22px;align-items:center;margin-top:20px;padding:16px}
+.store-mth{width:260px;height:160px;border-radius:var(--r-md,16px);background:center 32%/cover var(--c-paper-2,var(--surface-2));flex:none;box-shadow:var(--sh-soft,var(--shadow))}
+.store-sec{margin:26px 0 12px;font-size:17px;color:var(--c-ink-soft,var(--muted))}
+.store-gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.store-it{padding:10px}.store-th{position:relative;height:160px;border-radius:var(--r-md,16px);background:center 30%/cover var(--c-paper-2,var(--surface-2));display:grid;place-items:center;overflow:hidden}
+.store-row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:10px 4px 2px;font-size:15px}
+.store-buy{padding:7px 12px;font-size:13px;white-space:nowrap}.store-own{outline:2px solid var(--c-moss-soft,var(--sage-soft))}
+.store-seed{display:inline-block;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F3D9A8,#B7864A);margin-right:5px;vertical-align:-1px}
+.store-tag{position:absolute;top:8px;left:8px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.7);font-size:11.5px;font-weight:800;color:#6F6A6C;z-index:1}
+.store-soon b{color:var(--c-ink-soft,var(--muted))}
+.store-soon .store-th:after{content:"";position:absolute;inset:0;background:rgba(251,246,239,.28);pointer-events:none}
+.store-lock{color:var(--c-ink-faint,var(--muted));font-size:12.5px;font-weight:800}
+.store-sil{position:relative;width:96px;height:110px;display:block}
+.store-sil:after{content:"";position:absolute;left:42px;bottom:0;width:12px;height:40px;border-radius:6px;background:#BDB5B5}
+.store-sil:before{content:"";position:absolute;left:0;right:0;top:0;height:78px;border-radius:50% 50% 46% 46%;background:#C9C2C2;box-shadow:-18px 14px 0 -12px #C9C2C2,18px 14px 0 -12px #C9C2C2}
+.store-sil.olive:before{height:60px;top:14px;border-radius:50%}
+.store-sil.willow:before{height:88px;border-radius:50% 50% 22% 22%}
+.store-sil.palm:after{left:45px;width:8px;height:74px;transform:rotate(6deg);transform-origin:bottom}
+.store-sil.palm:before{left:14px;right:14px;top:10px;height:30px;border-radius:50%;box-shadow:-24px 12px 0 -6px #C9C2C2,24px 12px 0 -6px #C9C2C2,-10px 22px 0 -8px #C9C2C2,10px 22px 0 -8px #C9C2C2}
+.store-confirm{position:fixed;inset:0;display:grid;place-items:center;background:rgba(63,50,64,.25);z-index:80}
+.store-confirm[hidden]{display:none}
+.store-ctl{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+@media(max-width:700px){.store-gr{grid-template-columns:1fr 1fr;gap:10px}.store-th{height:120px}.store-mine{flex-direction:column;align-items:stretch}.store-mth{width:auto;height:170px}.store-row{flex-wrap:wrap}}
+[data-theme=dark] .store-tag{background:rgba(40,36,42,.7);color:#C9C2C2}
+[data-theme=dark] .store-soon .store-th:after{background:rgba(251,246,239,.18)}
+</style>
+{% endblock %}
+{% block content %}
+<main class="store-page">
+<div class="store-head">
+  <div><h1>Store</h1><p class="sub muted" style="margin:4px 0 0">Grow a new tree with the points you've earned.</p></div>
+  <span class="chip store-seeds" id="storeBal"><i class="store-seed"></i><span id="storePts">{{ '{:,}'.format(stats.points) }}</span> pts</span>
+</div>
+
+<div class="card store-mine" id="yourTree">
+  <div class="store-mth" id="yourScene" {% if selected and selected.scene %}style="background-image:url('{{ url_for('static', filename=selected.scene) }}')"{% endif %}></div>
+  <div>
+    <p class="sub muted" style="margin:0">Your tree</p>
+    <h2 style="font-size:24px;margin:4px 0" id="yourName">{{ selected.name if selected else 'Oak' }}</h2>
+    <p class="sub muted" id="yourSub">Selected · grows with every finished task</p>
+  </div>
+</div>
+
+<h2 class="store-sec">Trees</h2>
+{# shop-grid shop-list kept for tests that assert one plain list #}
+<div class="store-gr grid g-4 shop-grid shop-list">
+{% for it in items %}
+  {% set own = it.key in owned %}
+  {% set eq = it.key in equipped %}
+  <div class="card store-it shop-card{{ ' store-own' if own }}{{ ' store-soon' if it.coming_soon and not own }}{{ ' is-equipped' if eq }}" style="flex:none" data-item="{{ it.key }}" data-type="species" data-name="{{ it.name }}" data-price="{{ it.price }}" data-scene="{{ url_for('static', filename=it.scene) if it.scene else '' }}">
+    <div class="store-th"{% if it.scene %} style="background-image:url('{{ url_for('static', filename=it.scene) }}')"{% endif %}>
+      {% if it.coming_soon and not own %}
+        {% if not it.scene %}<i class="store-sil {{ it.sil }}" aria-hidden="true"></i>{% endif %}
+        <span class="store-tag">Coming soon</span>
+      {% endif %}
+    </div>
+    <div class="store-row">
+      <b>{{ it.name }}</b>
+      {% if own %}<span class="chip c-up">Owned</span>
+      {% elif it.coming_soon %}{# no Locked, no price, no button #}
+      {% else %}
+        <button type="button" class="btn store-buy" data-tree="{{ it.key }}" data-name="{{ it.name }}" data-price="{{ it.price }}"{% if stats.points < it.price %} disabled style="opacity:.5"{% endif %}><i class="store-seed"></i>{{ '{:,}'.format(it.price) }} pts</button>
+      {% endif %}
+    </div>
+  </div>
+{% endfor %}
+</div>
+
+<h2 class="store-sec">Redeem</h2>
+<p class="sub muted" style="margin:-4px 0 12px">Spend points on real rewards once this opens. Nothing charges yet.</p>
+<div class="store-gr" id="storeRedeem">
+  <div class="card store-it store-soon" data-item="reward_giftcard">
+    <div class="store-th" style="display:grid;place-items:center"><span class="ms" style="font-size:42px;color:var(--c-ink-soft,#9a9496)">redeem</span><span class="store-tag">Coming soon</span></div>
+    <div class="store-row"><b>Gift cards</b><span class="store-lock">Coming soon</span></div>
+  </div>
+  <div class="card store-it store-soon" data-item="reward_adfree">
+    <div class="store-th" style="display:grid;place-items:center"><span class="ms" style="font-size:42px;color:var(--c-ink-soft,#9a9496)">visibility_off</span><span class="store-tag">Coming soon</span></div>
+    <div class="store-row"><b>Ad-free Prody</b><span class="store-lock">Coming soon</span></div>
+  </div>
+</div>
+
+<div class="store-confirm" id="storeConfirm" hidden role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="card" style="max-width:360px;width:min(92vw,360px);padding:22px">
+    <h2 id="confirmTitle" style="margin:0 0 6px">Plant Cherry?</h2>
+    <p class="sub muted" id="confirmSub" style="margin:0">600 pts · you'll have 0 pts left.</p>
+    <p class="sub" id="confirmErr" hidden style="color:var(--terra-ink,#a44);margin:8px 0 0"></p>
+    <div class="store-ctl">
+      <button type="button" class="btn ghost btn-ghost" id="confirmNo">Not now</button>
+      <button type="button" class="btn" id="confirmYes">Buy for 600 pts</button>
+    </div>
+  </div>
+</div>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  const balEl=document.getElementById('storePts');
+  let bal={{ stats.points|int }};
+  const confirm=document.getElementById('storeConfirm');
+  const title=document.getElementById('confirmTitle');
+  const sub=document.getElementById('confirmSub');
+  const err=document.getElementById('confirmErr');
+  const yes=document.getElementById('confirmYes');
+  const no=document.getElementById('confirmNo');
+  let pending=null;
+  function csrf(){const m=document.querySelector('meta[name=csrf-token]');return m?m.content:'';}
+  function fmt(n){return Number(n).toLocaleString();}
+  function openConfirm(btn){
+    pending={key:btn.dataset.tree,name:btn.dataset.name,price:+btn.dataset.price,btn:btn};
+    err.hidden=true;err.textContent='';
+    title.textContent='Plant '+pending.name+'?';
+    const left=bal-pending.price;
+    sub.textContent=fmt(pending.price)+' pts · you\'ll have '+fmt(Math.max(0,left))+' pts left.';
+    yes.textContent='Buy for '+fmt(pending.price)+' pts';
+    yes.disabled=bal<pending.price;confirm.hidden=false;
+  }
+  function close(){confirm.hidden=true;pending=null;yes.disabled=false;}
+  document.querySelectorAll('.store-buy').forEach(b=>b.addEventListener('click',()=>openConfirm(b)));
+  no.addEventListener('click',close);
+  confirm.addEventListener('click',e=>{if(e.target===confirm)close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!confirm.hidden)close();});
+  yes.addEventListener('click',async()=>{
+    if(!pending||yes.disabled)return;
+    yes.disabled=true;
+    try{
+      const r=await fetch('/store/buy/'+encodeURIComponent(pending.key),{
+        method:'POST',credentials:'same-origin',
+        headers:{'Accept':'application/json','X-Requested-With':'fetch','X-CSRFToken':csrf()}
+      });
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.ok){err.textContent=j.message||"That didn't work — try again.";err.hidden=false;yes.disabled=false;return;}
+      bal=j.points;balEl.textContent=fmt(bal);
+      const card=document.querySelector('.shop-card[data-item="'+pending.key+'"]');
+      if(card){
+        card.classList.add('store-own');card.classList.remove('store-soon');
+        const row=card.querySelector('.store-row');
+        if(row){const b=row.querySelector('b');row.innerHTML='';row.appendChild(b);const chip=document.createElement('span');chip.className='chip c-up';chip.textContent='Owned';row.appendChild(chip);}
+      }
+      // optionally plant now → equip
+      const plantNow=confirm.querySelector('#plantNow');
+      if(!plantNow){
+        const a=document.createElement('button');a.type='button';a.className='btn ghost btn-ghost';a.id='plantNow';a.textContent='Plant it now';
+        a.style.marginRight='auto';
+        a.onclick=async()=>{
+          await fetch('/store/equip/'+encodeURIComponent(pending.key),{method:'POST',credentials:'same-origin',headers:{'X-CSRFToken':csrf(),'Accept':'application/json'}});
+          const scene=card&&card.dataset.scene;const name=pending.name;
+          if(scene)document.getElementById('yourScene').style.backgroundImage="url('"+scene+"')";
+          document.getElementById('yourName').textContent=name;
+          close();
+        };
+        yes.parentNode.insertBefore(a,no);
+      }
+      yes.textContent='Bought';
+      setTimeout(close,900);
+      document.querySelectorAll('.store-buy').forEach(b=>{if(bal<+b.dataset.price){b.disabled=true;b.style.opacity='.5';}});
+    }catch(e){err.textContent="That didn't work — try again.";err.hidden=false;yes.disabled=false;}
+  });
+})();
+</script>
+{% endblock %}

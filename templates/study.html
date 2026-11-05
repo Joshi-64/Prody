@@ -1,0 +1,71 @@
+{% extends 'base.html' %}{% from "_spot.html" import spot, empty, css %}{% block title %}Study Session{% endblock %}{% block head %}{{ css() }}{% endblock %}
+{% set BARE_TREE_UNDER_HOURS = 5 %}{# Leader: bare tree below this many study hours this week #}
+{% block content %}
+<div class="page-head"><div class="pc-head">{{ spot('icon_focus', 48, 48) }}<div><span class="eyebrow">Focus</span><h1>Focus session</h1><p class="muted">Pick a length, put your phone face down, and let the minutes add up. Every minute earns a point and helps {{ st.name }} grow.</p></div></div>
+  <div style="display:flex;gap:8px"><span class="chip"><span class="ms">eco</span><span id="pts">{{ '{:,}'.format(stats.points) }}</span> pts</span></div></div>
+<div class="grid g-main">
+  <div class="card timer-wrap timer-card">
+    <div class="mode-tabs"><button class="on" data-mode="25">Focus · 25</button><button data-mode="50">Deep · 50</button><span class="fb-custom"><button data-mode="custom" id="customBtn" title="Custom length (5–180 min)">Custom</button><input id="customMin" type="number" min="5" max="180" step="1" value="30" aria-label="Custom focus minutes"></span><button data-mode="5" data-break>Break · 5</button><button data-mode="15" data-break>Break · 15</button></div>
+    <div class="timer-ring">
+      <svg viewBox="0 0 280 280" width="100%" height="100%"><circle cx="140" cy="140" r="126" stroke="var(--track)" stroke-width="10" fill="none"/><circle id="arc" cx="140" cy="140" r="126" stroke="var(--green)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="791.7" stroke-dashoffset="0"/></svg>
+      <div class="t"><div><b id="clock">25:00</b><span class="muted" id="phase">Ready to focus</span></div></div>
+    </div>
+    <div class="row" style="width:100%;max-width:440px;margin-top:22px">
+      <div class="field"><label>Class</label><select id="course"><option value="">General</option>{% for c in courses %}<option value="{{ c.course_id }}">{{ c.course_name }}</option>{% endfor %}</select></div>
+      <div class="field"><label>Working on</label><input id="label" placeholder="Chapter 5 review"></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" id="start" style="min-width:140px"><span class="ms">play_arrow</span>Start</button>
+      <button class="btn btn-ghost" id="reset"><span class="ms">restart_alt</span>Reset</button>
+      <button class="btn btn-ghost" id="finish" title="Log the minutes so far"><span class="ms">flag</span>Finish &amp; log</button>
+    </div>
+  </div>
+  <div class="grid" style="align-content:start">
+    <div class="card" id="plantCard" style="padding:0;overflow:hidden">
+      <div id="plantArt" class="pc-tree" data-bare-under="{{ BARE_TREE_UNDER_HOURS }}" data-week-min="{{ stats.week_minutes }}">{{ spot('tree_small_bare' if stats.week_minutes < BARE_TREE_UNDER_HOURS * 60 else 'tree_small', 240, 220) }}</div>
+      <div style="padding:18px 20px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="font-size:24px">{{ st.name }}</h2><span class="tag" id="plantStage">{{ st.stage }}</span></div>
+        <div class="grow-note" id="growNote" style="margin-top:12px;{{ '' if grew else 'display:none' }}"><span class="ms">potted_plant</span><span id="growText">{{ st.name }} soaked that up and grew a little.</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin:14px 0 8px"><span class="muted" id="plantNext">{% if st.next_stage %}Next: {{ st.next_stage }}{% else %}Fully grown{% endif %}</span><span class="muted" id="plantPct">{{ st.to_next }}%</span></div>
+        <div class="progress"><span id="plantBar" style="width:{{ st.to_next }}%"></span></div>
+        <div class="small muted" style="margin-top:12px"><span id="plantHours">{{ '{:,}'.format(st.hours|round|int) }}</span> hours grown</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px">Recent sessions</h3>
+      {% if recent %}<ul class="list pc-sessions">{% for s in recent %}<li><span class="dot" style="background:{{ s.color|class_dot or 'var(--cream)' }}"></span><div class="grow"><div class="title">{{ s.label }}</div><div class="small muted">{{ s.course_name or 'General' }} · {{ s.started_at|nice_stamp }}</div></div><span class="time-pill">{% set m = s.minutes|int %}{{ (m // 60)|string ~ 'h' ~ ((' ' ~ (m % 60)|string ~ 'm') if m % 60 else '') if m >= 60 else m|string ~ 'm' }}{# pc_dur #}</span></li>{% endfor %}</ul>
+      {% else %}{{ empty('empty_watering_can', 'No sessions yet', 'Start your first focus block to tend your tree.') }}{% endif %}
+    </div>
+    <div class="card"><h3 style="margin-bottom:6px">Log time manually</h3>
+      <form method="POST" action="{{ url_for('study_bp.log_session') }}" class="row"><div class="field" style="margin:0"><input type="number" name="minutes" min="1" max="600" placeholder="Minutes" required></div><input type="hidden" name="label" value="Manual entry"><button class="btn btn-ghost">Log</button></form></div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/session_moment.js"></script>
+<script>
+let total=25*60,left=total,timer=null,isBreak=false,startedLeft=total;
+const $=id=>document.getElementById(id), C=791.7;
+function draw(){const m=Math.floor(left/60),s=left%60;$('clock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');$('arc').style.strokeDashoffset=C*(1-left/total);document.title=$('clock').textContent+' · Prody';window.dispatchEvent(new CustomEvent('focus:tick',{detail:{left,total,isBreak,running:!!timer,hold:!!window.__fbHold}}));}
+function setRunning(r){$('start').innerHTML=r?'<span class="ms">pause</span>Pause':'<span class="ms">play_arrow</span>'+(left<total?'Resume':'Start');}
+let fbLogged=false,fbAcc=0,fbSeg=0;const fbActive=()=>fbAcc+(fbSeg?Date.now()-fbSeg:0);
+async function log(mins,completed){if(mins<1)return;const hd={'Content-Type':'application/json',Accept:'application/json'},cm=document.querySelector('meta[name=csrf-token]');if(cm)hd['X-CSRFToken']=cm.content;const r=await fetch('{{ url_for("study_bp.log_session") }}',{method:'POST',headers:hd,body:JSON.stringify({minutes:mins,course_id:$('course').value,label:$('label').value||'Focus session',completed:!!completed,tz_offset:-new Date().getTimezoneOffset()})});const j=await r.json();if(j.ok){$('pts').textContent=j.points.toLocaleString();grow(j.plant,mins);window.prodySessionDone&&prodySessionDone($('course').value,mins);toast(mins+' focused minutes logged · +'+mins+' points');if(j.watered)setTimeout(()=>toast('Session done, your tree got tended.'),900);(j.new_badges||[]).forEach((b,i)=>setTimeout(()=>{celebrate();toast('Badge unlocked: '+b)},1200*(i+1)));}}
+function toast(t){prodyToast(t)}
+function pcTree(mins){const a=$('plantArt'),wk=(+a.dataset.weekMin||0)+mins;a.dataset.weekMin=wk;const n=wk<(+a.dataset.bareUnder)*60?'tree_small_bare':'tree_small';a.querySelectorAll('img').forEach(i=>i.src=i.src.replace(/tree_small(_bare)?(?=(_dark)?\.svg)/,n));}
+function grow(p,mins){if(!p)return;pcTree(mins);$('plantStage').textContent=p.stage;$('plantNext').textContent=p.next_stage?'Next: '+p.next_stage:'Fully grown';
+  $('plantPct').textContent=p.to_next+'%';$('plantHours').textContent=p.hours.toFixed(1);$('plantBar').style.width='0%';requestAnimationFrame(()=>setTimeout(()=>$('plantBar').style.width=p.to_next+'%',60));
+  $('growText').textContent=p.stage_up?p.name+' reached a new stage: '+p.stage+'!':p.revived?p.name+' perked right back up. Thanks for the water.':p.name+' soaked up '+mins+' minutes and grew a little.';
+  $('growNote').style.display='flex';$('plantCard').scrollIntoView({behavior:'smooth',block:'nearest'});if(p.stage_up)celebrate();}
+function setRun(r){document.querySelector('.timer-wrap').classList.toggle('running',r)}
+function tick(){left--;draw();if(left<=0){clearInterval(timer);timer=null;if(!isBreak&&!window.__fbDone&&!fbLogged){window.__fbDone=true;fbLogged=true;if(fbSeg){fbAcc+=Date.now()-fbSeg;fbSeg=0;}log(Math.floor(fbAcc/60000),true);/* actual minutes, once */}$('phase').textContent=isBreak?'Break over — back to it!':'Session complete!';try{new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=').play()}catch(e){}left=total;setRunning(false);draw();}}
+$('start').onclick=()=>{if(timer){clearInterval(timer);timer=null;if(fbSeg){fbAcc+=Date.now()-fbSeg;fbSeg=0;}$('phase').textContent='Paused';}else{if(left===total){fbLogged=false;fbAcc=0;}fbSeg=Date.now();timer=setInterval(tick,1000);window.__fbDone=false;$('phase').textContent=isBreak?'Break time':'Focusing…';}setRunning(!!timer);setRun(!!timer);};
+$('reset').onclick=()=>{clearInterval(timer);timer=null;fbSeg=0;fbAcc=0;left=total;$('phase').textContent='Ready';setRunning(false);draw();};
+$('finish').onclick=()=>{const m=Math.floor((total-left)/60);if(isBreak||m<1){toast('Study at least a minute to log it.');return;}if(fbLogged)return;fbLogged=true;clearInterval(timer);timer=null;fbSeg=0;fbAcc=0;log(m);window.__fbHold=1;left=total;setRunning(false);draw();window.__fbHold=0;$('phase').textContent='Logged';};
+function customMins(){const i=$('customMin');let v=Math.round(+i.value||30);v=Math.max(5,Math.min(180,v));i.value=v;try{localStorage.setItem('prody_focus_custom',v)}catch(e){}return v;}
+function testSecs(){/* test-only: ?focus_test_seconds=N or localStorage prody_focus_test_seconds */const q=+new URLSearchParams(location.search).get('focus_test_seconds')||+(localStorage.getItem('prody_focus_test_seconds')||0);return q>0?Math.round(q):0;}
+try{const cm=+localStorage.getItem('prody_focus_custom');if(cm>=5&&cm<=180)$('customMin').value=cm;}catch(e){}
+{const ts=testSecs();if(ts){total=left=ts;}}$('customMin').addEventListener('change',()=>{customMins();$('customBtn').click();});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('on'));b.classList.add('on');clearInterval(timer);timer=null;isBreak=b.hasAttribute('data-break');total=left=b.dataset.mode==='custom'?customMins()*60:+b.dataset.mode*60;if(!isBreak){const ts=testSecs();if(ts)total=left=ts;}$('phase').textContent=isBreak?'Take a breather':'Ready to focus';setRunning(false);draw();});
+draw();
+</script><script src="/static/js/vendor/gsap.min.js?v=1" defer></script><script src="/static/js/focus_bloom.js?v=35" defer></script>
+{% endblock %}

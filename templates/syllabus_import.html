@@ -1,0 +1,37 @@
+{% extends 'base.html' %}{% block title %}Syllabus · {{ course.course_name }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
+{% block content %}
+<main style="max-width:640px;margin:0 auto">
+  <div class="page-head"><div><a class="small muted" href="{{ url_for('user_courses_bp.add_courses') }}">← Classes</a>
+    <span class="eyebrow" style="display:block;margin-top:8px">Syllabus</span>
+    <h1>{{ course.course_name }}</h1>
+    <p class="muted">Upload a PDF or .txt. Prody finds dated exams, quizzes, and assignments for you to confirm.</p>
+  </div></div>
+
+  {% if not items %}
+  <div class="card">
+    <form method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="action" value="upload">
+      <div class="field"><label>Syllabus file</label><input type="file" name="syllabus" accept=".pdf,.txt,text/plain,application/pdf" required></div>
+      <button class="btn"><span class="ms">edit_note</span>Scan syllabus</button>
+    </form>
+  </div>
+  {% else %}
+  <form method="POST" class="card">
+    <input type="hidden" name="action" value="commit">
+    <h2 style="margin:0 0 12px;font-size:17px">Confirm deadlines</h2>
+    <p class="muted small">Uncheck anything that shouldn't be added.</p>
+    <ul class="list" style="margin:12px 0">
+    {% for it in items %}
+      <li style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)">
+        <input type="checkbox" name="pick" value="{{ loop.index0 }}" checked style="margin-top:4px">
+        <div class="grow"><b>{{ it.name }}</b><div class="small muted">{{ it.date }} · {{ it.line }}</div></div>
+      </li>
+    {% endfor %}
+    </ul>
+    <button class="btn"><span class="ms">flag</span>Add selected</button>
+    <a class="btn btn-ghost" href="{{ url_for('user_courses_bp.syllabus_import', course_id=course.course_id) }}">Start over</a>
+  </form>
+  {% endif %}
+</main>
+{% endblock %}

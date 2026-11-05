@@ -1,28 +1,18 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="card">
-  <h3>Log In</h3>
-  <form method="POST">
-    <label>Username</label>
-    <input type="text" name="username" required>
-    
-    <label>Password</label>
-    <input type="password" id="password" name="password" required>
-    
-    <div style="margin: -8px 0 16px; display: flex; align-items: center; gap: 8px;">
-      <input type="checkbox" id="togglePw" onclick="togglePasswordVisibility()" style="width: auto; margin: 0;">
-      <label for="togglePw" style="font-size: 0.9em; cursor: pointer;">Show Password</label>
-    </div>
-
-    <button type="submit">Sign In</button>
-  </form>
-  <p>Need an account? <a href="{{ url_for('register') }}">Register here</a></p>
+{% extends 'base.html' %}{% block title %}Log in{% endblock %}
+{% block auth %}
+<div class="auth">
+  {% include '_auth_art.html' %}
+  <div class="auth-form"><div class="auth-card">
+    <h2>Welcome back</h2>
+    <p class="muted" style="margin:0 0 26px;font-size:16px">Good to see you. Your tree missed you.</p>
+    <form method="POST" novalidate>
+      <div class="field"><label for="username">Username or email</label>
+        <input id="username" name="username" value="{{ ident or '' }}" placeholder="jdoe or jdoe@student.gsu.edu" required autofocus></div>
+      <div class="field"><label for="password">Password</label>
+        <div class="pw-wrap"><input id="password" type="password" name="password" placeholder="••••••••" required><button type="button" data-pw><span class="ms">visibility</span></button></div></div>
+      <button class="btn btn-block" type="submit">Log in <span class="ms">arrow_forward</span></button>
+    </form>
+    <p class="muted" style="text-align:center;margin-top:22px">New to Prody? <a href="{{ url_for('register') }}">Create an account</a></p>
+  </div></div>
 </div>
-
-<script>
-function togglePasswordVisibility() {
-  const pwInput = document.getElementById("password");
-  pwInput.type = pwInput.type === "password" ? "text" : "password";
-}
-</script>
 {% endblock %}

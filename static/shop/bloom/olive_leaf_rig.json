@@ -1,0 +1,105 @@
+{
+ "species": "olive",
+ "kind": "leaf_unfurl",
+ "viewBox": [
+  0,
+  0,
+  120,
+  120
+ ],
+ "anchor": [
+  60,
+  100
+ ],
+ "easing": "smoothstep",
+ "progress": "p = smoothstep(clamp((t - stagger) / (1 - stagger)))",
+ "transform": "translate(tx,ty) rotate(rotate) scale(sx,sy) about pivot (CSS: transform-origin = pivot)",
+ "blooms": false,
+ "leaf_color": "#6F8466",
+ "parts": [
+  {
+   "id": "half_left",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": [
+     0.12,
+     0.4
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": -4,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.1
+  },
+  {
+   "id": "half_right",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": [
+     0.12,
+     0.4
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 4,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0
+  },
+  {
+   "id": "midrib",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": [
+     1,
+     0.4
+    ],
+    "opacity": 0.6,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0
+  }
+ ]
+}

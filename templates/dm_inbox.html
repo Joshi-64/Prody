@@ -1,0 +1,28 @@
+{% extends 'base.html' %}{% block title %}Messages{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_fn.css') }}?v=3">{% endblock %}
+{% block content %}
+<div class="fnx">
+  <div class="ph">
+    <h1>Messages</h1>
+    {% if demo_label %}<span class="chip demo">Demo only</span>{% endif %}
+  </div>
+  {% if threads %}
+  <div class="lst">
+    {% for t in threads %}
+    <a class="card li" href="{{ url_for('dm_bp.thread', username=t.username) }}">
+      <i class="av" style="--a:{{ t.av }}" aria-hidden="true"></i>
+      <div><b>{{ t.display or t.username }}</b>
+        <p>{% if t.last %}{{ t.last.body }}{% else %}Say hi{% endif %}</p></div>
+      <div style="text-align:right">{% if t.when %}<div class="meta">{{ t.when }}</div>{% endif %}{% if t.unread %}<span class="cnt">{{ t.unread }}</span>{% endif %}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;padding:28px">
+    <h3>No friends to message yet</h3>
+    <p class="muted">Add a friend first, then you can DM them here.</p>
+    <a class="btn" href="{{ url_for('friends_bp.friends') }}">Find friends</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

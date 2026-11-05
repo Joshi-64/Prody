@@ -1,0 +1,144 @@
+/* Pixelcraft polish: Calendar + To-Do, per ui_spec_v1. Scoped to .pp */
+.pp{--bg:#f6f3ea;--surface:#fffdf8;--surface-2:#efe9dc;--text:#3f3423;--muted:#8a7a60;--faint:#a3967f;--line:#e6dfcf;--line-strong:#d8cfbb;
+ --green:#5b8b42;--green-ink:#4e7a38;--green-hover:#4f7b39;--on-green:#fffdf8;--sage-soft:#e3eed6;--blush:#f5e8db;--urgent:#d9963a;
+ --pp-shadow:0 1px 0 rgba(88,71,44,.06),0 10px 24px -14px rgba(88,71,44,.28);
+ font-family:'Nunito',var(--font);font-weight:600;font-size:15px;line-height:22px;color:var(--text)}
+[data-theme=dark] .pp{--bg:#161913;--surface:#20241c;--surface-2:#2a2f25;--text:#efe9dc;--muted:#a59c88;--faint:#857d6c;--line:#333a2d;--line-strong:#434b3a;
+ --green:#92b965;--green-ink:#a9cc7f;--green-hover:#a0c674;--on-green:#161913;--sage-soft:#2f3b25;--blush:#3a2f27;--pp-shadow:0 10px 24px -14px rgba(0,0,0,.6)}
+html:has(.pp) body{background:#f6f3ea}
+html[data-theme=dark]:has(.pp) body{background:#161913}
+.pp h1,.pp h2{font-family:'Fraunces',var(--display);font-weight:600;letter-spacing:-.01em;color:var(--text)}
+.pp h1{font-size:30px;line-height:36px}
+.pp h2,.pp .card-head h2{font-size:20px;line-height:26px}
+.pp h3{font-weight:800;font-size:15px}
+.pp .eyebrow{font-weight:800;font-size:12px;line-height:16px;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.pp .page-head{margin-bottom:24px;align-items:center}
+.pp .page-head p{font-size:15px;color:var(--muted);margin-top:4px}
+.pp .pc-head{display:flex;gap:16px;align-items:center}
+.pp .grid{gap:12px}
+.pp .card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--pp-shadow)}
+.pp .card-head{margin-bottom:12px}
+.pp .muted{color:var(--muted)}
+/* buttons */
+.pp .btn{font-family:'Nunito',var(--font);font-weight:800;font-size:15px;min-height:44px;padding:10px 18px;border-radius:16px;background:var(--green);color:var(--on-green);border:0}
+.pp .btn:hover{background:var(--green-hover);text-decoration:none}
+.pp .btn-sm{min-height:36px;padding:6px 14px;font-size:13.5px;border-radius:14px}
+.pp .btn-ghost{background:var(--surface-2)!important;color:var(--text);border:0}
+.pp .btn-ghost:hover{background:var(--line)!important}
+.pp .btn-block{min-height:52px;font-size:16px}
+.pp .btn-icon{width:36px;height:36px;border-radius:12px;color:var(--faint)}
+.pp .btn-icon:hover{background:var(--surface-2);color:var(--text)}
+/* fields */
+.pp .field label{font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.pp .field input:not([type=range]),.pp .field select{min-height:44px;border-radius:14px;background:var(--bg);border:1px solid var(--line);color:var(--text);font-family:inherit;font-weight:600;font-size:15px}
+.pp .field input:focus,.pp .field select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--sage-soft)}
+.pp input[type=range]{accent-color:var(--green)}
+/* lists */
+.pp .list li{padding:12px 0;border-color:var(--line);gap:12px}
+.pp .list .title{font-weight:700}
+.pp .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.pp .badge{border-radius:999px;font-weight:800;font-size:11.5px;padding:3px 10px;background:var(--blush);color:var(--text)}
+.pp .badge.b-red{background:color-mix(in srgb,var(--urgent) 18%,transparent);color:#a8691b}
+[data-theme=dark] .pp .badge.b-red{color:#e9b46a}
+.pp .progress{height:8px;background:var(--surface-2)}
+.pp .progress>span{background:var(--green)}
+/* modals */
+.pp .modal{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 48px -20px rgba(40,30,15,.45)}
+/* ---- To-Do ---- */
+.pp-tasks .check{width:24px;height:24px;border-radius:8px;border:2px solid var(--line-strong);color:var(--on-green)}
+.pp-tasks .check.on{background:var(--green);border-color:var(--green)}
+.pp-tasks li.done .title{text-decoration:line-through;opacity:.5}
+.pp-tasks li.done .small{opacity:.5}
+.pp-tasks .page-head>.card{border-radius:999px;padding:12px 22px!important;min-width:260px}
+.pp-tasks form.row{align-items:flex-end;gap:12px}
+.pp-tasks form.row>.btn{min-height:44px;margin-bottom:0}
+.pp-tasks .pc-done summary{font-weight:800;color:var(--muted);padding:12px 0 4px;cursor:pointer}
+.pp-tasks #concepts>div[style*="border-bottom"]{border-color:var(--line)!important;padding:14px 0!important}
+.pp-tasks #concepts>div[style*="border-bottom"]:last-child{border-bottom:0!important}
+/* ---- Calendar ---- */
+.pp-cal .legend{display:flex;flex-wrap:wrap;gap:8px}
+.pp-cal .legend>span{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.pp-cal .legend .dot{width:9px;height:9px}
+.pp-cal .fc{font-family:'Nunito',var(--font);font-size:13px;--fc-today-bg-color:color-mix(in srgb,var(--green) 9%,transparent);--fc-border-color:var(--line);--fc-list-event-hover-bg-color:var(--surface-2);--fc-neutral-bg-color:var(--surface-2)}
+.pp-cal .fc .fc-toolbar{gap:8px;flex-wrap:wrap}
+.pp-cal .fc .fc-toolbar-title{font-family:'Fraunces',var(--display);font-weight:600;font-size:22px}
+.pp-cal .fc .fc-button{background:var(--surface-2)!important;border:0!important;border-radius:999px!important;color:var(--text)!important;font-weight:800;font-size:13px;min-height:34px;padding:6px 14px}
+.pp-cal .fc .fc-button-group{gap:4px}
+.pp-cal .fc .fc-button-primary:not(:disabled).fc-button-active{background:var(--green)!important;color:var(--on-green)!important}
+.pp-cal .fc .fc-scrollgrid{border-radius:16px}
+.pp-cal .fc .fc-col-header-cell-cushion{font-weight:800;color:var(--muted);letter-spacing:.07em}
+.pp-cal .fc .fc-daygrid-day-number{font-weight:700}
+.pp-cal .fc .fc-day-today .fc-daygrid-day-number{background:var(--green);color:var(--on-green);border-radius:10px}
+.pp-cal .fc-event{border-radius:8px!important;font-weight:700}
+.pp-cal .fc .fc-list{border-radius:16px;overflow:hidden}
+.pp-cal .fc .fc-list-day-cushion{background:var(--surface-2)!important}
+.pp-cal .fc-list-day-text,.pp-cal .fc-list-day-side-text{color:var(--text);font-weight:800}
+.pp-cal .card>.list li{border:0;background:var(--bg);border-radius:16px;padding:12px 14px;margin-bottom:8px;position:relative;overflow:hidden}
+.pp-cal .card>.list li>.dot:first-child{position:absolute;left:0;top:0;bottom:0;width:6px;height:auto;border-radius:0}
+@media (max-width:820px){
+ .pp h1{font-size:28px;line-height:34px}
+ .pp .page-head{gap:12px}
+ .pp .page-head>div[style*="display:flex"]{width:100%}
+ .pp .page-head>div[style*="display:flex"]>.btn{flex:1}
+ .pp .card{padding:16px}
+ .pp-tasks .page-head>.card{width:100%;min-width:0}
+ .pp-tasks form.row{flex-wrap:wrap}
+ .pp-tasks form.row>.field{flex:1 1 40%!important}
+ .pp-tasks form.row>.field:first-child{flex:1 1 100%!important}
+ .pp-tasks form.row>.btn{flex:1 1 100%;min-height:52px}
+ .pp-cal .fc .fc-toolbar{flex-direction:column;align-items:stretch}
+ .pp-cal .fc .fc-toolbar-chunk{display:flex;justify-content:center}
+ .pp .pc-spot img{width:40px;height:40px}
+}
+.pp input[type=range]{border:0!important;background:transparent!important;box-shadow:none!important}
+@media (max-width:820px){.pp{padding-bottom:110px}}
+/* ---- Motion (Flux, ui_spec_v1 + v1b) ---- */
+.pp{--ease-out:cubic-bezier(.22,1,.36,1);--ease-io:cubic-bezier(.65,0,.35,1);--spring:cubic-bezier(.34,1.3,.64,1)}
+.pp .btn,.pp .btn-icon,.pp .card,.pp .list li,.pp .fc .fc-button,.pp .legend>span{transition:transform 220ms var(--spring),box-shadow 220ms var(--ease-out),background-color 160ms var(--ease-out)}
+.pp .btn:active,.pp .btn-icon:active,.pp .list li:active,.pp .fc .fc-button:active{transform:scale(.97);transition-duration:90ms}
+.pp .card:active{transform:scale(.99);box-shadow:0 0 0 1px var(--line);transition-duration:90ms}
+.pp .btn:not(.btn-ghost):active{background:var(--sage-soft);color:var(--green-ink)}
+.pp .fc .fc-button-primary.fc-button-active{transition:background-color 220ms var(--spring),color 220ms var(--spring)}
+.pp-tasks .check{transition:background-color 120ms var(--ease-out),border-color 120ms var(--ease-out),transform 220ms var(--spring)}
+.pp-tasks .check .ms{transition:transform 180ms var(--ease-out)}
+.pp-tasks li .title{background:linear-gradient(currentColor,currentColor) 0 55%/0 1.5px no-repeat;transition:background-size 220ms var(--ease-out),opacity 220ms var(--ease-out)}
+.pp-tasks li.done .title{text-decoration:none;background-size:100% 1.5px}
+.pp .progress>span{transition:width 600ms var(--ease-io)}
+@keyframes ppIn{from{transform:translateY(6px)}to{transform:none}}
+.pp-tasks .list li,.pp-cal .card>.list li{animation:ppIn 200ms var(--ease-out) both}
+.pp .list li:nth-child(2){animation-delay:30ms}.pp .list li:nth-child(3){animation-delay:60ms}.pp .list li:nth-child(4){animation-delay:90ms}
+.pp .list li:nth-child(5){animation-delay:120ms}.pp .list li:nth-child(6){animation-delay:150ms}.pp .list li:nth-child(7){animation-delay:180ms}.pp .list li:nth-child(n+8){animation-delay:210ms}
+.pp .modal-bg.open{backdrop-filter:blur(4px)}
+.pp .modal-bg{transition:opacity 220ms var(--ease-out)}.pp .modal-bg.open{transition-duration:320ms}
+@media (prefers-reduced-motion:reduce){
+ .pp *{animation:none!important}
+ .pp .btn,.pp .btn-icon,.pp .card,.pp .list li,.pp .check,.pp .progress>span,.pp li .title{transition-duration:150ms!important;transition-timing-function:linear!important}
+ .pp .btn:active,.pp .btn-icon:active,.pp .list li:active,.pp .card:active{transform:none}
+}
+/* ---- ui_spec_final additions (v3) ---- */
+.pp-cal .pp-week{margin-bottom:12px;padding:16px}
+.pp-week-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.pp-week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.pp-day{min-height:44px;height:64px;border:0;border-radius:16px;background:var(--surface-2);color:var(--text);font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:background-color 220ms var(--spring),color 220ms var(--spring),transform 220ms var(--spring)}
+.pp-day small{font-weight:800;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.pp-day b{font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
+.pp-day i{width:5px;height:5px;border-radius:50%}.pp-day i.has{background:var(--green)}
+.pp-day.on{background:var(--green);color:var(--on-green)}.pp-day.on small{color:var(--on-green);opacity:.85}.pp-day.on i.has{background:var(--on-green)}
+.pp-day:active{transform:scale(.97);transition-duration:90ms}
+.pp-cal .pp-dl li{padding-left:20px!important}
+.pp-cal .pp-dl li.u-urgent>.dot:first-child{background:var(--urgent)!important}
+.pp-cal .pp-dl li.u-soon>.dot:first-child{background:#9e6a46!important}
+.pp-cal .pp-dl li.u-later>.dot:first-child{background:var(--line-strong)!important}
+.pp-cal .pp-dchip{margin-left:auto}.pp-cal li.u-urgent .pp-dchip{background:color-mix(in srgb,var(--urgent) 20%,transparent);color:#a8691b}
+[data-theme=dark] .pp-cal li.u-urgent .pp-dchip{color:#e9b46a}
+.pp-tasks .pc-head{flex:1}.pp-add{margin-left:auto;width:44px;height:44px;flex:none;border:0;border-radius:16px;background:var(--green);color:var(--on-green);display:grid;place-items:center;cursor:pointer;transition:transform 220ms var(--spring)}
+.pp-add:active{transform:scale(.97);transition-duration:90ms}
+.pp-pills{display:flex;gap:8px;margin:0 0 12px;overflow-x:auto}
+.pp-pill{height:34px;padding:0 16px;border:0;border-radius:999px;background:var(--surface-2);color:var(--muted);font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;transition:background-color 220ms var(--spring),color 220ms var(--spring),transform 220ms var(--spring)}
+.pp-pill.on{background:var(--green);color:var(--on-green)}.pp-pill:active{transform:scale(.97);transition-duration:90ms}
+.pp-tasks .pp-sec{display:block;margin:0 0 8px}
+.pp-tasks .list li{background:var(--bg);border:0;border-radius:16px;padding:12px 14px;margin-bottom:8px}
+.pp-tasks li.done{opacity:.5}.pp-tasks li.done .title,.pp-tasks li.done .small{opacity:1}
+.pp-tasks[data-filter=open] .pc-done,.pp-tasks[data-filter=open] #concepts,.pp-tasks[data-filter=done] #ppTasksCard>.list,.pp-tasks[data-filter=done] #ppTasksCard>.pp-sec,.pp-tasks[data-filter=done] #ppTasksCard>.pc-empty,.pp-tasks[data-filter=done] #concepts,.pp-tasks[data-filter=concepts] #ppTasksCard{display:none}
+.pp-tasks[data-filter=open] .grid.g-2,.pp-tasks[data-filter=done] .grid.g-2,.pp-tasks[data-filter=concepts] .grid.g-2{grid-template-columns:1fr}
+@media (prefers-reduced-motion:reduce){.pp-day,.pp-pill,.pp-add{transition-duration:150ms!important}.pp-day:active,.pp-pill:active,.pp-add:active{transform:none}}

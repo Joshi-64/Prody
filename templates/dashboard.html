@@ -1,17 +1,101 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %}{% block title %}Home{% endblock %}
+{% from '_macros.html' import avatar %}
+{% block head %}<script>document.documentElement.classList.add('is-garden');/* start the garden fetch while the page parses */window.__gardenP=fetch('/api/tree',{credentials:'same-origin',headers:{Accept:'application/json'},redirect:'manual'});</script>
+<link rel="stylesheet" href="/static/css/garden.css?v=12">{% endblock %}
 {% block content %}
-<div class="card">
-  <p>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a> | 
-    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a> | 
-    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a> | 
-    <a href="{{ url_for('tasks_bp.manage_tasks') }}">Tasks</a> | 
-    <a href="{{ url_for('logout') }}">Log Out</a>
-  </p>
-  <hr>
-  <h3>Welcome, {{ username }}</h3>
-  <p><strong>Role:</strong> {{ role }}</p>
-  <p>Your session is active. You can now access your courses and study tools.</p>
-  <a href="{{ url_for('tasks_bp.manage_tasks') }}" style="display: inline-block; margin-top: 12px; padding: 10px 18px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">Open Tasks Tracker →</a>
+<div class="garden" data-garden data-assets="/static/garden/" data-tasks-url="{{ url_for('tasks_bp.manage_tasks') }}" data-classes-url="{{ url_for('user_courses_bp.add_courses') }}">
+  <div class="g-wash" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+  <div class="g-frame">
+    <div class="g-stage"></div>
+    <div class="g-blur" aria-hidden="true"></div>
+    <div class="g-items" aria-hidden="false"></div>
+    <div class="g-fly" aria-hidden="true"></div>
+    <button class="g-badge" type="button" hidden><img src="" alt=""><span class="g-badge-n"></span></button>
+
+    <header class="g-sky">
+      <div class="g-eyebrow">{{ greeting }} · {{ today.strftime('%A, %B %d').replace(' 0',' ') }}</div>
+      <h1 class="g-hello">{% if first_name %}Hi {{ first_name }}, your{% else %}Hi there, your{% endif %} semester is growing.</h1>
+      <p class="g-summary" data-g-summary aria-live="polite"></p>
+      <div class="g-pills" data-g-pills hidden></div>
+      <button class="g-next" type="button" data-g-next aria-haspopup="dialog" hidden><span class="g-next-ck" aria-hidden="true"></span><span class="g-next-tx"><b></b><small></small></span><span class="g-next-go">Harvest</span></button>
+    </header>
+    <button class="g-branch-pill" type="button" data-g-branch-pill>Branches</button>
+    <button type="button" class="g-more" data-more-open aria-label="More" title="More" aria-haspopup="dialog" aria-controls="moreSheet"><span class="ms">apps</span></button>
+    <a class="g-me" href="{{ url_for('profile_bp.public_profile', username=session['username']) if session.get('username') else url_for('profile_bp.my_profile') }}" aria-label="Your profile">{{ avatar(me, 34) }}</a>
+
+    <button class="g-almanac-btn" type="button" data-g-almanac aria-haspopup="dialog">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+      Today{% if events %} · {{ events|length }} {{ 'event' if events|length == 1 else 'events' }}{% endif %}
+    </button>
+    <div class="g-toast" role="status" hidden></div>
+    <ul class="g-sr" aria-label="Everything on your tree"></ul>
+  </div>
 </div>
+
+<div class="g-sheet" data-g-sheet hidden role="dialog" aria-modal="true" aria-label="Details">
+  <div class="g-sheet-card">
+    <button class="g-grip" type="button" data-g-close aria-label="Close"></button>
+    <div class="g-sheet-body"></div>
+  </div>
+</div>
+
+<section class="g-branches" data-g-branches hidden aria-label="Branches">
+  <div class="g-hero">
+    <header class="g-bh">
+      <button class="g-back" type="button"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Tree</button>
+      <h1 class="g-bh-title" tabindex="-1">Branches</h1>
+    </header>
+    <div class="g-chips" role="toolbar" aria-label="Classes"></div>
+    <div class="g-twig" aria-label="This class's branch">
+      <div class="g-twig-body">
+        <div class="g-grow g-grow-wood"><div class="g-grow-in"><img class="g-twig-art" alt=""></div></div>
+        <div class="g-grow g-grow-leaf"><div class="g-grow-in"><img class="g-twig-art" alt=""></div></div>
+        <div class="g-nodes"></div>
+      </div>
+    </div>
+    <div class="g-meta"><h2 class="g-branch-name"></h2><span class="g-harvested"></span></div>
+  </div>
+  <div class="g-list"></div>
+</section>
+
+<template id="g-almanac">
+  <div class="g-alm">
+    <h2>{{ today.strftime('%A, %B %d').replace(' 0',' ') }}</h2>
+    <p class="muted">{{ stats.week_minutes|hm }} of focus this week.</p>
+    <h3>Today</h3>
+    {% if events %}<ul>{% for e in events %}<li><span class="w">{{ e.event_date|nice_dt('%I:%M %p') }}</span><span class="t">{{ e.event_name }}</span>{% if e.is_ai_recommended %}<span class="w">Study block</span>{% endif %}</li>{% endfor %}</ul>
+    {% else %}<p class="muted">A free day. A good one for some quiet focus.</p>{% endif %}
+    <h3>Coming up</h3>
+    {% if deadlines %}<ul>{% for d in deadlines[:5] %}<li><span class="t">{{ d.deadline_name }}</span><span class="w">{{ d.deadline_date|rel_day }}</span></li>{% endfor %}</ul>
+    {% else %}<p class="muted">Nothing due. Clear skies.</p>{% endif %}
+    <h3>Your tree</h3>
+    <label class="g-switch"><span><b>Grow tasks on the tree</b><small>Acorns, blossoms or cones on the home tree. Off keeps the tree clean with one gentle badge.</small></span>
+      <input type="checkbox" data-g-mode role="switch"></label>
+    <div class="g-alm-links">
+      <button class="g-btn" type="button" data-g-open-branches>Branches</button>
+      <a class="g-btn" href="{{ url_for('calendar_bp.view_calendar') }}">Calendar</a>
+      <a class="g-btn" href="{{ url_for('tasks_bp.manage_tasks') }}">All tasks</a>
+      <a class="g-btn g-btn-quiet" href="{{ url_for('user_courses_bp.add_courses') }}">Classes</a>
+    </div>
+  </div>
+</template>
+<script src="/static/garden/tree-scene.js?v=4" defer></script>
+<script src="/static/js/garden.js?v=8" defer></script>
+<script>document.addEventListener('DOMContentLoaded',function(){var b=document.querySelector('[data-g-almanac]'),s=document.querySelector('[data-g-sheet]');if(!b||!s)return;
+b.addEventListener('click',function(){if(!window.prodyOpenSheet)return;window.prodyOpenSheet(function(body){body.appendChild(document.getElementById('g-almanac').content.cloneNode(true));
+var m=body.querySelector('[data-g-mode]');m.checked=window.prodyHomeMode()==='garden';m.addEventListener('change',function(){window.prodyHomeMode(m.checked?'garden':'clean');});
+body.querySelector('[data-g-open-branches]').addEventListener('click',function(){s.querySelector('[data-g-close]').click();setTimeout(window.prodyOpenBranches,200);});});});});</script>
+<script>/* clay desktop card: counts + the most urgent item, read from garden.js's own screen-reader list (".g-sr": "title, class, when, state"); opening it uses that item's own button, so Harvest / Undo stay garden.js's */
+document.addEventListener('DOMContentLoaded',function(){var sr=document.querySelector('.g-sr'),pills=document.querySelector('[data-g-pills]'),nx=document.querySelector('[data-g-next]'),bp=document.querySelector('[data-g-branch-pill]');if(!sr||!pills||!nx)return;
+var ST={'Needs a little care':'overdue','Ripening':'due_soon','Growing':'growing','Just planted':'new','Harvested':'done'},pick=null;
+if(bp)bp.addEventListener('click',function(){if(window.prodyOpenBranches)window.prodyOpenBranches();});
+function chip(n,cls,txt){var s=document.createElement('span');s.className='c-chip '+cls;s.textContent=n+' '+txt;return s;}
+function sync(){var c={overdue:0,due_soon:0,growing:0},best=null,rank={overdue:0,due_soon:1,growing:2,'new':3};
+  [].forEach.call(sr.querySelectorAll('button'),function(b){var p=b.textContent.split(', ');if(p.length<4)return;var st=ST[p[p.length-1]];if(!st||st==='done')return;
+    if(st==='new')c.growing++;else c[st]++;if(!best||rank[st]<rank[best.st])best={b:b,st:st,title:p.slice(0,p.length-3).join(', '),cls:p[p.length-3],when:p[p.length-2]};});
+  pills.textContent='';if(c.overdue)pills.appendChild(chip(c.overdue,'c-over','overdue'));if(c.due_soon)pills.appendChild(chip(c.due_soon,'c-soon','due soon'));if(c.growing)pills.appendChild(chip(c.growing,'c-up','growing'));
+  pills.hidden=!pills.children.length;pick=best;nx.hidden=!best;
+  if(best){nx.dataset.state=best.st;nx.querySelector('b').textContent=best.title;nx.querySelector('small').textContent=best.cls+' · '+best.when;nx.setAttribute('aria-label','Harvest '+best.title+', '+best.cls+', '+best.when);}}
+nx.addEventListener('click',function(){if(pick&&pick.b.isConnected)pick.b.click();});
+new MutationObserver(sync).observe(sr,{childList:true,subtree:true});sync();});</script>
 {% endblock %}

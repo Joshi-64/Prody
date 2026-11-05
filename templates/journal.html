@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block title %}Journal{% endblock %}
+{% block content %}
+<div class="page-head"><div class="eyebrow">Journal</div><h1>How did today go?</h1>
+  <p class="small">{{ (mins.get(today, 0) / 60) | round(1) }} hours studied today. Jot down what you worked on, what clicked, and what didn't.</p></div>
+<form method="post" class="card" style="padding:22px;display:grid;gap:14px">
+  <div class="zen-row" role="radiogroup" aria-label="Mood">{% for m in moods %}
+    <label class="chip{{ ' on' if cur and cur.mood == m }}"><input type="radio" name="mood" value="{{ m }}" hidden{{ ' checked' if cur and cur.mood == m }} onchange="this.closest('[role=radiogroup]').querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.contains(this)))">{{ m|capitalize }}</label>{% endfor %}</div>
+  <textarea name="body" rows="6" maxlength="4000" placeholder="Finished the SQL joins lab. Normalization still feels fuzzy, so I'm reviewing it tomorrow.">{{ cur.body if cur else '' }}</textarea>
+  <div><button class="btn"><span class="ms">edit_note</span>Save today</button></div>
+</form>
+{% if past %}<h2 style="margin-top:28px">Earlier</h2>
+<div style="display:grid;gap:12px">{% for e in past %}
+  <div class="card" style="padding:16px 20px"><div class="small"><b>{{ e.entry_date }}</b>{% if e.mood %} · {{ e.mood|capitalize }}{% endif %} · {{ (mins.get(e.entry_date, 0) / 60) | round(1) }} h studied</div>
+  {% if e.body %}<p style="margin:6px 0 0;white-space:pre-wrap">{{ e.body }}</p>{% endif %}</div>{% endfor %}</div>
+{% else %}<p class="small" style="margin-top:20px">Your past entries will show up here.</p>{% endif %}
+{% endblock %}

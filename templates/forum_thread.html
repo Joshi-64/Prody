@@ -1,0 +1,62 @@
+{% extends 'base.html' %}{% block title %}{{ thread.title }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_fn.css') }}?v=4">{% endblock %}
+{% block content %}
+<div class="fnx">
+  <div class="ph">
+    <a class="ib" href="{{ url_for('forums_bp.index', tab=thread.scope) }}" aria-label="Back"><span class="ms">arrow_back</span></a>
+    <h1>Post</h1>
+    {% if demo_label %}<span class="chip demo">Demo only</span>{% endif %}
+</div>
+  <section class="card post">
+    <p class="meta">{% if course %}{{ course.course_name }}{% if course.verified %} · verified{% endif %}{% elif thread.scope=='university' %}{{ thread.university }}{% else %}Global{% endif %}</p>
+    <a class="fn-author fn-author-head" href="{{ url_for('profile_bp.public_profile', username=thread.author.username) }}" aria-label="{{ thread.author.username }}'s profile">
+      <span class="av av-init" style="--a:{{ thread.author.av }}" aria-hidden="true">{{ thread.author.initial }}</span>
+      <span class="fn-author-name">{{ thread.author.username }}</span>
+    </a>
+    <h2>{% if thread.pinned %}<span class="chip pin">Pinned</span> {% endif %}{{ thread.title }}</h2>
+    <p class="body">{{ thread.body }}</p>
+    <div class="pact">
+      <span class="rc"><span class="ms">forum</span>{{ replies|length }} {{ 'reply' if replies|length == 1 else 'replies' }}</span>
+      {% if is_admin %}
+      <button type="button" class="ib more" id="fn-amenu-btn" aria-label="Admin actions">⋯</button>
+      <div class="amenu" id="fn-amenu">
+        <form method="POST" action="{{ url_for('forums_bp.admin_hide_thread', thread_id=thread.id) }}">
+          <button type="submit"><span class="ms">visibility_off</span>{{ 'Unhide' if thread.hidden else 'Hide' }}</button>
+        </form>
+        <form method="POST" action="{{ url_for('forums_bp.admin_pin_thread', thread_id=thread.id) }}">
+          <button type="submit"><span class="ms">check_circle</span>{{ 'Unpin' if thread.pinned else 'Pin' }}</button>
+        </form>
+        <form method="POST" action="{{ url_for('forums_bp.admin_delete_thread', thread_id=thread.id) }}" onsubmit="return confirm('Delete this thread?')">
+          <button type="submit"><span class="ms">delete</span>Delete</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% for r in replies %}
+    <div class="reply">
+      <a class="fn-author" href="{{ url_for('profile_bp.public_profile', username=r.author.username) }}" aria-label="{{ r.author.username }}'s profile">
+        <span class="av av-init" style="--a:{{ r.author.av }}" aria-hidden="true">{{ r.author.initial }}</span>
+        <span class="fn-author-name">{{ r.author.username }}</span>
+      </a>
+      <div class="reply-body"><p>{{ r.body }}</p></div>
+      {% if is_admin %}
+      <form method="POST" action="{{ url_for('forums_bp.admin_delete_reply', reply_id=r.id) }}">
+        <button class="btn btn-ghost btn-sm" type="submit" aria-label="Delete reply"><span class="ms">delete</span></button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <form class="comp" method="POST" action="{{ url_for('forums_bp.reply', thread_id=thread.id) }}" style="border:0;padding:0;margin-top:12px">
+      <input name="body" maxlength="4000" required placeholder="Write a reply…">
+      <button class="btn" type="submit">Reply</button>
+    </form>
+  </section>
+</div>
+{% if is_admin %}
+<script>
+(function(){var b=document.getElementById('fn-amenu-btn'),m=document.getElementById('fn-amenu');
+if(!b||!m)return; b.onclick=function(e){e.stopPropagation();m.classList.toggle('open');};
+document.addEventListener('click',function(){m.classList.remove('open');});})();
+</script>
+{% endif %}
+{% endblock %}

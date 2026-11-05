@@ -1,0 +1,45 @@
+{% extends 'base.html' %}{% block title %}Insights{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
+{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
+{% macro hm2(mins) %}{% set mi = (mins or 0)|round|int %}{% if mi >= 60 %}{{ '{:,}'.format(mi // 60) }}h{% if mi % 60 %} {{ mi % 60 }}m{% endif %}{% else %}{{ mi }}m{% endif %}{% endmacro %}
+{% block content %}
+<div class="page-head"><div class="fp-head"><span class="fp-icon">{{ spot('icon_insights',48,48) }}</span><div><span class="eyebrow">Insights</span><h1>Look how far you've come.</h1><p class="muted">Where your focus time goes, and when you're at your best.</p></div></div>
+  <div class="seg" role="tablist" aria-label="Time range">{% for key, label in [('week','Week'),('month','Month')] %}<a href="?period={{ key }}" class="{{ 'on' if period==key }}" role="tab" aria-selected="{{ 'true' if period==key else 'false' }}">{{ label }}</a>{% endfor %}</div></div>
+<div class="fp-soil" aria-hidden="true"></div>
+<div class="grid g-4" style="margin-bottom:20px">
+  <div class="card tile tile-pink stat"><div class="stat-icon"><span class="ms">schedule</span></div><div><div class="stat-val">{{ hm2(total) }}</div><div class="stat-label">Total in range</div></div></div>
+  <div class="card tile tile-butter stat"><div class="stat-icon"><span class="ms">avg_time</span></div><div><div class="stat-val">{{ hm2(avg) }}</div><div class="stat-label">Daily average</div></div></div>
+  <div class="card tile tile-blue stat"><div class="stat-icon"><span class="ms">calendar_today</span></div><div><div class="stat-val">{{ active_days }}/{{ rng }}</div><div class="stat-label">Active days</div></div></div>
+  <div class="card tile tile-red stat"><div class="stat-icon"><span class="ms">wb_twilight</span></div><div><div class="stat-val">{% if best_hour is not none %}{{ (best_hour % 12) or 12 }}{{ 'pm' if best_hour >= 12 else 'am' }}{% else %}—{% endif %}</div><div class="stat-label">Most productive hour</div></div></div>
+</div>
+{% if total %}
+<div class="grid g-main">
+  <div class="card span-2"><div class="card-head"><h2>Hours by class</h2><span class="small muted">{{ 'This week' if period=='week' else 'This month' }} · stacked</span></div><canvas id="stacked" height="140"></canvas></div>
+  <div class="card"><div class="card-head"><h2>Daily study minutes</h2><span class="small muted">today is still growing</span></div><canvas id="daily" height="120"></canvas></div>
+  <div class="card"><div class="card-head"><h2>By class</h2></div><canvas id="course" height="220"></canvas></div>
+  <div class="card span-2"><div class="card-head"><h2>Time of day</h2><span class="small muted">hours</span></div><canvas id="hours" height="70"></canvas></div>
+</div>
+{% else %}
+<div class="card fp-empty">{{ spot('empty_watering_can',160,120) }}<h3>Nothing watered yet</h3><p>No focus time in the last {{ rng }} days. One session waters the plant and your charts start growing here.</p><a class="btn" href="{{ url_for('study_bp.timer') }}"><span class="ms">timer</span>Start a focus session</a></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if total %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const dark=document.documentElement.dataset.theme==='dark', ink=dark?'#9BCBA8':'#2F6B3A', fillTop=dark?'rgba(78,154,79,.35)':'rgba(78,154,79,.28)';
+const dl={{ labels|tojson }}; if(dl.length) dl[dl.length-1]=dl[dl.length-1]+' (today)';
+Chart.defaults.font.family="'Inter',sans-serif"; Chart.defaults.color=getComputedStyle(document.body).getPropertyValue('--muted');
+const grid={color:getComputedStyle(document.body).getPropertyValue('--line')};
+const stacked={{ stacked|tojson }}, colors={{ course_colors|tojson }};
+const stackSets=Object.keys(stacked).map(function(name){return {label:name,data:stacked[name],backgroundColor:colors[name]||'#94a3b8',borderColor:getComputedStyle(document.documentElement).getPropertyValue('--surface').trim(),borderWidth:1.5,borderRadius:6,stack:'h'};});
+new Chart(document.getElementById('stacked'),{type:'bar',data:{labels:dl,datasets:stackSets},options:{plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',boxWidth:8}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid,title:{display:true,text:'Hours'}}}}});
+const ctx=document.getElementById('daily').getContext('2d'); const g=ctx.createLinearGradient(0,0,0,300); g.addColorStop(0,fillTop); g.addColorStop(1,'rgba(78,154,79,0)');
+new Chart(ctx,{type:'line',data:{labels:dl,datasets:[{data:{{ daily|tojson }},segment:{borderDash:c=>c.p1DataIndex===dl.length-1?[5,4]:undefined},borderColor:ink,backgroundColor:g,fill:true,tension:.35,pointRadius:3,pointBackgroundColor:ink,borderWidth:3}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid},x:{grid:{display:false}}}}});
+const bc={{ by_course|tojson }}; const garden=['#4E9A4F','#F08A6C','#F4C95D','#8A6242','#2F6B3A','#C8744F','#8CC56B','#E98F6C'];
+const legend={position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',boxWidth:8,color:getComputedStyle(document.body).getPropertyValue('--muted')}};
+new Chart(document.getElementById('course'),{type:'doughnut',data:{labels:Object.keys(bc),datasets:[{data:Object.values(bc).map(v=>v.minutes),backgroundColor:Object.keys(bc).map((k,i)=>garden[i%garden.length]),borderColor:getComputedStyle(document.documentElement).getPropertyValue('--surface').trim(),borderWidth:1.5}]},options:{cutout:'65%',plugins:{legend}}});
+new Chart(document.getElementById('hours'),{type:'bar',data:{labels:[...Array(24).keys()].map(h=>(h%12||12)+(h<12?'a':'p')),datasets:[{data:{{ hours|tojson }}.map(m=>+(m/60).toFixed(1)),backgroundColor:dark?'#4E9A4F':'#8CC56B',borderColor:getComputedStyle(document.documentElement).getPropertyValue('--surface').trim(),borderWidth:1.5,borderRadius:8,borderSkipped:false}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid},x:{grid:{display:false}}}}});
+</script>
+{% endif %}
+{% endblock %}

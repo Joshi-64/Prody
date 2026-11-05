@@ -1,0 +1,18 @@
+{% extends 'base.html' %}{% block title %}Admin log in{% endblock %}
+{% block auth %}
+<div class="auth">
+  {% include '_auth_art.html' %}
+  <div class="auth-form"><div class="auth-card">
+    <h2>Admin console</h2>
+    <p class="muted" style="margin:0 0 26px;font-size:16px">Administrators only. Student accounts are refused here.</p>
+    <form method="POST" novalidate>
+      <div class="field"><label for="username">Username or email</label>
+        <input id="username" name="username" value="{{ ident or '' }}" required autofocus></div>
+      <div class="field"><label for="password">Password</label>
+        <div class="pw-wrap"><input id="password" type="password" name="password" required><button type="button" data-pw><span class="ms">visibility</span></button></div></div>
+      <button class="btn btn-block" type="submit">Admin log in <span class="ms">arrow_forward</span></button>
+    </form>
+    <p class="muted" style="text-align:center;margin-top:22px"><a href="{{ url_for('login') }}">Student log in</a></p>
+  </div></div>
+</div>
+{% endblock %}

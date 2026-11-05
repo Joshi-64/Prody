@@ -9,3 +9,13 @@ config_ai.py
 .DS_Store
 Thumbs.db
 desktop.ini
+*.sqlite3
+venv/
+static/uploads/
+scripts/mysql_env.sh
+.secrets/
+.secrets/
+*.sqlite3
+venv/
+__pycache__/
+.env*

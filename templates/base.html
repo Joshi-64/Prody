@@ -1,26 +1,149 @@
+{% from '_macros.html' import avatar, uname, leaf %}
+{% from '_nav_icons.html' import nav_icon %}
 <!DOCTYPE html>
-<html>
+{% set _clay = request.endpoint != 'profile_bp.store' %}{% set _out = not (session.get('user_id') and me is defined) %}<html lang="en"{% if _clay or _out %} class="{% if _clay %}clay{% endif %}{% if _clay and _out %} {% endif %}{% if _out %}logged-out{% endif %}"{% endif %}>{# clay restyle: Store keeps its own look (no .clay = legacy page tokens); the sidebar is clay everywhere #}
 <head>
-  <title>Prody - User Management</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px auto; max-width: 600px; line-height: 1.6; }
-    .flash { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
-    .success { background: #d4edda; color: #155724; }
-    .danger { background: #f8d7da; color: #721c24; }
-    .warning { background: #fff3cd; color: #856404; }
-    .card { border: 1px solid #ddd; padding: 20px; border-radius: 6px; }
-    input, select { display: block; width: 100%; margin: 8px 0 16px; padding: 8px; box-sizing: border-box; }
-    button { padding: 10px 18px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
-    nav a { margin-right: 15px; }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f3ea">
+  <title>{% block title %}Prody{% endblock %} · Prody</title>
+  <script>(function(){var r=document.documentElement,q=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)');function saved(){try{var v=localStorage.getItem('prody-theme');return v==='dark'||v==='light'?v:null;}catch(e){return null;}}
+function apply(t){if(r.dataset.theme&&r.dataset.theme!==t){r.classList.add('theme-switching');requestAnimationFrame(function(){requestAnimationFrame(function(){r.classList.remove('theme-switching');});});}r.dataset.theme=t;var m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='dark'?'#161913':'#f6f3ea';}
+window.prodySetTheme=function(t){try{localStorage.setItem('prody-theme',t);}catch(e){}apply(t);};apply(saved()||(q&&q.matches?'dark':'light'));/* no saved choice: follow the system (live) until the user picks one in the app */
+if(q){var f=function(e){if(!saved())apply(e.matches?'dark':'light');};q.addEventListener?q.addEventListener('change',f):q.addListener&&q.addListener(f);}})()</script>
+  <script>window.__AV={{ asset_manifest()|tojson }};/* perf_r1: kit dir content hashes for tree_kit.js */(function(){var i=new Image();function no(){window.__noWebp=1;document.documentElement.classList.add('no-webp');}i.onload=function(){if(!(i.width>0))no();};i.onerror=no;i.src='data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==';})()/* WebP probe: Safari<14 gets the PNG art */</script>
+  <link rel="stylesheet" href="/static/css/fonts.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=31">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shell.css') }}?v=10">
+  <script src="/static/vendor/canvas-confetti-1.9.3.min.js" defer></script>
+  {% block head %}{% endblock %}
 </head>
 <body>
-  <h2>Prody Productivity App</h2>
+{% set icons = {'success':'check_circle','danger':'error','warning':'error','info':'info'} %}
+<div class="toasts">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for cat, msg in messages %}
-      <div class="flash {{ cat }}">{{ msg }}</div>
+      <div class="toast {{ cat }}" role="status"><span class="ms">{{ icons.get(cat, 'info') }}</span><div>{{ msg }}</div><button aria-label="Dismiss"><span class="ms" style="font-size:18px;color:inherit">close</span></button></div>
     {% endfor %}
   {% endwith %}
-  {% block content %}{% endblock %}
+</div>
+{% if session.get('user_id') and me is defined %}
+{% set ep = request.endpoint or '' %}
+<div class="frame">
+<header class="topnav"><div class="topnav-in">
+  <a class="brand" href="{{ url_for('dashboard') }}" aria-label="Prody home">{{ leaf() }}Prody</a>
+  {% set me_active = (ep=='profile_bp.public_profile' and request.view_args.get('username')==session['username']) or ep in ('profile_bp.edit_profile','profile_bp.my_profile') %}
+  {% set me_url = url_for('profile_bp.public_profile', username=session['username']) if session.get('username') else url_for('profile_bp.my_profile') %}
+  <nav class="navlinks" aria-label="Main">
+    <a href="{{ url_for('dashboard') }}" class="{{ 'active' if ep=='dashboard' }}"><span class="ms" aria-hidden="true">house</span>Home</a>
+    <a href="{{ url_for('tasks_bp.manage_tasks') }}" class="{{ 'active' if ep.startswith('tasks_bp') }}"><span class="ms" aria-hidden="true">checklist</span>To-Do</a>
+    <a href="{{ url_for('calendar_bp.view_calendar') }}" class="{{ 'active' if ep.startswith('calendar_bp') }}"><span class="ms" aria-hidden="true">calendar_today</span>Calendar</a>
+    <a href="{{ url_for('user_courses_bp.add_courses') }}" class="{{ 'active' if ep.startswith('user_courses_bp') }}"><span class="ms" aria-hidden="true">school</span>Classes</a>
+    <a href="{{ url_for('study_bp.timer') }}" class="{{ 'active' if ep=='study_bp.timer' }}"><span class="ms" aria-hidden="true">self_improvement</span>Zen</a>
+    <a href="{{ url_for('study_bp.analytics') }}" class="{{ 'active' if ep=='study_bp.analytics' }}"><span class="ms" aria-hidden="true">insights</span>Insights</a>
+    <a href="{{ url_for('grades_bp.grades') }}" class="{{ 'active' if ep.startswith('grades_bp') }}"><span class="ms" aria-hidden="true">grade</span>Grades</a>
+    <a href="{{ url_for('buddy_bp.chat') }}" class="{{ 'active' if ep.startswith('buddy_bp') }}"><span class="ms" aria-hidden="true">forum</span>Prody</a>
+    <a href="{{ url_for('profile_bp.store') }}" class="{{ 'active' if ep=='profile_bp.store' }}"><span class="ms" aria-hidden="true">storefront</span>Store</a>
+    <a href="{{ me_url }}" class="{{ 'active' if me_active }}"><span class="ms" aria-hidden="true">person</span>Me</a>
+  </nav>
+  <div class="nav-right">
+    <a class="pts-pill" href="{{ url_for('profile_bp.store') }}" title="Points to spend"><span class="ms">eco</span>{{ '{:,}'.format(me_points) }} <span class="pts-lbl">points</span></a>
+    <button class="icon-btn" data-theme-toggle title="Light / dark"><span class="ms">dark_mode</span></button>
+    <div class="dropdown side-me">
+      <button class="icon-btn side-me-btn" data-dropdown style="background:none;width:auto;height:auto" aria-label="Account menu">{{ avatar(me, 34) }}<span class="side-me-txt" aria-hidden="true"><b>{{ uname(me) }}</b><small>{{ '{:,}'.format(me_points) }} points</small></span></button>
+      <div class="menu">
+        <div class="menu-head">{{ avatar(me, 40) }}<div style="min-width:0"><div style="font-weight:700">{{ uname(me) }}</div><div class="small muted">@{{ me.username }}</div></div></div>
+        <a href="{{ me_url }}"><span class="ms">person</span>My profile</a>
+        <a href="{{ url_for('profile_bp.edit_profile') }}"><span class="ms">edit</span>Edit profile</a>
+        <a href="{{ url_for('study_bp.achievements') }}"><span class="ms">emoji_events</span>Achievements</a>
+        <a href="{{ url_for('buddy_bp.chat') }}"><span class="ms">forum</span>Talk to Prody</a>
+        <a href="{{ url_for('dm_bp.inbox') }}"><span class="ms">forum</span>Messages</a>
+        <a href="{{ url_for('forums_bp.index') }}"><span class="ms">group</span>Boards</a>
+        <a href="{{ url_for('rooms_bp.rooms') }}"><span class="ms">videocam</span>Rooms</a>
+        <a href="{{ url_for('friends_bp.friends') }}"><span class="ms">group</span>Friends</a>
+        <hr>
+        <a href="{{ url_for('profile_bp.whiteboard') }}"><span class="ms">draw</span>Whiteboard</a>
+        {% if session.get('role') == 'admin' %}<hr><a href="{{ url_for('admin') }}"><span class="ms">shield_person</span>Admin Console</a>
+        <a href="{{ url_for('admin_mod_bp.courses') }}"><span class="ms">how_to_reg</span>Verify courses</a>{% endif %}
+        <hr><form method="post" action="{{ url_for('logout') }}" class="logout-form"><button class="menu-btn"><span class="ms">logout</span>Log out</button></form>
+      </div>
+    </div>
+    <button type="button" class="icon-btn" id="moreOpen" data-more-open aria-label="More" title="More" aria-haspopup="dialog" aria-controls="moreSheet"><span class="ms">apps</span></button>
+  </div>
+</div></header>
+<main class="content">{% block content %}{% endblock %}</main>
+<nav class="tabbar" aria-label="Main">
+  <span class="tab-pill" aria-hidden="true"></span>
+  <a href="{{ url_for('dashboard') }}" class="tab{{ ' active' if ep=='dashboard' }}" {{ 'aria-current=page' if ep=='dashboard' }}>{{ nav_icon('home') }}<span class="tab-lbl">Home</span></a>
+  <a href="{{ url_for('tasks_bp.manage_tasks') }}" class="tab{{ ' active' if ep.startswith('tasks_bp') }}" {{ 'aria-current=page' if ep.startswith('tasks_bp') }}>{{ nav_icon('checklist') }}<span class="tab-lbl">To-Do</span></a>
+  <a href="{{ url_for('calendar_bp.view_calendar') }}" class="tab{{ ' active' if ep.startswith('calendar_bp') }}" {{ 'aria-current=page' if ep.startswith('calendar_bp') }}>{{ nav_icon('calendar') }}<span class="tab-lbl">Calendar</span></a>
+  <a href="{{ url_for('study_bp.timer') }}" class="tab{{ ' active' if ep=='study_bp.timer' }}" {{ 'aria-current=page' if ep=='study_bp.timer' }}>{{ nav_icon('leaf') }}<span class="tab-lbl">Zen</span></a>
+  <a href="{{ me_url }}" class="tab{{ ' active' if me_active }}" {{ 'aria-current=page' if me_active }}>{{ nav_icon('user') }}<span class="tab-lbl">Me</span></a>
+</nav>
+</div>
+{% else %}
+  <div class="frame auth-frame">{% block auth %}{% endblock %}</div>
+{% endif %}
+<script src="{{ url_for('static', filename='js/app.js') }}?v=7"></script>
+{% if celebrate %}<script>window.addEventListener('load',()=>setTimeout(()=>window.celebrate&&celebrate(),300))</script>{% endif %}
+{% block scripts %}{% endblock %}
+{% if session.get('user_id') and me is defined %}
+{% include '_achievements.html' %}
+<script src="/static/js/quickadd.js?v=2" defer></script>
+<script src="{{ url_for('static', filename='js/shell.js') }}?v=10" defer></script>
+{% endif %}
+
+{% if session.get('user_id') %}
+<div class="scrim" id="moreScrim" hidden></div>
+<section class="sheet" id="moreSheet" hidden role="dialog" aria-modal="true" aria-label="More">
+  <i class="grab" aria-hidden="true"></i>
+  <div class="ph"><h1>More</h1><button type="button" class="ib" id="moreClose" aria-label="Close"><span class="ms">close</span></button></div>
+  <div class="mgrid">
+    <a class="card mt" href="{{ url_for('buddy_bp.chat') }}"><span class="mi" style="--t:#DDE7D3"><span class="ms">smart_toy</span></span>Study buddy</a>
+    <a class="card mt" href="{{ url_for('study_bp.analytics') }}"><span class="mi" style="--t:#E7E1EE"><span class="ms">insights</span></span>Analytics</a>
+    <a class="card mt" href="{{ url_for('grades_bp.grades') }}"><span class="mi" style="--t:#F2E2CB"><span class="ms">grade</span></span>Grades</a>
+    <a class="card mt" href="{{ url_for('profile_bp.whiteboard') }}"><span class="mi" style="--t:#F5E0E3"><span class="ms">draw</span></span>Whiteboard</a>
+    <a class="card mt" href="{{ url_for('study_bp.achievements') }}"><span class="mi" style="--t:#F2E2CB"><span class="ms">emoji_events</span></span>Achievements</a>
+    <a class="card mt" href="{{ url_for('profile_bp.store') }}"><span class="mi" style="--t:#DDE7D3"><span class="ms">storefront</span></span>Store</a>
+    <a class="card mt" href="{{ url_for('dm_bp.inbox') }}"><span class="mi" style="--t:#F5E0E3"><span class="ms">forum</span></span>Messages</a>
+    <a class="card mt" href="{{ url_for('forums_bp.index') }}"><span class="mi" style="--t:#E7E1EE"><span class="ms">edit</span></span>Boards</a>
+    <a class="card mt" href="{{ url_for('rooms_bp.rooms') }}"><span class="mi" style="--t:#DDE7D3"><span class="ms">videocam</span></span>Study rooms</a>
+    <a class="card mt" href="{{ url_for('calendar_bp.view_calendar') }}"><span class="mi" style="--t:#F2E2CB"><span class="ms">calendar_today</span></span>Calendar sync</a>
+    {% if session.get('role') == 'admin' %}<a class="card mt admin" data-role="admin" href="{{ url_for('admin') }}"><span class="mi" style="--t:var(--c-paper-2,var(--surface-2))"><span class="ms">check_circle</span></span>Admin<em>admins only</em></a>{% endif %}
+  </div>
+</section>
+<style>
+.scrim{position:fixed;inset:0;background:rgba(63,50,64,.22);z-index:90}
+.sheet{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,92vw);padding:18px 20px 22px;border-radius:30px;background:var(--c-paper,var(--surface));border:1px solid var(--c-edge,var(--line));box-shadow:0 24px 60px -20px rgba(60,40,50,.45);z-index:91}
+.sheet .grab{display:none}.sheet .ph{display:flex;align-items:center;gap:10px;margin-bottom:14px}.sheet .ph h1{margin:0;flex:1;font-size:22px}
+.sheet .ib{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--c-paper,var(--surface));border:1px solid var(--c-edge,var(--line));box-shadow:var(--sh-soft,var(--shadow));color:var(--c-ink,var(--ink));cursor:pointer}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mt{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 6px;font-size:12.5px;font-weight:700;color:var(--c-ink,var(--ink));text-align:center;border-radius:var(--r-md,16px);text-decoration:none;background:var(--c-paper,var(--surface));border:1px solid var(--c-edge,var(--line));box-shadow:var(--sh-soft,var(--shadow))}
+.mi{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;background:var(--t);box-shadow:var(--sh-clay,var(--shadow))}.mi .ms{color:var(--c-ink,var(--ink));font-size:22px}
+[data-theme=dark] .mi{background:color-mix(in srgb,var(--t) 22%,var(--c-paper-2,var(--surface-2)))}
+.admin{border-style:dashed}.admin em{font-style:normal;font-size:10.5px;color:var(--c-ink-faint,var(--muted));margin-top:-5px}
+@media(max-width:700px){
+  .sheet{left:0;right:0;top:auto;bottom:0;transform:none;width:auto;border-radius:30px 30px 0 0;padding:10px 16px calc(env(safe-area-inset-bottom) + 24px)}
+  .sheet .grab{display:block;width:40px;height:5px;border-radius:9px;background:var(--c-edge,var(--line));margin:0 auto 10px}
+  .mgrid{grid-template-columns:repeat(3,1fr);gap:8px}.mt{padding:10px 4px}
+  body.more-open .tabbar{display:none}
+}
+</style>
+<script>
+(function(){
+  var sheet=document.getElementById('moreSheet'),
+      scrim=document.getElementById('moreScrim'), close=document.getElementById('moreClose');
+  if(!sheet)return;
+  var opens=[].slice.call(document.querySelectorAll('#moreOpen, [data-more-open]'));
+  if(!opens.length)return;
+  function show(){sheet.hidden=false;if(scrim)scrim.hidden=false;document.body.classList.add('more-open');}
+  function hide(){sheet.hidden=true;if(scrim)scrim.hidden=true;document.body.classList.remove('more-open');}
+  opens.forEach(function(open){open.addEventListener('click',show);});
+  if(close)close.addEventListener('click',hide);
+  if(scrim)scrim.addEventListener('click',hide);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!sheet.hidden)hide();});
+})();
+</script>
+{% endif %}
 </body>
 </html>

@@ -1,39 +1,74 @@
-{% extends 'base.html' %}
-
+{% extends 'base.html' %}{% from "_spot.html" import spot, empty, css %}{% from "_urgency.html" import urgency_chip %}{% block title %}To-Do & Concepts{% endblock %}{% block head %}{{ css() }}<link rel="stylesheet" href="/static/css/pages_pixelcraft.css?v=4"><link rel="stylesheet" href="/static/css/caltodo.css?v=7">{% endblock %}
 {% block content %}
-<div style="max-width: 600px; margin: 30px auto; font-family: sans-serif;">
-    <h2>My To-Do List & Concept Tracker</h2>
-    
-    <p>
-      <a href="{{ url_for('dashboard') }}">Dashboard</a> | 
-      <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a> | 
-      <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a> | 
-      <a href="{{ url_for('tasks_bp.manage_tasks') }}">Tasks</a> | 
-      <a href="{{ url_for('logout') }}">Log Out</a>
-    </p>
+{% set open_t = tasks|rejectattr('is_completed')|list %}{% set done_t = tasks|selectattr('is_completed')|list %}
+<div class="pp pp-tasks" data-filter="all">
+<div class="page-head ct-head">
+  <div><h1>To-Do</h1><p class="ct-sub">{{ open_t|length }} growing · {{ done }} harvested</p></div>
+  <div class="ct-acts"><button type="button" class="ct-ibtn ct-plant" title="Add task" onclick="ctAdd()"><span class="ms" aria-hidden="true">add</span><span class="ct-plant-l">Plant task</span></button></div>
+</div>
+{% if tasks %}<div class="ct-prog" role="progressbar" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ done }} of {{ tasks|length }} tasks done"><span style="width:{{ pct }}%"></span></div>{% endif %}
+<div class="pp-pills" role="tablist" aria-label="Filter">{% for k,l in [("all","All"),("open","Open"),("done","Done"),("concepts","Concepts")] %}<button type="button" role="tab" aria-selected="{{ 'true' if k=='all' else 'false' }}" class="pp-pill{{ " on" if k=="all" }}" data-f="{{ k }}" onclick="ppFilter(this)">{{ l }}</button>{% endfor %}</div>
 
-    <form method="POST" style="margin-bottom: 30px;">
-        <input type="text" name="task_name" placeholder="Enter task or concept..." required style="width: 60%; padding: 8px;">
-        <input type="date" name="due_date" style="padding: 8px;">
-        <button type="submit" style="padding: 8px 16px; background-color: #007bff; color: white; border: none; cursor: pointer;">Add</button>
-    </form>
+{% macro trow(task) %}{% set dot = task.color|class_dot %}
+  <li class="ct-row{{ ' done' if task.is_completed }}">
+    <form class="inline" method="POST" action="{{ url_for('tasks_bp.complete_task', task_id=task.task_id) }}"><button class="ct-check{{ ' on' if task.is_completed }}" aria-label="{{ 'Mark not done' if task.is_completed else 'Mark done' }}: {{ task.task_name }}" aria-pressed="{{ 'true' if task.is_completed else 'false' }}"><span class="ct-box"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 12.5l3.5 3.5 7.5-8"/></svg></span></button></form>
+    <button type="button" class="grow ct-open-row" data-del="{{ url_for('tasks_bp.delete_task', task_id=task.task_id) }}" data-name="{{ task.task_name }}" aria-haspopup="dialog" aria-label="Options for {{ task.task_name }}" onclick="ctRow(this)"><div class="title">{{ task.task_name }}</div>
+      {% if task.course_name or task.due_date %}<div class="ct-ds">{% if task.course_name %}{% if dot %}<span class="cls-dot" style="background:{{ dot }}"></span>{% endif %}{{ task.course_name }}{% endif %}{% if task.due_date %}{% if task.course_name %} · {% endif %}{{ task.due_date|nice_dt('%b %d') }}{% endif %}</div>{% endif %}</button>
+    {% if not task.is_completed %}{{ urgency_chip(task.due_days) }}{% else %}<span class="ct-chip u-done">Done</span>{% endif %}
+  </li>{% endmacro %}
 
-    <h3>Active Tasks</h3>
-    <ul>
-        {% for task in tasks %}
-            <li style="margin-bottom: 10px;">
-                {% if task.is_completed %}
-                    <strike>{{ task.task_name }} (Due: {{ task.due_date }})</strike> - <b>Completed</b>
-                {% else %}
-                    {{ task.task_name }} {% if task.due_date %}(Due: {{ task.due_date }}){% endif %}
-                    <form method="POST" action="{{ url_for('tasks_bp.complete_task', task_id=task.task_id) }}" style="display:inline; margin-left: 10px;">
-                        <button type="submit" style="background: green; color: white; border: none; padding: 4px 8px; cursor: pointer;">Mark Done</button>
-                    </form>
-                {% endif %}
-            </li>
-        {% else %}
-            <li>No tasks logged yet. Add one above!</li>
-        {% endfor %}
-    </ul>
+<div class="ct-tasks" id="ppTasksCard">
+{% if open_t %}
+  {% set g_now = open_t|selectattr('due_days','ne',None)|selectattr('due_days','le',1)|list %}
+  {% set g_week = open_t|selectattr('due_days','ne',None)|selectattr('due_days','gt',1)|selectattr('due_days','le',7)|list %}
+  {% set g_later = open_t|selectattr('due_days','ne',None)|selectattr('due_days','gt',7)|list %}
+  {% set g_none = open_t|selectattr('due_days','none')|list %}
+  {% for label, rows in [('Today & overdue', g_now), ('This week', g_week), ('Later', g_later), ('Anytime', g_none)] if rows %}
+  <section class="ct-group ct-open"><span class="eyebrow ct-sec">{{ label }}</span><ul class="ct-list card">{% for task in rows %}{{ trow(task) }}{% endfor %}</ul></section>
+  {% endfor %}
+{% elif done_t %}<div class="card ct-empty ct-open"><img class="ct-nap" src="/static/spot/nap_A_potted_drowsy_bud.png?v=1" width="120" height="90" alt="" decoding="async"><h3>All done</h3><p>Every task is checked off. Your tree is resting easy.</p><button type="button" class="ct-btn" onclick="ctAdd()"><span class="ms">add</span>Add another</button></div>
+{% else %}<div class="card ct-empty ct-open">{{ spot('empty_sprout', 120, 90) }}<h3>No tasks yet</h3><p>Add your first task and watch your tree grow.</p><button type="button" class="ct-btn" onclick="ctAdd()"><span class="ms">add</span>Add a task</button></div>{% endif %}
+{% if done_t %}<section class="ct-group ct-donegrp"><span class="eyebrow ct-sec">Harvested · {{ done_t|length }}</span><ul class="ct-list card">{% for task in done_t %}{{ trow(task) }}{% endfor %}</ul></section>
+{% else %}<div class="card ct-empty ct-empty-sm ct-donegrp ct-only-done">{{ spot('empty_seed', 96, 72) }}<p class="ct-empty-t">Nothing checked off yet. Tick a task to see it here.</p></div>{% endif %}
+</div>
+
+<section class="ct-group" id="concepts"><span class="eyebrow ct-sec">Concepts</span>
+{% if concepts %}<ul class="ct-list card">{% for c in concepts %}{% set cdot = c.color|class_dot %}
+  <li class="ct-row ct-concept"><div class="grow"><div class="title">{{ c.task_name }}</div>{% if c.course_name %}<div class="ct-ds">{% if cdot %}<span class="cls-dot" style="background:{{ cdot }}"></span>{% endif %}{{ c.course_name }}</div>{% endif %}</div>
+    <form method="POST" action="{{ url_for('tasks_bp.set_progress', task_id=c.task_id) }}" class="ct-range">
+      <input type="range" style="--p:{{ c.progress or 0 }}%" name="progress" min="0" max="100" step="5" value="{{ c.progress or 0 }}" aria-label="Mastery of {{ c.task_name }}" oninput="this.nextElementSibling.textContent=this.value+'%'" onchange="this.form.submit()"><span>{{ c.progress or 0 }}%</span></form></li>{% endfor %}</ul>
+{% else %}<div class="card ct-empty">{{ spot('empty_seed', 120, 90) }}<h3>No concepts yet</h3><p>Track how well you know a topic, from 0 to mastered.</p><button type="button" class="ct-btn" onclick="ctAdd('concept')"><span class="ms">add</span>Add a concept</button></div>{% endif %}
+</section>
+
+<div class="modal-bg ct-sheet" id="ctAddSheet"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="ctAddT">
+  <h2 id="ctAddT">New task</h2>
+  <form method="POST" class="ct-form">
+    <div class="field"><label for="ctName">Task or concept</label><input id="ctName" name="task_name" placeholder="e.g. Finish lab report, or “Recursion”" required maxlength="255"></div>
+    <div class="ct-2"><div class="field"><label for="ctCat">Type</label><select id="ctCat" name="category"><option value="task">Task</option><option value="concept">Concept</option></select></div>
+      <div class="field"><label for="ctDue">Due</label><input id="ctDue" type="date" name="due_date" value="{{ prefill_due }}"></div></div>
+    {% if courses %}<div class="field"><label for="ctCls">Class</label><select id="ctCls" name="course_id" required>{% if not last_course_id %}<option value="" disabled selected>Pick a class</option>{% endif %}{% for c in courses %}<option value="{{ c.course_id }}"{{ ' selected' if c.course_id == last_course_id }}>{{ c.course_name }}</option>{% endfor %}</select></div>
+    {% else %}<div class="field ct-firstcls" id="ctFirstCls"><p>Tasks belong to a class. Add your first class to get started.</p><a class="ct-btn ct-btn-2" href="{{ url_for('user_courses_bp.add_courses') }}"><span class="ms">add</span>Add your first class</a></div>{% endif %}
+    <div class="ct-2"><button type="button" class="ct-btn ct-btn-2" onclick="ctClose()">Cancel</button><button class="ct-btn">Add</button></div>
+  </form>
+</div></div>
+<div class="modal-bg ct-sheet" id="ctRowSheet"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="ctRowT">
+  <h2 id="ctRowT">Task</h2>
+  <form method="POST" id="ctRowDel" class="ct-form" onsubmit="return confirm('Delete this task?')">
+    <div class="ct-2"><button type="button" class="ct-btn ct-btn-2" onclick="ctRowClose()">Close</button><button class="ct-btn ct-btn-danger"><span class="ms" aria-hidden="true">delete</span>Delete task</button></div>
+  </form>
+</div></div>
 </div>
 {% endblock %}
+{% block scripts %}<script>
+function ppFilter(b){const r=document.querySelector('.pp-tasks');r.dataset.filter=b.dataset.f;r.querySelectorAll('.pp-pill').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-selected',on)});}
+function ctReq(){const c=document.getElementById('ctCat').value==='concept',k=document.getElementById('ctCls');if(k)k.required=!c;}
+document.getElementById('ctCat').addEventListener('change',ctReq);
+function ctAdd(cat,due){const s=document.getElementById('ctAddSheet');document.getElementById('ctCat').value=cat||'task';ctReq();if(due)document.getElementById('ctDue').value=due;document.getElementById('ctAddT').textContent=cat==='concept'?'New concept':'New task';s.classList.add('open');setTimeout(()=>document.getElementById('ctName').focus(),60);}
+function ctRow(b){document.getElementById('ctRowT').textContent=b.dataset.name;document.getElementById('ctRowDel').action=b.dataset.del;document.getElementById('ctRowSheet').classList.add('open');}
+function ctRowClose(){document.getElementById('ctRowSheet').classList.remove('open')}
+document.getElementById('ctRowSheet').addEventListener('click',e=>{if(e.target.id==='ctRowSheet')ctRowClose()});
+function ctClose(){ctRowClose();document.getElementById('ctAddSheet').classList.remove('open')}
+document.getElementById('ctAddSheet').addEventListener('click',e=>{if(e.target.id==='ctAddSheet')ctClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')ctClose()});
+{% if open_add %}ctAdd('task', {{ prefill_due|tojson }});{% endif %}
+</script>{% endblock %}

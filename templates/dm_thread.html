@@ -1,0 +1,46 @@
+{% extends 'base.html' %}{% block title %}{{ other.username }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_fn.css') }}?v=2">{% endblock %}
+{% block content %}
+<div class="fnx fnx-thread-page">
+  <div class="ph">
+    <a class="ib" href="{{ url_for('dm_bp.inbox') }}" aria-label="Back"><span class="ms">arrow_back</span></a>
+    <h1>{{ other.username }}</h1>
+    {% if demo_label %}<span class="chip demo">Demo only</span>{% endif %}
+  </div>
+  <section class="card thread">
+    <div class="thh"><i class="av" style="--a:{{ other_av }}" aria-hidden="true"></i><b>{{ other.username }}</b></div>
+    <div class="bubs" id="dm-log">
+      {% for m in messages %}
+      <div class="bub {{ 'me' if m.sender_id == me_id else 'them' }}" data-id="{{ m.id }}">{{ m.body }}</div>
+      {% else %}
+      <p class="muted" id="dm-empty">No messages yet. Say hello.</p>
+      {% endfor %}
+    </div>
+    <form class="comp" id="dm-form" method="POST" action="{{ url_for('dm_bp.thread', username=other.username) }}">
+      <input id="dm-body" name="body" maxlength="2000" required placeholder="Message {{ other.username }}…" autocomplete="off">
+      <button class="btn" type="submit">Send</button>
+    </form>
+  </section>
+</div>
+<script>
+(function(){
+  var log=document.getElementById('dm-log'), form=document.getElementById('dm-form'), body=document.getElementById('dm-body');
+  var since={{ (messages[-1].id if messages else 0)|int }}, user={{ other.username|tojson }};
+  function bubble(m){ var d=document.createElement('div'); d.className='bub '+(m.mine?'me':'them'); d.dataset.id=m.id; d.textContent=m.body; return d; }
+  function append(m){ var empty=document.getElementById('dm-empty'); if(empty)empty.remove();
+    if(log.querySelector('[data-id="'+m.id+'"]')) return; log.appendChild(bubble(m)); since=Math.max(since,m.id); log.scrollTop=log.scrollHeight; }
+  form.addEventListener('submit', function(e){
+    e.preventDefault(); var text=(body.value||'').trim(); if(!text) return;
+    fetch('/messages/'+encodeURIComponent(user)+'/send', {method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'fetch'},
+      body: JSON.stringify({body:text})}).then(function(r){return r.json()}).then(function(j){
+      if(j.ok){ body.value=''; append(j.message); } else { form.submit(); }
+    }).catch(function(){ form.submit(); });
+  });
+  setInterval(function(){
+    fetch('/messages/'+encodeURIComponent(user)+'/poll?since_id='+since, {headers:{'Accept':'application/json'}})
+      .then(function(r){return r.json()}).then(function(j){ if(j.ok) (j.messages||[]).forEach(append); }).catch(function(){});
+  }, 3000);
+  log.scrollTop=log.scrollHeight;
+})();
+</script>
+{% endblock %}

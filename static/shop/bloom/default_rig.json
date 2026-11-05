@@ -1,0 +1,352 @@
+{
+ "species": "default",
+ "kind": "bloom",
+ "viewBox": [
+  0,
+  0,
+  120,
+  120
+ ],
+ "anchor": [
+  60,
+  100
+ ],
+ "easing": "smoothstep",
+ "progress": "p = smoothstep(clamp((t - stagger) / (1 - stagger)))",
+ "transform": "translate(tx,ty) rotate(rotate) scale(sx,sy) about pivot (CSS: transform-origin = pivot)",
+ "blooms": true,
+ "bloom_color": "#F08A6C",
+ "parts": [
+  {
+   "id": "petal_3",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 14.4,
+    "scale": [
+     0.36,
+     0.62
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 144,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.24,
+   "color_closed": "#C57159",
+   "color_open": "#F08A6C"
+  },
+  {
+   "id": "petal_3_tint",
+   "parent": "petal_3",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 0,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.25
+  },
+  {
+   "id": "petal_4",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": -14.4,
+    "scale": [
+     0.36,
+     0.62
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": -144,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.28,
+   "color_closed": "#C57159",
+   "color_open": "#F08A6C"
+  },
+  {
+   "id": "petal_4_tint",
+   "parent": "petal_4",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 0,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.25
+  },
+  {
+   "id": "petal_2",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 7.2,
+    "scale": [
+     0.36,
+     0.62
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 72,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.16,
+   "color_closed": "#C57159",
+   "color_open": "#F08A6C"
+  },
+  {
+   "id": "petal_2_tint",
+   "parent": "petal_2",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 0,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.25
+  },
+  {
+   "id": "petal_5",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": -7.2,
+    "scale": [
+     0.36,
+     0.62
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": -72,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.2,
+   "color_closed": "#C57159",
+   "color_open": "#F08A6C"
+  },
+  {
+   "id": "petal_5_tint",
+   "parent": "petal_5",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 0,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.25
+  },
+  {
+   "id": "petal_1",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0.0,
+    "scale": [
+     0.36,
+     0.62
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.12,
+   "color_closed": "#C57159",
+   "color_open": "#F08A6C"
+  },
+  {
+   "id": "petal_1_tint",
+   "parent": "petal_1",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 0,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.25
+  },
+  {
+   "id": "center",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0,
+    "scale": 0,
+    "opacity": 0,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": 1,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.55
+  },
+  {
+   "id": "sepal_left",
+   "pivot": [
+    60,
+    50
+   ],
+   "closed": {
+    "rotate": 6,
+    "scale": 1,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 118,
+    "scale": 0.8,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0
+  },
+  {
+   "id": "sepal_right",
+   "pivot": [
+    60,
+    50
+   ],
+   "closed": {
+    "rotate": -6,
+    "scale": 1,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": -118,
+    "scale": 0.8,
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0
+  }
+ ]
+}

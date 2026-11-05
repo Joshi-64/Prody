@@ -1,0 +1,18 @@
+{# Achievement toasts. Include once in base.html, just before </body>. #}
+{% set _ach = pending_achievements() %}{% if _ach %}
+<div class="ach-stack" aria-live="polite">{% for a in _ach %}
+  <div class="ach-toast" style="animation-delay:{{ loop.index0 * 0.6 }}s"><span class="ach-ic ms">{{ a.icon }}</span><div><b>{{ a.title }}</b><small>{{ a.sub }}</small></div></div>{% endfor %}
+</div>
+<style>
+.ach-stack{position:fixed;top:84px;right:20px;display:grid;gap:10px;z-index:90;pointer-events:none}
+.ach-toast{display:flex;gap:12px;align-items:center;min-width:240px;max-width:320px;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(80,60,40,.14);opacity:0;animation:achIn .5s ease forwards,achOut .5s ease 6s forwards}
+.ach-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#f6dcc4;color:#c0643f;flex:none}
+.ach-toast b{display:block;font-size:15px}.ach-toast small{color:var(--muted);font-size:12px}
+@keyframes achIn{from{transform:translateX(24px)}to{transform:none}}
+@keyframes achOut{to{opacity:0;transform:translateX(24px)}}
+/* clay */
+html.clay .ach-toast{border-radius:var(--c-r-lg);background:var(--c-glass);border:1px solid var(--c-glass-line);box-shadow:var(--sh-soft);color:var(--c-ink);font-family:var(--f-sans)}
+html.clay .ach-ic{border-radius:50%;background:var(--c-pink);color:var(--c-pink-ink)}
+html.clay .ach-toast b{font:600 15px/1.25 var(--f-serif)}html.clay .ach-toast small{color:var(--c-ink-soft)}
+@media(prefers-reduced-motion:reduce){.ach-toast{animation:none;opacity:1}}
+</style>{% endif %}

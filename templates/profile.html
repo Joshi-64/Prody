@@ -1,0 +1,100 @@
+{% extends 'base.html' %}{% from '_macros.html' import avatar, uname %}{% from '_plantcard.html' import plant_card %}{% block title %}{{ d.display }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21"><link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}?v=15">{% endblock %}
+{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
+{% block content %}
+{% set _sk = (d.profile.species_key or '')|lower %}{% set _scene = 'cherry' if 'cherry' in _sk else ('pine' if 'pine' in _sk else 'tree') %}
+<header class="me-head" style="--me-scene:url('/static/garden/scenes/{{ _scene }}-scene.webp')">
+  <div class="me-av">{{ avatar(d, 84) }}</div>
+  <div class="me-id">
+  <h1 class="me-name"><span class="{{ d.name_cls }}">{{ d.profile.display_name or u.username }}</span></h1>
+  {% set _h_dup = (u.username|lower|replace(" ","")|replace("_","")|replace(".","")) == (d.display|lower|replace(" ","")|replace("_","")|replace(".","")) %}{% set _sub = ([] if _h_dup else ["@" ~ u.username]) + ([d.profile.pronouns] if d.profile.pronouns else []) + ([d.profile.major] if d.profile.major else []) %}{% if _sub %}<p class="me-sub">{{ _sub|join(" · ") }}</p>{% endif %}
+  {% if d.profile.university or u.created_at %}<p class="me-meta">{% if d.profile.university %}{{ d.profile.university }}{% if d.profile.class_year %} · Class of {{ d.profile.class_year }}{% endif %}{% endif %}{% if d.profile.university and u.created_at %} · {% endif %}{% if u.created_at %}Planted {{ u.created_at|nice_stamp('%b %Y') }}{% endif %}</p>{% endif %}
+  {% if d.profile.bio %}<p class="me-bio">{{ d.profile.bio }}</p>{% elif is_me %}<p class="me-bio muted">Add a bio so classmates know what you're about.</p>{% endif %}
+  </div>
+  {% if is_me %}<div class="me-actions me-actions-own"><a class="btn btn-ghost" href="{{ url_for('profile_bp.edit_profile') }}">Edit profile</a></div>{% endif %}
+  {% if not is_me %}<div class="me-actions">{% if is_me %}{% elif friend_rel == 'friends' %}<form method="POST" action="{{ url_for('friends_bp.remove', username=u.username) }}" style="margin:0"><input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-ghost" title="Remove friend" onclick="return confirm('Remove @{{ u.username }} from your friends?')"><span class="ms">how_to_reg</span>Friends</button></form>
+    {% elif friend_rel == 'requested' %}<form method="POST" action="{{ url_for('friends_bp.decline', fid=friend_row.id) }}" style="margin:0"><input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-ghost" title="Cancel request"><span class="ms">schedule</span>Requested</button></form>
+    {% elif friend_rel == 'incoming' %}<form method="POST" action="{{ url_for('friends_bp.accept', fid=friend_row.id) }}" style="margin:0"><input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-warm"><span class="ms">person_add</span>Accept friend</button></form>
+    {% else %}<form method="POST" action="{{ url_for('friends_bp.send_request') }}" style="margin:0"><input type="hidden" name="username" value="{{ u.username }}"><input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-warm"><span class="ms">person_add</span>Add friend</button></form>{% endif %}</div>{% endif %}
+  {% if active_room and (is_me or friend_rel == 'friends') %}
+  <div class="me-room-chip" style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:8px 0 4px">
+    <span class="chip" style="background:var(--c-moss-soft,#DDE7D3);color:var(--c-moss-ink,#3D5E3B);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:5px"><i style="width:7px;height:7px;border-radius:50%;background:var(--c-moss,#4E7A4C);display:inline-block"></i>In a room · {{ active_room.title }}</span>
+    {% if room_joinable %}<form method="post" action="{{ url_for('rooms_bp.join_friend_room', rid=active_room.room_id) }}" style="margin:0"><button class="btn" type="submit" style="background:var(--c-moss,#4E7A4C);color:var(--c-moss-ink-inv,#FBF8F1);border:0;border-radius:999px;min-height:44px;padding:7px 14px;font-weight:800"><span class="ms">arrow_forward</span>Join</button></form>{% endif %}
+  </div>
+  {% endif %}
+</header>
+
+{% set _earned = medals|selectattr('earned')|list|length %}{% set _hrs = (stats.total_minutes or 0) / 60 %}{% set _hrs_txt = ('{:,}'.format(_hrs|round|int) if _hrs >= 10 else ('%.1f'|format(_hrs))|replace('.0','')) %}
+{% set _buds = buds_growing if buds_growing is defined else 0 %}
+<section class="me-stats me-stats-5" aria-label="Stats">
+  <div class="me-tile"><b>{{ '{:,}'.format(_buds) }}</b><span>Buds growing</span></div>
+  <div class="me-tile"><b>{{ '{:,}'.format(stats.tasks_done) }}</b><span>Tasks harvested</span></div>
+  <div class="me-tile"><b>{{ _hrs_txt }}h</b><span>Zen time</span></div>
+  <div class="me-tile"><b>{{ '{:,}'.format(stats.points) }}</b><span>Points</span></div>
+  {# acad-r1: soft streak tile — append only; Me card cleanup owns the plant card below #}
+  {% set _fd = focus_days if focus_days is defined else [false, false, false, false, false, false, false] %}
+  <div class="me-tile me-tile-focusdays focusdays" aria-label="Focus days this week"><div class="dots">{% for on in _fd %}<i{% if on %} class="on"{% endif %}></i>{% endfor %}</div><span>Focus days this week</span></div>
+</section>
+
+<div class="me-grid">
+<div class="me-col">
+{% if is_me %}<section class="me-group" aria-label="Settings">
+  <a class="me-row" href="{{ url_for('profile_bp.edit_profile') }}"><span class="me-ic"><span class="ms">edit</span></span><span class="me-lbl">Edit profile</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('friends_bp.friends') }}"><span class="me-ic"><span class="ms">group</span></span><span class="me-lbl">Friends &amp; park</span>{% if friend_requests_count() %}<span class="me-badge">{{ friend_requests_count() }}</span>{% endif %}<span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('profile_bp.store') }}"><span class="me-ic warm"><span class="ms">storefront</span></span><span class="me-lbl">Store</span><span class="ms me-chev">chevron_right</span></a>
+  <button type="button" class="me-row" data-theme-toggle><span class="me-ic"><span class="ms">dark_mode</span></span><span class="me-lbl">Appearance</span><span class="me-val">Light / dark</span></button>
+  <form method="POST" action="{{ url_for('profile_bp.leaderboard_optin') }}" class="me-row me-switch-row"><label class="me-switch-lbl"><span class="me-ic"><span class="ms">leaderboard</span></span><span class="me-lbl">Show me on the leaderboard<small>Off by default. When off, only you see your rank.</small></span><input class="me-switch" type="checkbox" role="switch" name="show" value="1" onchange="this.form.submit()"{{ ' checked' if d.profile.show_on_leaderboard }}></label><noscript><button class="btn btn-ghost btn-sm">Save</button></noscript></form>
+</section>{% endif %}
+
+{% if courses %}<section class="me-card"><div class="me-card-head"><h2>Growing this semester</h2><span>{{ courses|length }}</span></div>
+  <div class="me-chips">{% for c in courses %}<span class="me-chip"><span class="dot" style="background:{{ (c.color|class_dot) or 'var(--sage)' }}"></span>{{ c.course_name }}</span>{% endfor %}</div>
+  <p class="me-note">Each class grows its own branch.</p></section>{% endif %}
+
+  <section class="plant-hero equal fp-hero me-plant">
+    <div class="ph-art fp-mini tier-{{ card.tier }}" id="fpMini" aria-label="{{ card.species_name }} tree">
+      {% if is_me or friend_rel == 'friends' %}<div class="me-scene" data-me-scene="{{ 'oak' if _scene == 'tree' else _scene }}" {% if not is_me %}data-tree-src="{{ url_for('profile_bp.friend_tree', username=u.username) }}" {% endif %}role="img" aria-label="{{ card.species_name }} tree"><img class="me-scene-still" src="/static/garden/scenes/{{ _scene }}-fallback.jpg?v=2" alt="" decoding="async"></div>{% else %}<div class="me-tree-ph" role="img" aria-label="{{ d.display.split(' ')[0] }}'s tree is private"><span>🌱</span><p>Add {{ d.display.split(' ')[0] }} as a friend to see their tree</p></div>{% endif %}</div>
+    <div class="ph-info" >
+      <div><span class="eyebrow">{{ 'Your' if is_me else (d.display.split(' ')[0] ~ "'s") }} tree</span>
+        <h2 >{{ card.species_name }}</h2></div>
+      <div class="kv" style="grid-template-columns:1fr 1fr">
+        <div><b>{{ '{:,}'.format(st.hours|round|int) }} hours</b><span>tended</span></div>
+        <div><b>{{ _earned }}/{{ medals|length }}</b><span>medals</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+<div class="me-col">
+  <section class="me-card"><div class="me-card-head"><h2>Garden medals</h2><span>{{ medals|selectattr('earned')|list|length }}/{{ medals|length }}</span></div>
+    <div class="me-medals">{% for m in medals %}<div class="me-medal {{ '' if m.earned else 'locked' }}" title="{{ m.desc }}">{{ spot(m.img, 48, 48) }}<b>{{ m.name }}</b><span>{{ m.desc if m.earned else 'Not yet' }}</span></div>{% endfor %}</div></section>
+  {% set pinned = pinned|rejectattr('key','equalto','streak7')|rejectattr('key','equalto','streak3')|list %}{# owner: no streak medals on Me #}{% if pinned %}<section class="me-card"><div class="me-card-head"><h2>Pinned badges</h2></div>
+    {% if pinned %}<div class="me-pins">{% for b in pinned %}<div class="me-pin"><span class="me-ic"><span class="ms">{{ b.icon }}</span></span><div><b>{{ b.name }}</b><span>{{ b.desc }}</span></div></div>{% endfor %}</div>
+    {% else %}<div class="fp-empty" style="padding:0">{{ spot('empty_no_badges',120,90) }}</div><p class="me-note" style="text-align:center">No badges pinned yet.{% if is_me %} <a href="{{ url_for('profile_bp.edit_profile') }}">Pick some</a>{% endif %}</p>{% endif %}</section>{% endif %}
+</div>
+</div>
+
+{# acad-r1 More hub links — keep as trailing block so Me card cleanup can edit above without conflict #}
+{% if is_me %}<section class="me-group me-more" aria-label="More" style="margin-top:18px">
+  <p class="me-sec" style="margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--c-ink-soft,var(--muted))">More</p>
+  <a class="me-row" href="{{ url_for('study_bp.analytics') }}"><span class="me-ic"><span class="ms">insights</span></span><span class="me-lbl">Analytics</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('study_bp.achievements') }}"><span class="me-ic"><span class="ms">emoji_events</span></span><span class="me-lbl">Achievements</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('grades_bp.grades') }}"><span class="me-ic"><span class="ms">grade</span></span><span class="me-lbl">Grades</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('buddy_bp.chat') }}"><span class="me-ic"><span class="ms">forum</span></span><span class="me-lbl">Study buddy</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('profile_bp.whiteboard') }}"><span class="me-ic"><span class="ms">draw</span></span><span class="me-lbl">Whiteboard</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('profile_bp.store') }}"><span class="me-ic warm"><span class="ms">storefront</span></span><span class="me-lbl">Store</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('dm_bp.inbox') }}"><span class="me-ic"><span class="ms">forum</span></span><span class="me-lbl">Messages</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('forums_bp.index') }}"><span class="me-ic"><span class="ms">school</span></span><span class="me-lbl">Boards</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('rooms_bp.rooms') }}"><span class="me-ic"><span class="ms">videocam</span></span><span class="me-lbl">Study rooms</span><span class="ms me-chev">chevron_right</span></a>
+  <a class="me-row" href="{{ url_for('calendar_bp.view_calendar') }}"><span class="me-ic"><span class="ms">calendar_today</span></span><span class="me-lbl">Calendar sync</span><span class="ms me-chev">chevron_right</span></a>
+  {% if session.get('role') == 'admin' %}<a class="me-row" href="{{ url_for('admin') }}"><span class="me-ic"><span class="ms">shield_person</span></span><span class="me-lbl">Admin</span><span class="ms me-chev">chevron_right</span></a>{% endif %}
+</section>{% endif %}
+{% endblock %}
+{% block scripts %}{% if is_me or friend_rel == 'friends' %}
+<script src="/static/garden/tree-scene.js?v=3" defer></script><script>
+/* Me tree card: the SAME clay scene Home draws (garden/tree-scene.js + static/garden/scenes/*), scaled into the card.
+   The server-rendered still (that scene's own fallback.jpg) shows until WebGL is ready; TreeScene honours reduced motion. */
+document.addEventListener('DOMContentLoaded',function(){var el=document.querySelector('#fpMini [data-me-scene]');if(!el||!window.TreeScene)return;
+  try{var s=TreeScene.mount(el,{scene:el.dataset.meScene,assets:'/static/garden/scenes/',fit:'cover',focus:[0.5,0.47],interactive:false,label:el.getAttribute('aria-label')});
+    s.ready.then(function(){el.classList.add('is-live');});}catch(e){}});
+</script>
+{% endif %}{% endblock %}

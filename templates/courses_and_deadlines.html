@@ -1,48 +1,62 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %}{% from "_spot.html" import spot, empty, css %}{% block title %}My Classes{% endblock %}{% block head %}{{ css() }}{% endblock %}
 {% block content %}
-<div class="card">
-  <p>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a> | 
-    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a> | 
-    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a> | 
-    <a href="{{ url_for('tasks_bp.manage_tasks') }}">Tasks</a> | 
-    <a href="{{ url_for('logout') }}">Log Out</a>
-  </p>
-
-  <hr>
-
-  <h3>Choose Whether to Add Courses or Course Deadlines Here!</h3>
-  <p style="font-size: 0.9em; color: #555;">
-    Add Courses
-  </p>
-  <form action="{{ url_for('user_courses_bp.add_courses') }}" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px;">
-    <input type="text" name="course_name" placeholder="Algebra I" style="margin: 0; flex-grow: 1";required>
-    <button type="submit" style="white-space: nowrap;">Add Course</button>
-  </form>
-  <p style="font-size: 0.9em; color: #555;">
-    Add Course Deadlines
-  </p>
-  <form action="{{ url_for('user_courses_bp.add_course_deadlines') }}" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px;">
-    <input type="text" name="course_name" placeholder="Chem II" style="margin: 0; flex-grow: 1;"required>
-    <input type="text" name="deadline_name" placeholder="Exam 2" style="margin: 0; flex-grow: 1;"required>
-    <input type="datetime-local" name="deadline_date" placeholder="10/12/2026" style="margin: 0; flex-grow: 1;" required>
-    <button type="submit" style="white-space: nowrap;">Add Course Deadline</button>
-  </form>
-
-  <h3> View Your Courses</h3>
-  <ul style="padding-left: 20px; margin-bottom: 20px;">
-    {% for course in user_courses %}
-      <li style="margin-bottom: 5px;">
-        <strong>{{ course.course_name }}</strong> 
-        <span style="font-size: 0.8em; color: #777;">(ID: {{ course.course_id }})</span>
-      </li>
-    {% else %}
-      <li style="color: #777; list-style-type: none; margin-left: -20px;">
-        No courses tracked yet. Use the form above to register your first class!
-      </li>
-    {% endfor %}
-  </ul>
-  
-
+<div class="page-head"><div class="pc-head">{{ spot('icon_classes', 48, 48) }}<div><span class="eyebrow">Classes</span><h1>Your semester lineup.</h1><p class="muted">Add your classes and deadlines once. They land on your calendar automatically.</p></div></div></div>
+<div class="grid g-2" style="margin-bottom:24px">
+  <div class="card">
+    <h2 style="margin-bottom:14px">Add a class</h2>
+    <form method="POST" action="{{ url_for('user_courses_bp.add_courses') }}">
+      <div class="row">
+        <div class="field"><label>Course name</label><input name="course_name" placeholder="Software Engineering" required maxlength="255"></div>
+        <div class="field" style="max-width:130px"><label>Code</label><input name="course_code" placeholder="CSC 4350"></div>
+      </div>
+      <div class="row"><div class="field"><label>Subject</label><select name="subject" required><option value="" disabled selected>Choose a subject</option>{% for s in subjects %}<option>{{ s }}</option>{% endfor %}</select></div>
+        <div class="field" style="flex:none"><label>&nbsp;</label><button class="btn"><span class="ms">add</span>Add class</button></div></div>
+    </form>
+  </div>
+  <div class="card">
+    <h2 style="margin-bottom:14px">Add a deadline</h2>
+    <form method="POST" action="{{ url_for('user_courses_bp.add_course_deadlines') }}">
+      <div class="row">
+        <div class="field"><label>Class</label><input name="course_name" list="courseList" placeholder="Chem II" required></div>
+        <div class="field"><label>Assignment</label><input name="deadline_name" placeholder="Exam 2" required maxlength="255"></div>
+      </div>
+      <div class="row"><div class="field"><label>Due</label><input type="datetime-local" name="deadline_date" min="{{ now.strftime('%Y-%m-%dT%H:%M') }}" required></div>
+        <div class="field" style="flex:none"><label>&nbsp;</label><button class="btn"><span class="ms">flag</span>Add deadline</button></div></div>
+      <datalist id="courseList">{% for c in user_courses %}<option value="{{ c.course_name }}">{% endfor %}</datalist>
+    </form>
+  </div>
 </div>
+
+{% if user_courses %}
+<div class="card-head" style="margin-top:8px"><h2>Your classes</h2><span class="tag soft">{{ user_courses|length }} this semester</span></div>
+<div class="grid g-3">
+{% for course in user_courses %}{% set onred = False %}
+  <div class="pcard" style="flex:none">
+    <div class="pcard-top" style="background:var(--surface);box-shadow:inset 0 4px 0 {{ course.color or '#8FBF7F' }};border-bottom:1px solid var(--line);height:auto;padding:22px 20px;display:block;{% if onred %}color:var(--on-red){% endif %}">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%">
+        <span class="tag" style="position:static;{% if onred %}background:var(--cream-2);color:var(--red-ink){% endif %}">{{ course.upcoming }} upcoming</span>
+        <form class="inline" method="POST" action="{{ url_for('user_courses_bp.delete_course', course_id=course.course_id) }}"><button class="round-btn ghost" style="width:32px;height:32px;{% if onred %}border-color:var(--on-red);color:var(--on-red){% else %}border-color:var(--ink);color:var(--ink){% endif %}" data-confirm="Remove {{ course.course_name }} and its deadlines and grades?" title="Remove class"><span class="ms" style="font-size:17px">delete</span></button></form>
+      </div>
+      <div class="display" style="font-size:30px;color:inherit;margin-top:16px;text-align:left">{{ course.course_name }}</div>
+      <div class="small" style="font-weight:600;opacity:.85;text-align:left">{{ course.course_code or '' }}{% if course.course_code and course.subject %} · {% endif %}{{ course.subject or '' }}</div>
+    </div>
+    <div style="padding:6px 16px 10px">
+    {% if course.deadlines %}
+    <ul class="list">{% for d in course.deadlines %}{% set past = d.deadline_date < now %}{% set rd = d.deadline_date|rel_day %}
+      <li class="{{ 'done' if d.is_completed }}">
+        <form class="inline" method="POST" action="{{ url_for('user_courses_bp.toggle_deadline', deadline_id=d.deadline_id) }}"><button class="check {{ 'on' if d.is_completed }}" title="Mark done"><span class="ms">check</span></button></form>
+        <div class="grow"><div class="title">{{ d.deadline_name }}</div><div class="small muted">{{ d.deadline_date|nice_dt }}</div></div>
+        {% if not d.is_completed %}<span class="badge {{ 'b-red' if past or rd in ('Today','Tomorrow') else 'b-amber' if rd.startswith('in 2') or rd.startswith('in 3') else 'b-gray' }}">{{ 'Due soon' if rd in ('Today','Tomorrow') else rd }}</span>{% endif %}
+        <form class="inline" method="POST" action="{{ url_for('user_courses_bp.delete_deadline', deadline_id=d.deadline_id) }}"><button class="btn-icon" title="Delete"><span class="ms" style="font-size:18px">close</span></button></form>
+      </li>{% endfor %}</ul>
+    {% else %}<p class="muted small" style="padding:10px 0">No deadlines yet.</p>{% endif %}
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('user_courses_bp.course_concepts', course_id=course.course_id) }}" style="margin:8px 0 0;display:inline-flex"><span class="ms">checklist</span>Concepts</a>
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('user_courses_bp.syllabus_import', course_id=course.course_id) }}" style="margin:8px 0 0 8px;display:inline-flex"><span class="ms">edit_note</span>Syllabus</a>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% else %}
+<div class="card">{{ empty('empty_seed_packet', 'No classes planted yet', 'Add your first class above and it grows a branch on your tree.') }}</div>
+{% endif %}
 {% endblock %}

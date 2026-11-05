@@ -1,0 +1,279 @@
+/* Prody · Roots + Branches semester plant (Coder). All rules scoped under .roots.
+   Palette from prody_assets/roots_style/STYLE.md. Light = cream sky / warm soil, dark = "soil night". */
+.roots{
+  --r-sky:#FBF6EC; --r-soil:#C49A72; --r-horizon:#6B4A2F; --r-bark:#6B4A2F; --r-root:#3B2A1E; --r-root-hover:#6B4A2F;
+  --r-accent:#3FA34D; --r-coral:#F08A6C; --r-butter:#F4C95D; --r-bud:#8CC56B; --r-sepal:#2F6B3A; --r-rib:#FBF6EC;
+  --r-ink:#3B2A1E; --r-ink-under:#2A1D14; --r-under-halo:#D4AF8A; --r-tip-bg:#3B2A1E; --r-tip-fg:#FBF6EC;
+  position:relative; display:block; width:100%; font-family:Inter,system-ui,-apple-system,sans-serif; color:var(--r-ink);
+  border-radius:20px; overflow:hidden; background:var(--r-sky); -webkit-tap-highlight-color:transparent;
+}
+[data-theme="dark"] .roots{
+  --r-sky:#1E1712; --r-soil:#2A2019; --r-horizon:#3B2A1E; --r-bark:#8A6242; --r-root:#8A6242; --r-root-hover:#B08460;
+  --r-accent:#4E9A4F; --r-ink:#FBF6EC; --r-ink-under:rgba(251,246,236,.85); --r-under-halo:#2A2019; --r-tip-bg:#FBF6EC; --r-tip-fg:#1E1712;
+}
+.roots svg{display:block;width:100%;height:auto}
+.roots .r-soil,.roots .r-horizon,.roots .r-pebble{pointer-events:none}
+.roots .r-soil{fill:var(--r-soil)}
+.roots .r-horizon{fill:none;stroke:var(--r-horizon);stroke-width:2.2;stroke-linecap:round;opacity:.6}
+.roots .r-pebble{fill:var(--r-horizon);opacity:.55}
+.roots .r-trunk,.roots .r-branch{fill:var(--r-bark)}
+.roots .r-root{fill:var(--r-root);transition:fill .15s}
+.roots .r-hair{fill:none;stroke:var(--r-root);stroke-width:.8;stroke-linecap:round;opacity:.7}
+.roots .r-hair.dashed{stroke-dasharray:2 2}
+.roots .r-hitp{fill:none;stroke:transparent;stroke-width:24;stroke-linecap:round;pointer-events:stroke}
+.roots .r-lbl{font-size:13px;font-weight:600;fill:var(--r-ink);paint-order:stroke;stroke:var(--r-sky);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.roots .r-lbl.under{font-size:12px;font-weight:500;fill:var(--r-ink-under);stroke:var(--r-under-halo)}
+.roots .r-badge circle{fill:var(--r-coral)} .roots .r-badge text{font-size:9px;font-weight:700;fill:#fff;text-anchor:middle}
+.roots .r-item{cursor:pointer;outline:none;transition:opacity .2s,filter .15s}
+.roots.is-hover .r-item{opacity:.45} .roots.is-hover .r-item.on{opacity:1}
+.roots .r-item.on[data-type="branch"]{filter:brightness(1.08)} .roots .r-item.on .r-course{font-weight:700}
+.roots .r-item.on .r-root{fill:var(--r-root-hover)}
+.roots .r-item:focus-visible .r-hitp{stroke:var(--r-accent);stroke-opacity:.35}
+.roots .r-tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--r-tip-bg);color:var(--r-tip-fg);font-size:12px;line-height:1.4;
+  padding:7px 11px;border-radius:10px;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .15s;white-space:nowrap;z-index:2}
+.roots .r-tip b{font-weight:600} .roots .r-tip.show{opacity:1}
+/* motion: timings from STYLE.md */
+.roots .r-sway{transform-box:view-box;animation:r-sway 4s ease-in-out infinite alternate}
+.roots .r-pop{transform-box:view-box;transform-origin:0 0;animation:r-pop .4s cubic-bezier(.34,1.56,.64,1) both;animation-delay:var(--d,0s)}
+.roots.intro .r-grow{transform-box:fill-box;animation:r-extend .8s cubic-bezier(.22,1,.36,1) both;animation-delay:var(--d,0s)}
+.roots.intro .r-draw{animation:r-draw .6s ease-out both;animation-delay:var(--d,0s)}
+@keyframes r-sway{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
+@keyframes r-pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes r-extend{from{transform:scale(.05)}to{transform:scale(1)}}
+@keyframes r-draw{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion:reduce){.roots .r-sway,.roots .r-pop,.roots.intro .r-grow,.roots.intro .r-draw{animation:none!important}}
+/* v2: depth ticks, +N later, empty state, reduced motion */
+.roots .r-tick path{stroke:var(--r-ink-under);stroke-width:1.2;opacity:.45}
+.roots .r-tick text{font-size:11px;font-weight:500;fill:var(--r-ink-under);opacity:.5}
+.roots .r-later{font-weight:600;opacity:.75}
+.roots .r-empty{position:absolute;left:0;right:0;top:12%;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.roots .r-empty p{margin:0;font-size:15px;color:var(--r-ink)}
+.roots .r-empty .btn{display:inline-block;padding:10px 18px;border-radius:999px;background:var(--r-accent);color:#fff;font-weight:600;text-decoration:none}
+.roots .r-empty .btn:focus-visible{outline:2px solid var(--r-accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.roots .r-sway,.roots .r-pop,.roots.intro .r-grow,.roots.intro .r-draw{animation:none!important}}
+/* v2 label pills: AA contrast on soil in both themes */
+.roots{--r-pill-bg:rgba(251,246,238,.9);--r-pill-fg:#3A2A1C}
+[data-theme="dark"] .roots{--r-pill-bg:rgba(30,23,18,.9);--r-pill-fg:#FBF6EC}
+.roots .r-pill{pointer-events:none}
+.roots .r-pill rect{fill:var(--r-pill-bg)}
+.roots .r-pill text{fill:var(--r-pill-fg);font-weight:600;font-family:Inter,system-ui,sans-serif}
+.roots .r-item.on .r-pill rect{stroke:var(--r-accent);stroke-width:1.5}
+/* v3 course colour link */
+.roots .r-dot{stroke:#3A2A1C;stroke-opacity:.45;stroke-width:1}
+[data-theme="dark"] .roots .r-dot{stroke:#FBF6EC;stroke-opacity:.5}
+.roots .r-item[style*="--rc"] .r-root{fill:color-mix(in srgb,var(--r-root) 78%,var(--rc))}
+.roots .r-item.on[style*="--rc"] .r-root{fill:color-mix(in srgb,var(--r-root-hover) 70%,var(--rc))}
+/* v4 shared course accent */
+.roots .r-chip{stroke:var(--r-sky);stroke-width:1.5;pointer-events:none}
+.roots .r-item[style*="--rc"] .r-root{fill:color-mix(in srgb,var(--r-root) 65%,var(--rc))}
+/* v5 growth intro + add-course bud */
+.roots.intro .r-rise{animation:r-rise .9s cubic-bezier(.33,0,.2,1) .3s both}
+.roots.intro .r-grow{animation-duration:.5s}
+.roots.intro .r-draw{animation:r-draw .6s ease-out both;animation-delay:var(--d,0s)}
+.roots.intro .r-fade{animation:r-fadein .3s ease-out both;animation-delay:var(--d,0s)}
+.roots .r-seed{pointer-events:none}
+.roots.intro .r-seed-in{transform-box:fill-box;transform-origin:50% 100%;animation:r-seed 1.3s ease-out both}
+.roots:not(.intro) .r-seed{display:none}
+.roots.intro .r-addbud .r-budin{transform-box:fill-box;transform-origin:50% 100%;animation:r-pop .35s cubic-bezier(.34,1.56,.64,1) 1.1s both,r-bounce .6s ease-in-out 2.2s 1}
+.roots.r-fadein svg{animation:r-fadein .4s ease-out both}
+.roots .r-budhit{fill:transparent}
+.roots .r-plus{opacity:0;transition:opacity .15s;pointer-events:none}
+.roots .r-plus circle{fill:var(--r-accent)} .roots .r-plus path{stroke:#fff;stroke-width:2;stroke-linecap:round}
+.roots .r-addbud:hover .r-plus,.roots .r-addbud:focus-visible .r-plus,.roots .r-addbud.on .r-plus{opacity:1}
+.roots .r-addbud:hover .r-budin,.roots .r-addbud:focus-visible .r-budin{transform-box:fill-box;transform-origin:50% 50%;animation:r-pulse 1.4s ease-in-out infinite}
+.roots .r-addbud:focus-visible .r-budhit{stroke:var(--r-accent);stroke-width:2;stroke-opacity:.5}
+.roots.is-hover .r-addbud.on{opacity:1}
+.roots .r-newbr{transform-box:view-box;animation:r-sprout .9s cubic-bezier(.22,1,.36,1) both;animation-delay:var(--d,0s)}
+@keyframes r-rise{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes r-seed{0%{transform:scale(0);opacity:0}20%{transform:scale(1);opacity:1}70%{opacity:1}100%{transform:scale(.6);opacity:0}}
+@keyframes r-fadein{from{opacity:.85}to{opacity:1}}
+@keyframes r-bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}70%{transform:translateY(1px)}}
+@keyframes r-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes r-sprout{from{transform:translate(var(--bx),var(--by)) scale(0)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.roots *, .roots.r-fadein svg{animation:none!important}.roots .r-seed{display:none}}
+/* v5b fit short containers (Store preview) */
+.roots.r-fit{height:100%} .roots.r-fit svg{height:100%;width:100%}
+.roots .r-pot,.roots .r-decor{pointer-events:none}
+/* v6 cards, hover emphasis, shop art */
+.roots .r-pill{pointer-events:auto;cursor:pointer}
+.roots .r-root{transition:fill .15s,transform .15s}
+.roots .r-item[data-type=root]:hover .r-root,.roots .r-item[data-type=root].on .r-root{filter:brightness(1.25) saturate(1.2);stroke:currentColor;stroke-width:1.5;color:var(--r-root-hover)}
+.roots .r-item[data-type=root]:hover .r-root{stroke-width:2.4}
+.roots .r-item.hglow,.roots .r-item.glow,.roots.is-hover .r-item.hglow{opacity:1!important;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--r-accent) 70%,transparent))}
+.roots .r-item.r-gone{opacity:0!important;transition:opacity .5s;pointer-events:none}
+.roots .r-course{stroke:var(--r-halo,var(--r-sky))}
+.roots .r-card{position:absolute;z-index:3;box-sizing:border-box;padding:14px 16px 12px;border-radius:14px;background:var(--r-sky);color:var(--r-ink);
+  border:1px solid color-mix(in srgb,var(--r-ink) 14%,transparent);box-shadow:0 10px 30px rgba(30,20,10,.22);font-size:13px;line-height:1.4;animation:r-fadein .15s ease-out}
+.roots .r-card h4{margin:0 22px 6px 0;font-size:15px;font-weight:700;display:flex;gap:8px;align-items:center}
+.roots .r-cdot{flex:none;width:10px;height:10px;border-radius:50%;border:1px solid color-mix(in srgb,var(--r-ink) 40%,transparent)}
+.roots .r-card .r-sub{margin:-2px 0 6px;opacity:.75}
+.roots .r-card dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0 0 10px}
+.roots .r-card dt{opacity:.65} .roots .r-card dd{margin:0;font-weight:600}
+.roots .r-card .r-h{margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.6}
+.roots .r-card ul{list-style:none;margin:0 0 10px;padding:0} .roots .r-card li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px solid color-mix(in srgb,var(--r-ink) 10%,transparent)}
+.roots .r-card li em{font-style:normal;opacity:.7;white-space:nowrap}
+.roots .r-x{position:absolute;top:6px;right:8px;border:0;background:none;color:inherit;font-size:20px;line-height:1;cursor:pointer;opacity:.6;padding:4px}
+.roots .r-acts{display:flex;flex-wrap:wrap;gap:6px}
+.roots .r-btn{font:600 12.5px/1 Inter,system-ui,sans-serif;padding:8px 12px;border-radius:999px;border:1px solid color-mix(in srgb,var(--r-ink) 22%,transparent);background:transparent;color:var(--r-ink);cursor:pointer;text-decoration:none;display:inline-block}
+.roots .r-btn.r-primary{background:var(--r-accent);border-color:var(--r-accent);color:#fff}
+.roots .r-btn:focus-visible,.roots .r-x:focus-visible,.roots .r-edit input:focus-visible{outline:2px solid var(--r-accent);outline-offset:2px}
+.roots .r-edit{display:grid;gap:8px} .roots .r-edit label{display:grid;gap:3px;font-size:12px;opacity:.85}
+.roots .r-edit input{font:500 13px Inter,system-ui,sans-serif;padding:7px 9px;border-radius:8px;border:1px solid color-mix(in srgb,var(--r-ink) 25%,transparent);background:color-mix(in srgb,var(--r-sky) 85%,var(--r-ink) 4%);color:var(--r-ink);color-scheme:light dark}
+.roots .r-err{margin:8px 0 0;color:#C2476E;font-weight:600;font-size:12px}
+[data-theme="dark"] .roots .r-err{color:#F29AB0}
+.roots .r-toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:4;display:flex;gap:12px;align-items:center;padding:9px 14px;border-radius:999px;background:var(--r-tip-bg);color:var(--r-tip-fg);font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.2);animation:r-fadein .2s ease-out}
+.roots .r-toast .r-link{border:0;padding:2px 4px;color:inherit;text-decoration:underline;font-weight:700}
+.roots .r-potring,.roots .r-skyimg,.roots image.r-decor{pointer-events:none}
+@media (prefers-reduced-motion:reduce){.roots .r-card,.roots .r-toast,.roots .r-item.r-gone{animation:none!important;transition:none!important}}
+/* v7 card fixes */
+.roots.has-card .r-tip{display:none}
+.roots .r-card .r-acts{flex-wrap:nowrap} .roots .r-card .r-btn{padding:8px 10px;white-space:nowrap}
+@media (max-width:360px){.roots .r-card .r-acts{flex-wrap:wrap}}
+/* v8 shading, tags, tip labels */
+.roots .r-shade,.roots .r-soilshade{pointer-events:none}
+.roots .r-chip,.roots .r-course{display:none}
+.roots .r-rtext text{font-family:Inter,system-ui,sans-serif;font-weight:600;fill:#F6EBDD;stroke:none;text-shadow:0 1px 3px rgba(43,33,24,.55);cursor:pointer}
+.roots .r-rtext .r-rdays{font-weight:500;fill-opacity:.75}
+.roots .r-pill.r-rtext{pointer-events:auto}
+.roots .r-string{fill:none;stroke:#8A6A4A;stroke-width:1;stroke-linecap:round}
+.roots .r-tag{cursor:pointer}
+.roots .r-tag{transition:translate .15s}
+.roots .r-tagfill{fill:#E9D3AE;stroke:#C9AE84;stroke-width:1}
+.roots .r-taghi{stroke:#FFF5E2;stroke-width:1;fill:none}
+.roots .r-hole{fill:#8A6A4A}
+.roots .r-tag text{font-family:Inter,system-ui,sans-serif;font-weight:600;letter-spacing:.06em;stroke:none}
+.roots .r-item.on .r-tag .r-tagfill,.roots .r-item.glow .r-tagfill,.roots .r-item.hglow .r-tagfill{stroke:var(--r-accent);stroke-width:1.5}
+.roots .r-item.on .r-tag{translate:0 -2px}
+.roots .r-item.hglow,.roots .r-item.glow{filter:none!important}
+.roots .r-item.hglow .r-branch:not(.r-shade),.roots .r-item.glow .r-branch:not(.r-shade),.roots .r-item.on[data-type=branch] .r-branch:not(.r-shade){stroke:var(--r-accent);stroke-width:2.5;stroke-opacity:.55}
+.roots .r-item.on[data-type=branch]{filter:none}
+.roots.intro .r-tag,.roots.intro .r-rtext{animation:r-fadein .4s ease-out 2.1s both}
+.roots .r-seed{pointer-events:none}
+@media (prefers-reduced-motion:reduce){.roots .r-tagbody{transition:none}}
+/* v9 QA fixes */
+.roots .r-hitp{vector-effect:non-scaling-stroke}
+.roots .r-card{background:var(--surface,var(--r-sky));color:var(--text,var(--r-ink));border:1px solid var(--line,rgba(0,0,0,.12))}
+.roots .r-card .r-btn{color:var(--text,var(--r-ink));border-color:var(--line,rgba(0,0,0,.2))}
+.roots .r-card .r-btn.r-primary{color:#fff}
+.roots.r-lightsoil .r-rtext text{fill:#2B2118;text-shadow:0 1px 2px rgba(255,248,236,.75)}
+.roots.r-lightsoil .r-rtext .r-rdays{fill-opacity:.8}
+/* v10 dark theme keeps light deadline text on the dark default soil (lightsoil is measured in light theme) */
+[data-theme="dark"] .roots.r-lightsoil:not([style*="--r-soil"]) .r-rtext text{fill:#F6EBDD;text-shadow:0 1px 3px rgba(43,33,24,.55)}
+/* v11 */
+.roots.r-measure *{animation:none!important;transition:none!important}
+/* v12c final tag style + peat halo */
+.roots .r-tag text{fill:#3B2A1E!important}
+.roots .r-hole{fill:#8A6A4A;stroke-width:1}
+.roots.r-lightsoil .r-rtext text{fill:#2B2118;stroke:rgba(255,245,226,.6);stroke-width:2px;paint-order:stroke;stroke-linejoin:round;text-shadow:none}
+/* v12d garden tag v3 */
+.roots .r-tagfill{fill:url(#pd-kraft);stroke:#9A7350;stroke-width:.8}
+.roots .r-tagpt{fill:none;stroke:#CDAE80;stroke-width:1.6;stroke-opacity:.6}
+.roots .r-hole{fill:#6B4A2F;stroke:none}
+.roots .r-lip{fill:none;stroke:#FBF2DE;stroke-width:.6;stroke-opacity:.7}
+.roots .r-tie{fill:none;stroke:#8A6A4A;stroke-width:1.1;vector-effect:non-scaling-stroke}
+.roots .r-tag text{fill:#3B2A1E!important;font-weight:600;letter-spacing:.06em}
+.roots .r-item.on .r-tag .r-tagfill,.roots .r-item.glow .r-tagfill,.roots .r-item.hglow .r-tagfill{stroke:var(--r-accent);stroke-width:1.5}
+/* v14 */
+.roots .r-rtext.r-halo text{stroke:var(--r-soil);stroke-width:2px;paint-order:stroke;stroke-linejoin:round}
+/* v15 phone twine */
+.roots.r-narrow .r-string,.roots.r-narrow .r-tie{stroke-width:1.5px}
+
+/* patch20: keep cards clear of phone nav */
+.roots .r-card{scroll-margin-top:16px;scroll-margin-bottom:calc(96px + env(safe-area-inset-bottom))}
+
+/*v21*/ .roots .r-empty{top:14%}
+.roots .r-seedbed{transform-box:fill-box}
+
+/*v25 perf: sway = transform only, ~30fps steps on an eased curve, paused off screen / hidden tab; isolate paint */
+.roots .r-sway{animation:r-sway25 4s 1 steps(15,jump-none)}  /* one gentle sway (~4s) after load, then still: no infinite SVG relayout loop */
+.roots .r-sway:hover,.roots .r-sway:focus-visible{animation:r-sway25h 4s 1 steps(15,jump-none)}
+@keyframes r-sway25h{0%{transform:rotate(0deg)}12.5%{transform:rotate(-.85deg)}25%{transform:rotate(-1.2deg)}37.5%{transform:rotate(-.85deg)}50%{transform:rotate(0deg)}62.5%{transform:rotate(.85deg)}75%{transform:rotate(1.2deg)}87.5%{transform:rotate(.85deg)}100%{transform:rotate(0deg)}}
+@keyframes r-sway25{0%{transform:rotate(0deg)}12.5%{transform:rotate(-.85deg)}25%{transform:rotate(-1.2deg)}37.5%{transform:rotate(-.85deg)}50%{transform:rotate(0deg)}62.5%{transform:rotate(.85deg)}75%{transform:rotate(1.2deg)}87.5%{transform:rotate(.85deg)}100%{transform:rotate(0deg)}}
+.roots.r-still *{animation-play-state:paused!important}
+.roots .r-item{transition:opacity .2s}
+@media (prefers-reduced-motion:reduce){.roots .r-sway{animation:none!important}}
+/*v25 sky fills the card; tags stay kraft + #3B2A1E ink on every sky */
+.roots.r-hassky{border-radius:inherit}
+.roots.r-hassky svg{border-radius:inherit;overflow:hidden}
+.roots .r-tagfill{fill:url(#pd-kraft)!important;stroke:#9A7350}
+.roots .r-tag text{fill:#3B2A1E!important}
+
+/*v25 mini (Profile card) */
+.roots.r-mini{height:100%;pointer-events:none}
+.roots.r-mini *:not(.tier-shimmer){animation:none!important;transition:none!important}
+
+/*v25 pot tier effects (STYLE.md): shimmer once on hover, never loops; legendary glow is static */
+.roots .tier-shimmer{transform:translateX(-200px);opacity:0;pointer-events:none}
+.roots .tier-wrap{pointer-events:none}
+.roots:hover .tier-shimmer,.pot-card:hover .roots .tier-shimmer,.pcard:hover .roots .tier-shimmer{animation:r-shim .9s ease-out 1}
+@keyframes r-shim{from{transform:translateX(-200px);opacity:1}to{transform:translateX(1100px);opacity:1}}
+@media (prefers-reduced-motion:reduce){.roots .tier-shimmer{display:none}}
+
+/*v26 day/night sky: both layers rendered once, theme toggle swaps via CSS */
+.roots svg{background:var(--r-skybg-d,none)}
+.roots{--r-sky:var(--r-sky-d,#FBF6EC)}
+[data-theme="dark"] .roots{--r-sky:var(--r-sky-n,var(--r-sky-d,#1E1712))}
+[data-theme="dark"] .roots svg{background:var(--r-skybg-n,var(--r-skybg-d,none))}
+.roots[style*="--r-ink-d"]{--r-ink:var(--r-ink-d)}.roots[style*="--r-halo-d"]{--r-halo:var(--r-halo-d)}
+[data-theme="dark"] .roots[style*="--r-ink-n"]{--r-ink:var(--r-ink-n)}[data-theme="dark"] .roots[style*="--r-halo-n"]{--r-halo:var(--r-halo-n)}
+.roots .r-skyimg.r-night{display:none}
+[data-theme="dark"] .roots .r-skyimg.r-night{display:inline}
+[data-theme="dark"] .roots .r-skyimg.r-day{display:none}
+
+/*v26 canopy (behind trunk) + stub art swap; .stub interaction CSS is Design's (app.css) */
+.roots .r-canopy{pointer-events:none}
+.roots .r-can-lobes{opacity:var(--co-l)} .roots .r-can-sh{opacity:var(--cs-l)} .roots .r-can-sheen{opacity:calc(var(--co-l) * .48)}
+[data-theme="dark"] .roots .r-can-lobes{opacity:var(--co-d)} [data-theme="dark"] .roots .r-can-sh{opacity:var(--cs-d)}
+.roots .r-stub-d{display:none} [data-theme="dark"] .roots .r-stub-l{display:none} [data-theme="dark"] .roots .r-stub-d{display:inline}
+.roots.r-mini .stub{display:none}
+
+/*v27 canopy v2 (image per theme) */
+.roots .r-canopy{pointer-events:none}
+.roots .r-can-d{display:none} [data-theme="dark"] .roots .r-can-l{display:none} [data-theme="dark"] .roots .r-can-d{display:inline}
+
+/* v29 phone class/deadline card = bottom sheet (Coder) */
+.roots .r-card.r-sheet{position:fixed;left:8px;right:8px;bottom:calc(var(--r-sheet-b,0px) + env(safe-area-inset-bottom));top:auto;width:auto;max-height:40vh;max-height:40dvh;overflow-y:auto;overscroll-behavior:contain;z-index:70;border-radius:20px 20px 14px 14px;padding:18px 16px 12px;animation:r-sheetin .2s ease-out;box-shadow:0 -6px 30px rgba(20,15,10,.25)}
+.roots .r-card.r-sheet .r-grab{position:absolute;top:6px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:currentColor;opacity:.25}
+.roots .r-card.r-sheet .r-x{top:8px;right:8px;width:36px;height:36px;font-size:24px}
+.roots .r-card.r-sheet .r-acts{flex-wrap:wrap}
+.roots .r-scrim{position:fixed;inset:0;z-index:69;background:rgba(0,0,0,.08)}
+@keyframes r-sheetin{from{transform:translateY(24px)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.roots .r-card.r-sheet{animation:none}}
+@media (max-width:599px){.roots .r-tag .r-tagbody text{letter-spacing:-.01em}}
+/* v29 solid pot body behind pot art; dark mode lifted so it never matches the dark card (~#2A2019) */
+[data-theme=dark] .roots .r-potfill path:first-child{fill:#8A6446}
+[data-theme=dark] .roots .r-potfill path:last-child{fill:#4A3324!important}
+
+/* v30 (Coder): tags on top, tapped-tag highlight, anchored card arrow, dark week markers */
+.roots .r-tagon .r-tagbody{translate:0 -3px;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--r-accent) 85%,transparent));transition:translate .2s ease,filter .2s ease}
+@media (prefers-reduced-motion:reduce){.roots .r-tagon .r-tagbody{translate:none;transition:none}}
+.roots .r-card .r-arrow{position:absolute;width:12px;height:12px;background:inherit;border:inherit;border-width:0 0 1px 1px;transform:rotate(45deg);margin:-6px}
+.roots .r-card .r-arrow[data-side=right]{left:0}.roots .r-card .r-arrow[data-side=left]{left:100%;transform:rotate(225deg)}
+.roots .r-card .r-arrow[data-side=down]{top:0;transform:rotate(135deg)}.roots .r-card .r-arrow[data-side=up]{top:100%;transform:rotate(-45deg)}
+[data-theme=dark] .roots .r-tick text{opacity:.85;fill:#F1E6D4}[data-theme=dark] .roots .r-tick path{opacity:.75;stroke:#F1E6D4}
+/* v30: one continuous sky: gradient on the frame itself (svg transparent) so a taller container never shows a second tone */
+.roots{background:var(--r-skybg-d,var(--r-sky))}.roots svg{background:none!important}
+[data-theme="dark"] .roots{background:var(--r-skybg-n,var(--r-skybg-d,var(--r-sky)))}
+
+/* v31 banner mode (profile .fp-banner-tree): transparent, no interaction, svg fills slot height */
+.r-banner{height:100%;display:flex;justify-content:center;align-items:flex-end;pointer-events:none}
+.roots.r-banner,.r-banner.roots{background:transparent!important;border-radius:0;overflow:visible;box-shadow:none}
+.r-banner svg{height:100%;width:auto;max-width:100%;background:none!important;display:block}
+
+/* v32: visible card arrow (10px, card fill + border); card overflow visible on desktop */
+.roots .r-card:not(.r-sheet){overflow:visible}
+.roots .r-card .r-arrow{width:10px;height:10px;margin:-5px;background:var(--surface,var(--r-sky));border:1px solid var(--line,rgba(0,0,0,.18));border-width:0 0 1px 1px;z-index:1;display:block}
+[data-theme=dark] .roots .r-tick{opacity:1}[data-theme=dark] .roots .r-tick text{opacity:.9;fill:#F1E6D4}[data-theme=dark] .roots .r-tick path{opacity:.8;stroke:#F1E6D4}
+
+/* v33: desktop card arrow, high contrast in dark */
+[data-theme=dark] .roots .r-card .r-arrow{background:#2A2F2A;border:2px solid #E8DCC6;border-width:0 0 2px 2px;width:12px;height:12px;margin:-6px;box-shadow:-2px 2px 6px rgba(0,0,0,.5)}
+[data-theme=dark] .roots .r-card:not(.r-sheet){border:1.5px solid #E8DCC6}
+
+/* v41 banner: park-planted ground layer (data-layer=ground; hide via .r-banner [data-layer=ground]{display:none} when park_tree_base art lands) */
+.r-banner .r-gshadow{fill:#2f5a2a;opacity:.28}
+.r-banner .r-flare,.r-banner .r-sroot{fill:var(--r-bark,#6B4A2F)}
+.r-banner .r-sroot{fill:none;stroke:var(--r-bark,#6B4A2F);stroke-linecap:round}
+.r-banner .r-tuft{fill:#6FA85A}
+html[data-theme=dark] .r-banner .r-gshadow{fill:#0b1a0d;opacity:.45}
+html[data-theme=dark] .r-banner .r-tuft{fill:#3F6E3C}
+.fp-banner:has(img[data-park=tree_base]:not([hidden])) .r-banner [data-layer=ground]{display:none}

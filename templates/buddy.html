@@ -1,0 +1,120 @@
+{% extends 'base.html' %}{% block title %}Talk to Prody{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21"><style>
+.nap-art{display:block;margin:0 auto;max-width:100%;height:auto;object-fit:contain}
+.buddy-rest{display:flex;flex-direction:column;align-items:center;gap:6px;margin:14px auto 4px;padding:12px 16px;max-width:360px;text-align:center;border-radius:18px;background:var(--surface-2)}
+.buddy-rest p{margin:0;font-size:14px;color:var(--muted)}
+[data-theme=dark] .nap-art{filter:brightness(.92)}
+@media (prefers-reduced-motion:no-preference){.nap-art{animation:napIn .4s ease-out both}}
+@keyframes napIn{from{opacity:0}to{opacity:1}}
+/* chips only on an empty chat; afterwards a single Ideas chip brings them back */
+.fp-suggest{transition:opacity .25s ease}.fp-suggest.is-off{display:none}.fp-suggest.is-fading{opacity:0}
+.buddy-ideas{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:0 10px;min-height:36px;font:600 12.5px var(--font);cursor:pointer;white-space:nowrap}
+.buddy-ideas[hidden]{display:none}
+.fp-chat .chat-input{gap:8px;align-items:center}.fp-chat .chat-input input{min-width:0;flex:1 1 auto}
+/* phone: page is a column; card fills leftover space; input fixed just above tab bar */
+@media (max-width:760px){
+  body:has(.fp-chat) .frame{height:100dvh;height:100svh;overflow:hidden;display:flex;flex-direction:column;padding-bottom:0!important}
+  body:has(.fp-chat) .content{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:calc(62px + 14px + env(safe-area-inset-bottom,0px) + 64px)!important}
+  body:has(.fp-chat) .page-head{flex:none;margin-bottom:8px}
+  body:has(.fp-chat) .page-head .muted{display:none}
+  body:has(.fp-chat) .fp-soil{display:none}
+  .fp-chat{flex:1 1 auto;min-height:0;height:auto!important;margin-bottom:0!important;display:flex;flex-direction:column;overflow:hidden}
+  .fp-chat .chat-log{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .fp-chat .fp-suggest{flex:none;padding-bottom:4px}
+  .fp-chat .chat-input{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(62px + 14px + env(safe-area-inset-bottom,0px) + 8px);z-index:55;border:1px solid var(--line);border-radius:18px;background:var(--surface-2);box-shadow:0 4px 16px rgba(60,40,50,.12);padding:10px 12px}
+}
+@media (prefers-reduced-motion:reduce){.fp-suggest{transition:none}}
+</style>{% endblock %}
+{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
+{% macro nap(w=160, h=120) %}<img class="nap-art" src="{{ url_for('static', filename='spot/nap_A_potted_drowsy_bud.png') }}?v=1" width="{{ w }}" height="{{ h }}" alt="" decoding="async">{% endmacro %}
+{% block content %}
+{% set st = plant_state(session['user_id']) %}
+<div class="page-head"><div style="display:flex;gap:18px;align-items:flex-end">
+  <div style="width:84px;height:84px;border-radius:50%;background:var(--surface-2);overflow:hidden;display:grid;place-items:center;flex:none;border:1px solid var(--line)"><div style="width:62px">{{ render_plant(st, fit=True) }}</div></div>
+  <div><span class="eyebrow"><img src="{{ url_for('static', filename='spot/icon_prody.svg') }}?v=1" class="theme-light-only" width="18" height="18" alt="" style="vertical-align:-4px"><img src="{{ url_for('static', filename='spot/icon_prody_dark.svg') }}?v=1" class="theme-dark-only" width="18" height="18" alt="" style="vertical-align:-4px"> Study buddy</span><h1>Talk to {{ st.name }}</h1><p class="muted" style="margin-top:4px">Explanations, quick quizzes and study tips from the tree that knows your classes.</p></div></div>
+  <div style="display:flex;gap:8px;align-items:center"><span class="badge {{ 'b-green' if ai_ready else 'b-amber' }}">{{ 'Awake' if ai_ready else 'Resting' }}</span>
+  {% if messages %}<form method="POST" action="{{ url_for('buddy_bp.clear') }}"><button class="btn btn-ghost btn-sm" data-confirm="Clear the whole conversation?"><span class="ms">delete_sweep</span>Clear</button></form>{% endif %}</div></div>
+{% set av %}<span class="buddy-av">{{ render_plant(st, fit=True) }}</span>{% endset %}
+<div class="fp-soil" aria-hidden="true"></div>
+<div class="card chat fp-chat">
+  {# hidden avatar source for live replies; empty chat draws no bubbles #}
+  <span id="buddyAvSrc" hidden aria-hidden="true">{{ av }}</span>
+  <div class="chat-log" id="log">
+    {% if not messages %}
+    {% if ai_ready %}<div class="fp-empty" style="padding:10px 0 0">{{ spot('empty_buddy_prompt',160,120) }}</div>{% else %}<div class="fp-empty buddy-rest-art" style="padding:10px 0 0">{{ nap(160,120) }}</div>{% endif %}
+    {% endif %}
+    {% for m in messages %}{% if m.role == 'assistant' %}<div class="msg-row">{{ av }}<div class="msg assistant">{{ m.content }}</div></div>{% else %}<div class="msg user">{{ m.content }}</div>{% endif %}{% endfor %}
+    {% if messages and (not ai_ready or resting or capped) %}<div class="buddy-rest" role="status">{{ nap(120,90) }}<p>{% if capped %}{{ st.name }} has had a full day of questions and is napping until tomorrow.{% else %}{{ st.name }} is resting right now. Try again a little later.{% endif %}</p></div>{% endif %}
+  </div>
+  {% if ai_ready and not capped %}
+  <div class="fp-suggest{{ ' is-off' if messages }}" id="buddySuggest" aria-label="Suggestions">{% for q in ['Quiz me on my next deadline', 'Explain this simply', 'Make me a 25-minute study plan'] %}<button type="button" data-q="{{ q }}">{{ q }}</button>{% endfor %}</div>
+  <form class="chat-input" method="POST" onsubmit="this.querySelector('button[aria-label=Send]').disabled=true">
+    <button type="button" class="buddy-ideas" id="buddyIdeas" aria-controls="buddySuggest" aria-expanded="false"{{ '' if messages else ' hidden' }}>💡 Ideas</button>
+    <input name="message" value="{{ draft }}" placeholder="Ask {{ st.name }} anything…" autocomplete="off" required maxlength="2000">
+    <button class="btn" type="submit" aria-label="Send"><span class="ms">arrow_upward</span></button>
+  </form>{% else %}<div class="chat-input" style="justify-content:center"><a class="btn btn-ghost" href="{{ url_for('study_bp.timer') }}"><span class="ms">timer</span>Start a focus session instead</a></div>{% endif %}
+</div>
+{% endblock %}
+{% block scripts %}<script>
+(function(){
+  const log=document.getElementById('log');
+  if(log)log.scrollTop=log.scrollHeight;
+  /* phone input is position:fixed above the tab bar; no scrollIntoView */
+  const form=document.querySelector('form.chat-input');
+  const input=form&&form.querySelector('input[name=message]');
+  const btn=form&&form.querySelector('button[aria-label=Send]');
+  const sug=document.getElementById('buddySuggest'),ideas=document.getElementById('buddyIdeas');
+  const rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function hideChips(){if(!sug||sug.classList.contains('is-off'))return;const done=()=>{sug.classList.add('is-off');sug.classList.remove('is-fading');};if(rm)done();else{sug.classList.add('is-fading');setTimeout(done,260);}if(ideas){ideas.hidden=false;ideas.setAttribute('aria-expanded','false');}}
+  if(ideas)ideas.addEventListener('click',()=>{const off=sug.classList.toggle('is-off');ideas.setAttribute('aria-expanded',String(!off));});
+  function csrf(){const m=document.querySelector('meta[name=csrf-token]');return m?m.content:'';}
+  function softFail(msg){
+    const row=document.createElement('div');row.className='msg-row buddy-soft-fail';row.setAttribute('role','status');
+    row.innerHTML='<div class="msg assistant">'+(msg||"That didn't send, try again")+'</div>';
+    log.appendChild(row);log.scrollTop=log.scrollHeight;
+  }
+  function addMsg(role,text){
+    if(role==='user'){const d=document.createElement('div');d.className='msg user';d.textContent=text;log.appendChild(d);}
+    else{const row=document.createElement('div');row.className='msg-row';
+      const av=document.querySelector('#buddyAvSrc .buddy-av')||document.querySelector('.msg-row .buddy-av');
+      row.innerHTML=(av?av.outerHTML:'')+'<div class="msg assistant"></div>';
+      row.querySelector('.msg').textContent=text;log.appendChild(row);}
+    log.scrollTop=log.scrollHeight;
+  }
+  async function send(text){
+    if(!form||!input||!text)return;
+    const csrfBefore=csrf();
+    input.value=text;btn&&(btn.disabled=true);
+    addMsg('user',text);input.value='';
+    // empty-state art and the three chips go after the first send; the Ideas chip brings the chips back
+    const empty=document.querySelector('.fp-empty');if(empty)empty.remove();
+    hideChips();
+    try{
+      const fd=new FormData();fd.set('message',text);
+      const r=await fetch(form.action||location.href,{method:'POST',headers:{'X-CSRFToken':csrfBefore,'Accept':'application/json','X-Requested-With':'fetch'},body:fd,credentials:'same-origin'});
+      const ct=r.headers.get('content-type')||'';
+      if(!r.ok){softFail();return;}
+      if(ct.includes('application/json')){
+        const j=await r.json();
+        if(j.ok&&j.reply)addMsg('assistant',j.reply);
+        else softFail(j.message||j.error);
+      } else {
+        // HTML redirect fallback: reload to show new messages
+        location.reload();
+      }
+    }catch(e){softFail();}
+    finally{btn&&(btn.disabled=false);input.focus();}
+  }
+  if(form){form.addEventListener('submit',function(e){e.preventDefault();const t=(input.value||'').trim();if(t)send(t);});}
+  document.querySelectorAll('.fp-suggest [data-q]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(!input||!form)return;
+      const tokBefore=csrf();
+      input.value=b.dataset.q;
+      // chip must never overwrite the injected csrf hidden field
+      if(csrf()!==tokBefore){softFail();return;}
+      if(form.requestSubmit)form.requestSubmit(); else form.dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
+    });
+  });
+})();
+</script>{% endblock %}

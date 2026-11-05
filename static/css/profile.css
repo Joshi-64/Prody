@@ -1,0 +1,187 @@
+/* Me page — page-scoped polish (spec §4: banner, 84px avatar, 3 stat tiles, grouped settings) */
+.me-head{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:12px;position:relative;z-index:2;padding:0 8px}
+.me-av .avatar{box-shadow:0 0 0 4px var(--bg);background:var(--blush)}
+.me-name{font-family:var(--display);font-size:26px;line-height:1.15;margin:12px 0 2px;color:var(--text)}
+.me-sub,.me-meta{margin:0;color:var(--muted);font-size:14px}
+.me-meta{font-size:13px;margin-top:2px}
+.me-bio{margin:10px 0 0;max-width:52ch;font-size:15px;line-height:1.45;color:var(--text)}
+.me-bio.muted{color:var(--muted)}
+.me-actions{display:flex;gap:10px;margin-top:14px}
+.me-actions .btn{min-height:44px}
+
+.me-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0 18px}
+.me-tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-row);box-shadow:var(--shadow);padding:14px 8px 12px;text-align:center;min-width:0}
+.me-tile b{display:block;font-family:var(--font);font-weight:800;font-size:24px;line-height:1.1;color:var(--text);font-variant-numeric:tabular-nums}
+.me-tile b small{font-size:14px;color:var(--muted);font-weight:700}
+.me-tile span{display:block;margin-top:4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
+.me-grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.me-col{display:grid;gap:18px;align-content:start;min-width:0}
+@media (min-width:960px){.me-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}.me-head{padding:0}.me-stats{max-width:560px;margin-inline:auto}}
+
+.me-group,.me-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow)}
+.me-group{padding:4px 0;overflow:hidden}
+.me-row{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:6px 16px;margin:0;background:none;border:0;font:inherit;font-size:15px;color:var(--text);text-decoration:none;text-align:left;cursor:pointer;position:relative;transition:opacity var(--t-press) var(--ease-out)}
+.me-row+.me-row::before{content:"";position:absolute;top:0;left:60px;right:0;border-top:1px solid var(--line)}
+.me-row:active{opacity:.6}
+.me-row:focus-visible{outline:2px solid var(--pri);outline-offset:-2px;border-radius:var(--r-row)}
+.me-ic{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--priT);color:var(--pri)}
+.me-ic.warm{background:var(--blush);color:var(--bark)}
+.me-ic .ms{font-size:19px}
+.me-lbl{flex:1;min-width:0;font-weight:600}
+.me-lbl small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:1px}
+.me-val{color:var(--muted);font-size:13.5px}
+.me-chev{color:var(--muted);font-size:20px}
+.me-badge{background:var(--pri);color:var(--on-green);font-size:12px;font-weight:800;border-radius:999px;padding:2px 8px}
+.me-switch-row{padding:0}
+.me-switch-lbl{display:flex;align-items:center;gap:12px;width:100%;padding:10px 16px;cursor:pointer}
+.me-switch{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line-strong);position:relative;cursor:pointer;margin:0;transition:background var(--t-color) var(--ease-out)}
+.me-switch::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform var(--t-press) var(--ease-out)}
+.me-switch:checked{background:var(--pri);border-color:var(--pri)}
+.me-switch:checked::after{transform:translateX(18px)}
+.me-switch:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+
+.me-card{padding:18px}
+.me-card-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.me-card-head h2{font-family:var(--display);font-size:19px;margin:0}
+.me-card-head span{color:var(--muted);font-size:13px;font-weight:700}
+.me-chips{display:flex;flex-wrap:wrap;gap:8px}
+.me-chip{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border-radius:999px;background:var(--surface-2);font-size:13.5px;font-weight:600;color:var(--text);max-width:100%}
+.me-chip .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.me-note{margin:12px 0 0;font-size:13px;color:var(--muted)}
+
+.me-medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+.me-medal{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:12px 6px;border-radius:var(--r-row);background:var(--surface-2);font-size:12px;color:var(--muted);min-width:0}
+.me-medal b{color:var(--text);font-size:12.5px;line-height:1.2}
+.me-medal span{line-height:1.25}
+.me-medal.locked img{opacity:.4;filter:grayscale(1)}
+.me-medal.locked b{color:var(--muted)}
+.me-pins{display:grid;gap:12px}
+.me-pin{display:flex;gap:12px;align-items:center}
+.me-pin b{display:block;font-weight:700}.me-pin span{font-size:13px;color:var(--muted)}
+
+.me-plant{border-radius:var(--r-card)!important}
+.me-plant .ph-info{padding:22px!important}
+.me-plant h2{font-size:28px!important}
+@media (max-width:600px){.me-plant .ph-info{padding:18px!important}}
+
+@media (prefers-reduced-motion:reduce){.me-row,.me-switch,.me-switch::after{transition:opacity 150ms linear}}
+.me-plant .list>li{content-visibility:visible}
+
+/* fix3: own tree = Home's /api/tree render, capped at 320px on phones */
+@media (max-width:600px){.me-plant .me-tree .tk-stage{transform:scale(var(--me-tk-s,.59));transform-origin:top center;margin-bottom:calc(var(--tk-h,415px) * (var(--me-tk-s,.59) - 1))}}
+/* fix3: neutral placeholder for non-friends (no flat art) */
+.me-tree-ph{min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;border-radius:18px;background:var(--sky1);color:var(--muted,inherit)}
+.me-tree-ph span{font-size:36px;opacity:.7}.me-tree-ph p{margin:0;font-size:14px;max-width:22ch}
+.fp-mini:has(.me-tree){padding:0!important;overflow:hidden;min-height:0!important}.me-tree{width:100%}.me-tree .tk-stage{border-radius:18px}
+/* app.css `.plant-hero .ph-art svg{width:240px}` was inflating tree_kit's flower svgs into the "cactus/tulip" look; restore tree_kit sizing */
+.me-plant .ph-art .me-tree svg.tk-fla{width:20px;height:20px}
+@media (max-width:760px){.me-plant .ph-art .me-tree svg.tk-fla{width:24px;height:24px}}
+.me-plant .ph-art .me-tree svg.tk-roots{width:auto;height:auto}
+/* fix4: flat night tint over the park picture in dark (night.svg stops #141b2b -> #2c3654), no glow */
+/* fix5: legend wraps inside the card; compact chips so tree + legend <= 320px at 390 */
+.me-plant .tk-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:100%;box-sizing:border-box;margin:6px 0 0!important;padding:0 10px 10px!important;overflow:hidden;width:auto!important;left:auto!important;right:auto!important;transform:none!important}
+@media (max-width:600px){.me-plant .tk-legend .tk-chip{min-height:0;padding:5px 10px;font-size:12px;max-width:100%}}
+.me-plant .ph-art .me-tree{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box}
+
+/* profile_fix_v1 (Critic NFQS) */
+/* 1: class tags off the tree art -> wrapping chip row under the plant */
+.me-plant .ph-art .tk-legend,.me-plant .ph-art .tk-lbl{display:none!important}
+.me-plant .me-tree-tags{display:flex!important;flex-direction:row!important;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 10px 4px;justify-content:flex-start;width:100%;box-sizing:border-box}
+.me-plant .me-tree-tags[hidden]{display:none!important}
+.me-tree-tags .me-chip{min-height:32px;font-size:12.5px;padding:0 9px;gap:5px;flex:0 0 auto;width:auto!important}
+.me-tree-tags .me-chip-n{white-space:nowrap}
+.me-tree-tags .me-chip-n{font-weight:500;color:var(--me-sub)}
+/* 2: medal grid: 3 cols (2 on phones), fixed 72px badges, clamped text, 16px row gap */
+.me-plant,.me-card{--me-sub:#675a44}
+[data-theme=dark] .me-plant,[data-theme=dark] .me-card{--me-sub:var(--muted)}
+.me-medals{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:16px;column-gap:10px}
+@media (max-width:420px){.me-medals{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.me-medal img{width:72px;height:72px;flex:none;object-fit:contain}
+.me-medal b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:100%;overflow-wrap:anywhere}
+.me-medal span{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--me-sub)}
+/* 3: locked: only the badge is dimmed; text keeps >=4.5:1 */
+.me-medal.locked img{opacity:.4;filter:grayscale(1)}
+.me-medal.locked b{color:var(--text)}
+.me-medal.locked span{color:var(--me-sub)}
+/* 1 (layout): tags sit directly under the art; on two-column widths the info column spans both rows */
+@media (min-width:761px){.me-plant{grid-template-rows:auto auto}.me-plant .ph-art{grid-column:1;grid-row:1}.me-plant .me-tree-tags{grid-column:1/-1;grid-row:2;padding:12px 16px 16px}.me-plant .ph-info{grid-column:2;grid-row:1}}
+/* 5: no empty band above the tree: centre the art vertically and drop the 440px floor */
+.me-plant .ph-art{place-items:center!important;align-content:center;min-height:0!important;padding-top:12px!important;padding-bottom:12px!important}
+
+/* ================= Clay (Design clay_shell 2_me @4dc31fa). Tiles: Buds growing, Tasks harvested, Zen time, Points. First focus medal (not streak). ================= */
+html.clay .me-head{flex-direction:row;align-items:center;text-align:left;gap:18px;margin:0;padding:26px;min-height:170px;border-radius:var(--c-r-lg);border:1px solid var(--c-edge);box-shadow:var(--sh-clay);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c-bg) 92%,transparent) 0%,color-mix(in srgb,var(--c-bg) 55%,transparent) 45%,color-mix(in srgb,var(--c-bg) 0%,transparent) 75%),var(--me-scene) center 20%/cover no-repeat,var(--c-sky-mid)}
+html.clay[data-theme=dark] .me-head{background:linear-gradient(90deg,rgba(34,29,40,.94) 0%,rgba(34,29,40,.7) 45%,rgba(34,29,40,.25) 80%),var(--me-scene) center 20%/cover no-repeat,#2A2430}
+html.clay .me-av{flex:none}
+html.clay .me-av .avatar{box-shadow:0 0 0 4px var(--c-paper),var(--sh-soft)}
+html.clay .me-id{flex:1;min-width:0}
+html.clay .me-name{margin:0 0 4px;font:600 30px/1.15 var(--f-serif);color:var(--c-ink)}
+html.clay .me-sub,html.clay .me-meta{color:#5B4A58}
+html.clay[data-theme=dark] .me-sub,html.clay[data-theme=dark] .me-meta{color:var(--c-ink-soft)}
+html.clay .me-bio{max-width:46ch;color:var(--c-ink)}
+html.clay .me-actions{flex:none;margin:0 0 0 auto;align-self:center}
+html.clay .me-actions .btn{min-height:40px;padding:0 18px}
+html:not(.clay) .me-actions-own{display:none}
+/* five stat tiles */
+html.clay .me-stats{grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;max-width:none;margin:18px 0}
+html.clay .me-tile{padding:16px 8px;border:1px solid var(--c-edge);border-radius:var(--c-r-lg);background:var(--c-paper);box-shadow:var(--sh-clay)}
+html.clay .me-tile b{font:600 26px/1.15 var(--f-serif);color:var(--c-ink)}
+html.clay .me-tile b small{font:700 14px var(--f-sans);color:var(--c-ink-soft)}
+html.clay .me-tile span{margin-top:4px;font:600 13px/1.3 var(--f-sans);letter-spacing:0;text-transform:none;color:var(--c-ink-soft)}
+/* medals left, settings right (mockup order) */
+@media (min-width:960px){html.clay .me-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}html.clay .me-grid>.me-col:last-child{order:-1}}
+html.clay .me-grid,html.clay .me-col{gap:18px}
+html.clay :is(.me-group,.me-card){border:1px solid var(--c-edge);border-radius:var(--c-r-lg);background:var(--c-paper);box-shadow:var(--sh-clay)}
+html.clay .me-card{padding:20px}
+html.clay .me-card-head h2{font:600 19px/1.2 var(--f-serif)}
+html.clay .me-medals{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));row-gap:14px;margin-top:4px}
+html.clay .me-medal{padding:4px 2px;background:none;gap:6px}
+html.clay .me-medal img{width:54px;height:54px;border-radius:50%;background:var(--c-pink);box-shadow:var(--sh-clay)}
+html.clay .me-medal.locked img{opacity:.45;background:var(--c-paper-2)}
+html.clay .me-medal b{font:700 12.5px/1.25 var(--f-sans);color:var(--c-ink-soft)}
+html.clay .me-medal span{font-size:11.5px}
+/* settings list: plain icons, full-width hairlines, moss switch */
+html.clay .me-group{padding:8px 20px}
+html.clay .me-row{padding:6px 2px;min-height:48px;font-weight:600}
+html.clay .me-row+.me-row::before{left:0;border-top-color:var(--c-edge)}
+html.clay .me-ic,html.clay .me-ic.warm{width:24px;height:24px;background:none;color:var(--c-ink)}
+html.clay .me-ic .ms{font-size:21px}
+html.clay .me-switch-lbl{padding:10px 2px}
+html.clay .me-switch{width:38px;height:22px;background:var(--c-paper-2);border-color:var(--c-edge)}
+html.clay .me-switch::after{width:16px;height:16px;background:#fff}
+html.clay .me-switch:checked{background:var(--c-moss);border-color:var(--c-moss)}
+html.clay .me-switch:checked::after{transform:translateX(16px)}
+html.clay .me-chip{background:var(--c-paper-2)}
+html.clay .me-plant{border-radius:var(--c-r-lg)!important}
+@media (max-width:760px){
+  html.clay .me-head{flex-wrap:wrap;min-height:0;padding:70px 22px 22px;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--c-bg) 10%,transparent),color-mix(in srgb,var(--c-bg) 90%,transparent) 70%),var(--me-scene) center 18%/cover no-repeat,var(--c-sky-mid)}
+  html.clay[data-theme=dark] .me-head{background:linear-gradient(180deg,rgba(34,29,40,.2),rgba(34,29,40,.92) 70%),var(--me-scene) center 18%/cover no-repeat,#2A2430}
+  html.clay .me-id{flex-basis:100%}
+  html.clay .me-actions{margin:4px 0 0 auto}
+  html.clay .me-stats{grid-template-columns:1fr 1fr;gap:14px}
+}
+
+/* Me plant card: Home's clay tree scene (same art files as the dashboard), scaled to fit the card */
+.fp-mini:has(.me-scene){padding:0!important;min-height:0!important;overflow:hidden}
+.me-scene{position:relative;width:100%;aspect-ratio:4/5;max-height:440px;border-radius:18px;overflow:hidden;background:#E9D7E3}
+.me-scene-still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 47%;display:block}
+.me-scene.is-live .me-scene-still{opacity:0}
+[data-theme=dark] .me-scene{background:#2A2430}
+[data-theme=dark] .me-scene::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(180deg,rgba(24,20,34,.38),rgba(24,20,34,.22))}
+@media (max-width:760px){.me-scene{aspect-ratio:1/1;max-height:360px}}
+@media (prefers-reduced-motion:reduce){.me-scene-still{transition:none}}
+
+/* Item 14: four Me tiles (Buds / Tasks / Zen / Points) */
+html.clay .me-stats.me-stats-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:700px){html.clay .me-stats.me-stats-4{grid-template-columns:1fr 1fr}}
+
+/* acad-r1: Focus days this week + locked medal outlines */
+html.clay .me-stats.me-stats-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:700px){html.clay .me-stats.me-stats-5{grid-template-columns:1fr 1fr}.focusdays,.me-tile-focusdays{grid-column:1/-1}}
+.me-tile-focusdays .dots,.focusdays .dots{display:flex;gap:7px;justify-content:center;height:30px;align-items:center}
+.me-tile-focusdays .dots i,.focusdays .dots i{width:12px;height:12px;border-radius:50%;background:var(--c-paper-2,var(--surface-2));box-shadow:inset 0 1px 2px rgba(90,60,60,.18);display:block}
+.me-tile-focusdays .dots i.on,.focusdays .dots i.on{background:var(--c-moss,var(--sage));box-shadow:inset 0 -2px 0 rgba(0,0,0,.12),0 1px 0 rgba(255,255,255,.6) inset}
+.me-medal.locked{opacity:.55}
+.me-medal.locked img,.me-medal.locked .ms{opacity:.45;filter:grayscale(1)}

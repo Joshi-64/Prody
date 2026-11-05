@@ -1,0 +1,198 @@
+{% extends 'base.html' %}{% block title %}{{ r.title }}{% endblock %}
+{% block content %}
+<div class="rm-shell" id="board">
+  <div class="ph rm-ph"><h1>{{ r.title }}</h1><span class="rm-pills"><span class="chip demo"><i class="live"></i>{{ members|length }} joined</span><button class="chip" type="button" id="rmCopy" data-link="{{ join_link }}" aria-label="Copy invite link"><span class="ms">link</span><span>Invite</span></button><a class="chip" href="{{ url_for('rooms_bp.rooms') }}"><span class="ms">logout</span><span>Leave</span></a></span></div>
+  {% if is_owner %}
+  <form class="rm-set card" method="post" action="{{ url_for('rooms_bp.room_settings', rid=r.room_id) }}" style="padding:10px 14px;display:flex;align-items:center;gap:10px;margin:0">
+    <span class="ms" style="color:var(--c-moss,#4E7A4C)">group</span>
+    <label class="rm-set-lbl" style="flex:1;min-width:0"><b>Friends can join</b><small class="muted" style="display:block;font-weight:600">Friends see this room and join without a link</small></label>
+    <input class="me-switch" type="checkbox" role="switch" name="friends_can_join" value="1" onchange="this.form.submit()"{{ ' checked' if r.friends_can_join }}>
+    <noscript><button class="btn btn-ghost btn-sm">Save</button></noscript>
+  </form>
+  <p class="muted" style="font-size:12px;margin:0 4px 4px">Turn off for a private session. Invite links still work for anyone you send one to.</p>
+  {% endif %}
+
+  <section class="rm-video">
+    {% if video_on %}
+    <div class="jitsi" id="jitsi" data-room="{{ jitsi_room }}" data-domain="{{ jitsi_domain }}" data-name="{{ display_name }}"{% if jitsi_jwt %} data-jwt="{{ jitsi_jwt }}"{% endif %}><p class="rm-fallback" id="rmFail" hidden>The video call couldn't load. Check your connection and reload.</p></div>
+    {% else %}
+    <div class="rm-soon" role="status"><p>{{ video_almost }}</p></div>
+    {% endif %}
+  </section>
+
+  <section class="rm-board card wb-card" aria-label="Shared whiteboard">
+    <div class="wb-stage" id="wbStage"><canvas id="wb"></canvas><canvas id="wbPrev" aria-hidden="true"></canvas></div>
+    <div class="wb-tools" role="toolbar" aria-label="Whiteboard tools">
+      <span class="wb-grp" aria-label="Tool">
+        <button class="chip wb-tool on" data-t="pen" title="Pen"><span class="ms">edit</span><span class="wb-l">Pen</span></button>
+        <button class="chip wb-tool" data-t="hl" title="Highlighter"><span class="ms">ink_highlighter</span><span class="wb-l">Highlight</span></button>
+        <button class="chip wb-tool" data-t="erase" title="Eraser"><span class="ms">ink_eraser</span><span class="wb-l">Eraser</span></button>
+        <button class="chip wb-tool" data-t="line" title="Line"><span class="ms">horizontal_rule</span></button>
+        <button class="chip wb-tool" data-t="arrow" title="Arrow"><span class="ms">arrow_right_alt</span></button>
+        <button class="chip wb-tool" data-t="rect" title="Rectangle"><span class="ms">crop_square</span></button>
+        <button class="chip wb-tool" data-t="ellipse" title="Ellipse"><span class="ms">circle</span></button>
+        <button class="chip wb-tool" data-t="text" title="Text"><span class="ms">text_fields</span></button>
+        <button class="chip wb-tool" data-t="note" title="Sticky note"><span class="ms">sticky_note</span></button>
+      </span>
+      <span class="wb-grp" aria-label="Colour">
+      {% for c,n in [('pencil','Pencil'),('#2f5d46','Green'),('#c0643f','Terracotta'),('#3d5a80','Ink blue'),('#b8892b','Ochre'),('#8a4f7d','Plum')] %}<button class="wb-ink{{ ' on' if loop.first }}" data-c="{{ c }}" title="{{ n }}" aria-label="{{ n }}" style="--c:{{ 'var(--wb-pencil)' if c=='pencil' else c }}"></button>{% endfor %}
+      </span>
+      <span class="wb-grp" aria-label="Size">
+        <button class="chip wb-size on" data-s="2">Fine</button><button class="chip wb-size" data-s="5">Marker</button><button class="chip wb-size" data-s="10">Bold</button>
+      </span>
+      <span class="wb-grp wb-acts">
+        <button class="btn btn-ghost btn-sm" id="wbUndo" title="Undo"><span class="ms">undo</span><span class="wb-l">Undo</span></button>
+        <button class="btn btn-ghost btn-sm" id="wbRedo" title="Redo"><span class="ms">redo</span><span class="wb-l">Redo</span></button>
+        <button class="btn btn-ghost btn-sm" id="wbClear"><span class="ms">delete</span><span class="wb-l">Clear</span></button>
+        <button class="btn btn-sm" id="wbSave"><span class="ms">download</span>Save PNG</button>
+      </span>
+    </div>
+  </section>
+</div>
+<style>
+.rm-shell{display:flex;flex-direction:column;gap:10px;min-height:0}
+.rm-ph{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}.rm-ph h1{margin:0;font-size:22px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rm-pills{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.rm-pills .chip{min-height:36px}
+.chip.demo{background:var(--c-paper-2,#f3ebe4);color:var(--c-ink-soft,#6b5f68);border:1px solid var(--c-edge,#e8dcd3);white-space:nowrap}
+.live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c-moss,#5a7d4f);margin-right:4px}
+.rm-video{flex:none}
+.jitsi{height:120px;border-radius:16px;background:#2A2430;overflow:hidden;position:relative;border:1px solid var(--c-edge,#e8dcd3)}
+.jitsi iframe{display:block;border:0}
+.rm-fallback{color:#F1E8EE;padding:12px;text-align:center;font-size:13px}
+.rm-soon{padding:18px 14px;border-radius:16px;background:var(--c-paper-2,#f3ebe4);border:1px solid var(--c-edge,#e8dcd3);color:var(--c-ink-soft,#6b5f68);text-align:center;min-height:72px;display:grid;place-items:center}
+.rm-soon p{margin:0;font-size:14px;font-weight:600;line-height:1.4;max-width:28ch}
+.rm-board.wb-card{padding:0;overflow:hidden;display:flex;flex-direction:column;flex:1;min-height:0;
+  --wb-board:var(--surface);--wb-pencil:var(--pencil,var(--text));--wb-hl:#e8c547;
+  border-radius:22px;border:1px solid var(--line);box-shadow:var(--sh-clay,0 8px 22px -10px rgba(90,60,60,.22))}
+html[data-theme=dark] .rm-board.wb-card{--wb-board:var(--bg);--wb-hl:#d9b84a}
+.wb-stage{position:relative;flex:1;min-height:220px;touch-action:none;background:var(--wb-board)}
+#wb,#wbPrev{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;display:block}
+#wbPrev{background:none;pointer-events:none}
+.wb-tools{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface);
+  position:sticky;bottom:calc(var(--tabbar-h,72px) + env(safe-area-inset-bottom));z-index:3}
+.wb-grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.wb-acts{margin-left:auto}
+.wb-tools .chip,.wb-tools .btn{min-height:44px;min-width:44px;justify-content:center;border-radius:999px;font-weight:800}
+.wb-tools .btn{border-radius:14px}
+.wb-tools .btn-ghost{background:var(--surface-2);border:0}
+.wb-ink{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,var(--c) 0 11px,transparent 12px);border:0;cursor:pointer;padding:0;flex:none}
+.wb-ink.on{background:radial-gradient(circle,var(--c) 0 11px,transparent 12px 14px,var(--c) 15px 16px,transparent 17px)}
+.wb-ink[data-c=pencil]{box-shadow:inset 0 0 0 1px var(--line)}
+.wb-tool.on,.wb-size.on{background:var(--sage-soft,var(--c-moss-soft,#dde7d3));border-color:var(--green,var(--c-moss));color:var(--green-ink,var(--c-moss-ink))}
+.wb-note{position:absolute;width:160px;min-height:120px;background:#f6e27a;color:#2f2a24;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.18);display:flex;flex-direction:column;font-size:15px;z-index:2}
+.wb-note .wb-nbar{height:28px;cursor:move;display:flex;justify-content:flex-end;background:rgba(0,0,0,.06);touch-action:none}
+.wb-note .wb-nbar button{border:0;background:none;color:inherit;width:44px;height:28px;cursor:pointer;font-size:16px}
+.wb-note .wb-nbody{flex:1;padding:8px;outline:none;white-space:pre-wrap;word-break:break-word}
+.wb-txt{position:absolute;min-width:120px;font:18px Inter,system-ui,sans-serif;border:1px dashed var(--green,var(--c-moss));background:color-mix(in srgb,var(--wb-board) 85%,transparent);color:var(--wb-pencil);border-radius:8px;padding:2px 4px;z-index:2}
+.content{padding-bottom:calc(var(--tabbar-h,72px) + 8px + env(safe-area-inset-bottom))}
+@media(max-width:700px){
+  .rm-shell{min-height:calc(100dvh - var(--tabbar-h,72px) - env(safe-area-inset-bottom) - 12px)}
+  .jitsi{height:96px} /* slim video strip — board gets the rest */
+  .wb-stage{min-height:0;flex:1}
+  .wb-l{display:none}.wb-acts{margin-left:0}.wb-tools{gap:6px;max-width:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .wb-tools .wb-grp{flex-wrap:nowrap}
+}
+@media(min-width:701px){
+  .jitsi{height:min(28vh,220px)}
+  .wb-stage{min-height:min(48vh,520px)}
+}
+</style>
+{% if video_on %}
+<script src="https://{{ jitsi_domain }}/{{ jitsi_room.split('/')[0] ~ '/' if '/' in jitsi_room else '' }}external_api.js" async onload="rmStart()" onerror="document.getElementById('rmFail').hidden=false"></script>
+<script>
+function rmStart(){var el=document.getElementById('jitsi');try{var opts={roomName:el.dataset.room,parentNode:el,width:'100%',height:'100%',
+  userInfo:{displayName:el.dataset.name},
+  configOverwrite:{prejoinPageEnabled:false,prejoinConfig:{enabled:false},startWithAudioMuted:true,disableDeepLinking:true},
+  interfaceConfigOverwrite:{TOOLBAR_BUTTONS:['microphone','camera','desktop','chat','raisehand','tileview','fullscreen','hangup','settings']}};
+  if(el.dataset.jwt)opts.jwt=el.dataset.jwt;
+  window.rmApi=new JitsiMeetExternalAPI(el.dataset.domain,opts);
+  rmApi.addListener('readyToClose',function(){location.href={{ url_for('rooms_bp.rooms')|tojson }};});}catch(e){document.getElementById('rmFail').hidden=false;}}
+</script>
+{% endif %}
+<script>
+document.getElementById('rmCopy').onclick=function(){var b=this,l=b.dataset.link;(navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(function(){b.querySelector('span:last-child').textContent='Copied';},function(){prompt('Invite link',l);});};
+(()=>{
+const URL_={{ url_for('rooms_bp.get_strokes', rid=r.room_id)|tojson }};
+const cv=document.getElementById('wb'),cx=cv.getContext('2d'),pv=document.getElementById('wbPrev'),px=pv.getContext('2d'),stage=document.getElementById('wbStage');
+let ink='pencil',size=2,tool='pen',down=false,sx=0,sy=0,undo=[],redo=[],all=[],pend=[],last=0,busy=false,cur=null;
+const dpr=window.devicePixelRatio||1,cssv=n=>getComputedStyle(stage).getPropertyValue(n).trim(),
+  inkC=()=>ink==='pencil'?cssv('--wb-pencil'):ink,hlC=()=>ink==='pencil'?cssv('--wb-hl'):ink,
+  isDark=()=>document.documentElement.getAttribute('data-theme')==='dark';
+function fit(){const r=cv.getBoundingClientRect();[cv,pv].forEach(c=>{c.width=r.width*dpr;c.height=r.height*dpr;c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);});cx.lineCap=cx.lineJoin='round';redraw();}
+const npt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height];};
+const pt=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top,e.pressure||.5];};
+function strokeColor(s){return (!s.c||s.c==='pencil')?cssv('--wb-pencil'):s.c;}
+function drawFree(s){if(!s.pts||!s.pts.length)return;const W=cv.width/dpr,H=cv.height/dpr,mode=s.mode||'pen';
+  cx.save();
+  if(mode==='erase'){cx.globalCompositeOperation='destination-out';cx.globalAlpha=1;cx.strokeStyle='#000';cx.lineWidth=(s.w||22);}
+  else if(mode==='hl'){cx.globalCompositeOperation=isDark()?'source-over':'multiply';cx.globalAlpha=.35;cx.strokeStyle=(!s.c||s.c==='pencil')?cssv('--wb-hl'):s.c;cx.lineWidth=(s.w||size)*6+8;}
+  else{cx.globalCompositeOperation='source-over';cx.globalAlpha=1;cx.strokeStyle=strokeColor(s);cx.lineWidth=s.w||3;}
+  cx.lineCap=cx.lineJoin='round';cx.beginPath();
+  cx.moveTo(s.pts[0][0]*W,s.pts[0][1]*H);s.pts.forEach(p=>cx.lineTo(p[0]*W,p[1]*H));
+  if(s.pts.length===1)cx.lineTo(s.pts[0][0]*W+.1,s.pts[0][1]*H);cx.stroke();cx.restore();}
+function drawShape(s){const W=cv.width/dpr,H=cv.height/dpr,x0=s.x0*W,y0=s.y0*H,x1=s.x1*W,y1=s.y1*H;
+  cx.save();cx.globalCompositeOperation='source-over';cx.globalAlpha=1;cx.strokeStyle=strokeColor(s);cx.lineWidth=Math.max(2,s.w||3);cx.lineCap=cx.lineJoin='round';cx.beginPath();
+  if(s.t==='rect')cx.rect(x0,y0,x1-x0,y1-y0);
+  else if(s.t==='ellipse')cx.ellipse((x0+x1)/2,(y0+y1)/2,Math.abs(x1-x0)/2,Math.abs(y1-y0)/2,0,0,7);
+  else{cx.moveTo(x0,y0);cx.lineTo(x1,y1);if(s.t==='arrow'){const a=Math.atan2(y1-y0,x1-x0),h=10+cx.lineWidth*2;cx.moveTo(x1,y1);cx.lineTo(x1-h*Math.cos(a-.45),y1-h*Math.sin(a-.45));cx.moveTo(x1,y1);cx.lineTo(x1-h*Math.cos(a+.45),y1-h*Math.sin(a+.45));}}
+  cx.stroke();cx.restore();}
+function drawText(s){const W=cv.width/dpr,H=cv.height/dpr;cx.save();cx.fillStyle=strokeColor(s);cx.font=((14+(s.size||2)*2))+'px Inter,system-ui,sans-serif';cx.textBaseline='middle';cx.fillText(s.text,s.x*W,s.y*H);cx.restore();}
+function addNoteEl(o){const n=document.createElement('div');n.className='wb-note';n.style.left=(o.x*stage.clientWidth)+'px';n.style.top=(o.y*stage.clientHeight)+'px';
+  n.innerHTML='<div class="wb-nbar"><button type="button" aria-label="Delete note">✕</button></div><div class="wb-nbody" contenteditable="true"></div>';
+  n.querySelector('.wb-nbody').innerText=o.text||'';n.querySelector('.wb-nbar button').onclick=()=>n.remove();
+  stage.appendChild(n);return n;}
+function drawOne(s){if(!s)return;if(s.clear)return;if(s.t==='text')return drawText(s);if(s.t==='note')return;if(s.t)return drawShape(s);drawFree(s);}
+function wipe(){cx.save();cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);cx.restore();}
+function redraw(){wipe();stage.querySelectorAll('.wb-note').forEach(n=>n.remove());
+  all.forEach(s=>{if(s.t==='note')addNoteEl(s);else drawOne(s);});pend.forEach(drawOne);if(cur)drawOne(cur);}
+function apply(list){list.forEach(x=>{last=Math.max(last,x.id);if(x.s.clear){all=[];stage.querySelectorAll('.wb-note').forEach(n=>n.remove());}else all.push(x.s);});if(list.length){pend=[];redraw();}}
+function poll(){if(busy)return;busy=true;fetch(URL_+'?since='+last,{credentials:'same-origin'}).then(r=>r.json()).then(d=>apply(d.strokes||[])).catch(()=>{}).finally(()=>busy=false);}
+function send(o){return fetch(URL_,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).then(poll);}
+function pushLocal(s){undo.push(s);if(undo.length>40)undo.shift();redo=[];}
+function shapePreview(t,x0,y0,x1,y1){px.clearRect(0,0,pv.width,pv.height);const W=cv.width/dpr,H=cv.height/dpr;
+  const s={t,x0:x0/W,y0:y0/H,x1:x1/W,y1:y1/H,c:inkC(),w:Math.max(2,size)};
+  const _cx=cx;window._tmp=cx; /* draw on preview via same math with px */
+  const old=cx; // use px manually
+  px.save();px.strokeStyle=inkC();px.lineWidth=Math.max(2,size);px.lineCap=px.lineJoin='round';px.beginPath();
+  if(t==='rect')px.rect(x0,y0,x1-x0,y1-y0);else if(t==='ellipse')px.ellipse((x0+x1)/2,(y0+y1)/2,Math.abs(x1-x0)/2,Math.abs(y1-y0)/2,0,0,7);
+  else{px.moveTo(x0,y0);px.lineTo(x1,y1);if(t==='arrow'){const a=Math.atan2(y1-y0,x1-x0),h=10+px.lineWidth*2;px.moveTo(x1,y1);px.lineTo(x1-h*Math.cos(a-.45),y1-h*Math.sin(a-.45));px.moveTo(x1,y1);px.lineTo(x1-h*Math.cos(a+.45),y1-h*Math.sin(a+.45));}}
+  px.stroke();px.restore();}
+function placeText(nx,ny,x,y){const i=document.createElement('input');i.className='wb-txt';i.style.left=x+'px';i.style.top=(y-14)+'px';i.setAttribute('aria-label','Text');stage.appendChild(i);setTimeout(()=>i.focus(),0);
+  let done=false;const fin=()=>{if(done)return;done=true;const v=i.value.trim();i.remove();if(!v)return;
+    const s={t:'text',x:nx,y:ny,text:v,c:ink==='pencil'?'pencil':ink,size};pushLocal(s);pend.push(s);redraw();send(s);};
+  i.addEventListener('keydown',e=>{if(e.key==='Enter')fin();if(e.key==='Escape'){i.value='';fin();}});i.addEventListener('blur',fin);}
+cv.addEventListener('pointerdown',e=>{
+  const [nx,ny]=npt(e),[x,y]=pt(e);
+  if(tool==='text'){e.preventDefault();return placeText(nx,ny,x,y);}
+  if(tool==='note'){e.preventDefault();const s={t:'note',x:nx,y:ny,text:''};pushLocal(s);send(s).then(()=>{const n=addNoteEl(s);const b=n.querySelector('.wb-nbody');b.focus();
+    let sent=false;const flush=()=>{if(sent)return;sent=true;s.text=b.innerText||'';send({t:'note',x:nx,y:ny,text:s.text});};b.addEventListener('blur',flush);});return;}
+  down=true;cv.setPointerCapture(e.pointerId);sx=x;sy=y;
+  if(['line','arrow','rect','ellipse'].includes(tool))return;
+  const mode=tool==='hl'?'hl':tool==='erase'?'erase':'pen';
+  cur={pts:[[nx,ny]],c:ink==='pencil'?'pencil':ink,w:tool==='erase'?22:size,mode};
+});
+cv.addEventListener('pointermove',e=>{
+  if(!down)return;const[nx,ny]=npt(e),[x,y]=pt(e);
+  if(['line','arrow','rect','ellipse'].includes(tool)){shapePreview(tool,sx,sy,x,y);return;}
+  if(!cur)return;cur.pts.push([nx,ny]);redraw();
+});
+function end(e){if(!down)return;down=false;const[nx,ny]=npt(e),[x,y]=pt(e);
+  if(['line','arrow','rect','ellipse'].includes(tool)){px.clearRect(0,0,pv.width,pv.height);
+    const W=cv.width/dpr,H=cv.height/dpr;const s={t:tool,x0:sx/W,y0:sy/H,x1:x/W,y1:y/H,c:ink==='pencil'?'pencil':ink,w:Math.max(2,size)};
+    pushLocal(s);pend.push(s);redraw();send(s);return;}
+  if(!cur)return;const s=cur;cur=null;if(s.pts.length>2000)s.pts=s.pts.filter((_,i)=>i%2===0);
+  pushLocal(s);pend.push(s);redraw();send(s);}
+['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,end));
+document.querySelectorAll('.wb-tool').forEach(b=>b.onclick=()=>{document.querySelectorAll('.wb-tool').forEach(x=>x.classList.remove('on'));b.classList.add('on');tool=b.dataset.t;cv.style.cursor=tool==='text'?'text':'crosshair';});
+document.querySelectorAll('.wb-ink').forEach(b=>b.onclick=()=>{document.querySelectorAll('.wb-ink').forEach(x=>x.classList.remove('on'));b.classList.add('on');ink=b.dataset.c;});
+document.querySelectorAll('.wb-size').forEach(b=>b.onclick=()=>{document.querySelectorAll('.wb-size').forEach(x=>x.classList.remove('on'));b.classList.add('on');size=+b.dataset.s;});
+document.getElementById('wbUndo').onclick=()=>{const u=undo.pop();if(!u)return;redo.push(u);const i=all.lastIndexOf(u);if(i>=0)all.splice(i,1);else{const j=pend.lastIndexOf(u);if(j>=0)pend.splice(j,1);}redraw();};
+document.getElementById('wbRedo').onclick=()=>{const r=redo.pop();if(!r)return;undo.push(r);pend.push(r);redraw();send(r);};
+document.getElementById('wbClear').onclick=()=>{if(!confirm('Clear the board for everyone?'))return;all=[];pend=[];undo=[];redo=[];redraw();send({clear:true});};
+document.getElementById('wbSave').onclick=()=>{const o=document.createElement('canvas');o.width=cv.width;o.height=cv.height;const c=o.getContext('2d');c.fillStyle=cssv('--wb-board');c.fillRect(0,0,o.width,o.height);c.drawImage(cv,0,0);
+  const a=document.createElement('a');a.download='prody-room-board.png';a.href=o.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove();};
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(fit,200);});
+fit();poll();setInterval(poll,1000);
+})();
+</script>
+{% endblock %}

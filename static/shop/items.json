@@ -1,0 +1,1061 @@
+{
+ "version": 1,
+ "scene": {
+  "width": 900,
+  "height": 900,
+  "soil_y": 420,
+  "bottom": 850
+ },
+ "garden_shape": "garden:{soil,sky,flower,leaves,decor:[..],pot}; null = default",
+ "defaults": {
+  "soil": "soil_loam",
+  "sky": "sky_clear_day",
+  "flower": "flower_coral",
+  "leaves": null,
+  "decor": [],
+  "pot": "pot_terracotta (only when pot mode on; null = open ground)",
+  "species": "species_default"
+ },
+ "items": [
+  {
+   "id": "soil_loam",
+   "type": "soil",
+   "name": "Loam",
+   "price": 0,
+   "rarity": "common",
+   "default": true,
+   "svg": "shop/soil/loam.svg",
+   "thumb": "shop/thumbs/soil_loam.svg",
+   "colors": {
+    "fill": "#C49A72",
+    "mark": "#6B4A2F",
+    "horizon": "#6B4A2F",
+    "texture": "pebbles",
+    "tile_width": 300,
+    "root": "#3B2A1E",
+    "root_label": "#3B2A1E",
+    "root_contrast": 5.35,
+    "moss": null
+   }
+  },
+  {
+   "id": "soil_peat",
+   "type": "soil",
+   "name": "Dark peat",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/soil/peat.svg",
+   "thumb": "shop/thumbs/soil_peat.svg",
+   "colors": {
+    "fill": "#A27C5B",
+    "mark": "#5A3E28",
+    "horizon": "#5A3E28",
+    "texture": "fibres",
+    "tile_width": 300,
+    "root": "#3B2A1E",
+    "root_label": "#3B2A1E",
+    "root_contrast": 3.63,
+    "moss": null
+   }
+  },
+  {
+   "id": "soil_red_clay",
+   "type": "soil",
+   "name": "Red clay",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/soil/red_clay.svg",
+   "thumb": "shop/thumbs/soil_red_clay.svg",
+   "colors": {
+    "fill": "#CF8A66",
+    "mark": "#8E4A2E",
+    "horizon": "#8E4A2E",
+    "texture": "streaks",
+    "tile_width": 300,
+    "root": "#3B2A1E",
+    "root_label": "#3B2A1E",
+    "root_contrast": 4.87,
+    "moss": null
+   }
+  },
+  {
+   "id": "soil_sandy",
+   "type": "soil",
+   "name": "Sandy",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/soil/sandy.svg",
+   "thumb": "shop/thumbs/soil_sandy.svg",
+   "colors": {
+    "fill": "#E2C99A",
+    "mark": "#B08A5A",
+    "horizon": "#B08A5A",
+    "texture": "grains",
+    "tile_width": 300,
+    "root": "#3B2A1E",
+    "root_label": "#3B2A1E",
+    "root_contrast": 8.5,
+    "moss": null
+   }
+  },
+  {
+   "id": "soil_mossy",
+   "type": "soil",
+   "name": "Mossy topsoil",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/soil/mossy.svg",
+   "thumb": "shop/thumbs/soil_mossy.svg",
+   "colors": {
+    "fill": "#B3A574",
+    "mark": "#5E7A3A",
+    "horizon": "#5E7A3A",
+    "texture": "moss",
+    "tile_width": 300,
+    "root": "#3B2A1E",
+    "root_label": "#3B2A1E",
+    "root_contrast": 5.57,
+    "moss": "#5E7A3A"
+   }
+  },
+  {
+   "id": "sky_clear_day",
+   "type": "sky",
+   "name": "Clear day",
+   "price": 0,
+   "rarity": "common",
+   "default": true,
+   "svg": "shop/sky/clear_day.svg",
+   "thumb": "shop/thumbs/sky_clear_day.svg",
+   "colors": {
+    "stops": [
+     {
+      "offset": 0,
+      "color": "#9FC4E4"
+     },
+     {
+      "offset": 0.55,
+      "color": "#C4DAEC"
+     },
+     {
+      "offset": 0.8,
+      "color": "#98B7D1"
+     },
+     {
+      "offset": 1,
+      "color": "#B6B19A"
+     }
+    ],
+    "label": "#3B2A1E",
+    "label_halo": "#F4E6CF",
+    "trunk": "#6B4A2F",
+    "tag_fill": "#E9D3AE",
+    "tag_ink": "#3B2A1E",
+    "label_contrast": 6.34
+   }
+  },
+  {
+   "id": "sky_clear_night",
+   "type": "sky",
+   "name": "Clear night",
+   "price": 0,
+   "rarity": "common",
+   "default": false,
+   "night_default": true,
+   "svg": "shop/sky/clear_night.svg",
+   "thumb": "shop/thumbs/sky_clear_night.svg",
+   "colors": {
+    "stops": [
+     {
+      "offset": 0,
+      "color": "#141633"
+     },
+     {
+      "offset": 0.6,
+      "color": "#262650"
+     },
+     {
+      "offset": 1,
+      "color": "#3A3466"
+     }
+    ],
+    "label": "#FBF6EC",
+    "label_halo": "#141633",
+    "trunk": "#8A6242",
+    "tag_fill": "#E9D3AE",
+    "tag_ink": "#3B2A1E",
+    "label_contrast": 10.46
+   }
+  },
+  {
+   "id": "sky_day",
+   "type": "sky",
+   "name": "Cream day",
+   "price": 0,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/sky/day.svg",
+   "thumb": "shop/thumbs/sky_day.svg",
+   "colors": {
+    "stops": [
+     {
+      "offset": 0.0,
+      "color": "#FBF6EC"
+     },
+     {
+      "offset": 1.0,
+      "color": "#FBF6EC"
+     }
+    ],
+    "label": "#3B2A1E",
+    "label_halo": "#FBF6EC",
+    "trunk": "#6B4A2F",
+    "label_contrast": 12.69
+   },
+   "hidden": true,
+   "store": false
+  },
+  {
+   "id": "sky_sunset",
+   "type": "sky",
+   "name": "Golden sunset",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/sky/sunset.svg",
+   "thumb": "shop/thumbs/sky_sunset.svg",
+   "colors": {
+    "stops": [
+     {
+      "offset": 0.0,
+      "color": "#E98F6C"
+     },
+     {
+      "offset": 0.55,
+      "color": "#F4BB72"
+     },
+     {
+      "offset": 1.0,
+      "color": "#FBE3B4"
+     }
+    ],
+    "label": "#3B2A1E",
+    "label_halo": "#FBEBD0",
+    "trunk": "#6B4A2F",
+    "label_contrast": 5.61
+   }
+  },
+  {
+   "id": "sky_night",
+   "type": "sky",
+   "name": "Night sky",
+   "price": 600,
+   "rarity": "epic",
+   "default": false,
+   "svg": "shop/sky/night.svg",
+   "thumb": "shop/thumbs/sky_night.svg",
+   "colors": {
+    "stops": [
+     {
+      "offset": 0.0,
+      "color": "#141B2B"
+     },
+     {
+      "offset": 1.0,
+      "color": "#2C3654"
+     }
+    ],
+    "label": "#FBF6EC",
+    "label_halo": "#141B2B",
+    "trunk": "#8A6242",
+    "label_contrast": 11.06
+   }
+  },
+  {
+   "id": "sky_dawn",
+   "type": "sky",
+   "name": "Spring dawn",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/sky/dawn.svg",
+   "thumb": "shop/thumbs/sky_dawn.svg",
+   "colors": {
+    "stops": [
+     {
+      "offset": 0.0,
+      "color": "#DCE6EE"
+     },
+     {
+      "offset": 0.6,
+      "color": "#F8E6DE"
+     },
+     {
+      "offset": 1.0,
+      "color": "#FCEFD9"
+     }
+    ],
+    "label": "#3B2A1E",
+    "label_halo": "#FBF6EC",
+    "trunk": "#6B4A2F",
+    "label_contrast": 10.81
+   }
+  },
+  {
+   "id": "sky_rain",
+   "type": "sky",
+   "name": "Soft rain",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/sky/rain.svg",
+   "thumb": "shop/thumbs/sky_rain.svg",
+   "colors": {
+    "stops": [
+     {
+      "offset": 0.0,
+      "color": "#C3CDD3"
+     },
+     {
+      "offset": 1.0,
+      "color": "#E4E7E4"
+     }
+    ],
+    "label": "#2A2420",
+    "label_halo": "#F1F2EE",
+    "trunk": "#6B4A2F",
+    "label_contrast": 9.47
+   }
+  },
+  {
+   "id": "flower_coral",
+   "type": "flower",
+   "name": "Coral",
+   "price": 0,
+   "rarity": "common",
+   "default": true,
+   "svg": "shop/flower/coral.svg",
+   "thumb": "shop/thumbs/flower_coral.svg",
+   "colors": {
+    "petal": "#F08A6C",
+    "center": "#F4C95D",
+    "edge_opacity": 0.08
+   }
+  },
+  {
+   "id": "flower_lavender",
+   "type": "flower",
+   "name": "Lavender",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/flower/lavender.svg",
+   "thumb": "shop/thumbs/flower_lavender.svg",
+   "colors": {
+    "petal": "#B59BD6",
+    "center": "#F4C95D",
+    "edge_opacity": 0.08
+   }
+  },
+  {
+   "id": "flower_sunflower",
+   "type": "flower",
+   "name": "Sunflower",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/flower/sunflower.svg",
+   "thumb": "shop/thumbs/flower_sunflower.svg",
+   "colors": {
+    "petal": "#F2B632",
+    "center": "#6B4A2F",
+    "edge_opacity": 0.08
+   }
+  },
+  {
+   "id": "flower_cherry",
+   "type": "flower",
+   "name": "Cherry blossom",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/flower/cherry.svg",
+   "thumb": "shop/thumbs/flower_cherry.svg",
+   "colors": {
+    "petal": "#F6B8C8",
+    "center": "#C2506E",
+    "edge_opacity": 0.08
+   }
+  },
+  {
+   "id": "flower_daisy",
+   "type": "flower",
+   "name": "White daisy",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/flower/daisy.svg",
+   "thumb": "shop/thumbs/flower_daisy.svg",
+   "colors": {
+    "petal": "#FFFDF7",
+    "center": "#F2B632",
+    "edge_opacity": 0.22
+   }
+  },
+  {
+   "id": "leaves_autumn",
+   "type": "leaves",
+   "name": "Autumn",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/leaves/autumn.svg",
+   "thumb": "shop/thumbs/leaves_autumn.svg",
+   "colors": {
+    "leaf_pairs": [
+     {
+      "upper": "#B5541F",
+      "lower": "#E0892B"
+     },
+     {
+      "upper": "#9C3A22",
+      "lower": "#D2553A"
+     },
+     {
+      "upper": "#C27A18",
+      "lower": "#E8B03A"
+     }
+    ],
+    "bud": "#E8B03A",
+    "bud_rib": "#4E9A4F",
+    "snow": null,
+    "note": "cycle pairs by leaf index"
+   }
+  },
+  {
+   "id": "leaves_cherry",
+   "type": "leaves",
+   "name": "Cherry spring",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/leaves/cherry.svg",
+   "thumb": "shop/thumbs/leaves_cherry.svg",
+   "colors": {
+    "leaf_pairs": [
+     {
+      "upper": "#6E9C52",
+      "lower": "#A9CF84"
+     },
+     {
+      "upper": "#7AA85C",
+      "lower": "#B8DA94"
+     }
+    ],
+    "bud": "#F6B8C8",
+    "bud_rib": "#C2506E",
+    "snow": null,
+    "note": "tip bud pink; add 1 pink bud per ~3 leaves"
+   }
+  },
+  {
+   "id": "leaves_winter",
+   "type": "leaves",
+   "name": "Winter frost",
+   "price": 600,
+   "rarity": "epic",
+   "default": false,
+   "svg": "shop/leaves/winter.svg",
+   "thumb": "shop/thumbs/leaves_winter.svg",
+   "colors": {
+    "leaf_pairs": [
+     {
+      "upper": "#3E6B66",
+      "lower": "#6F9C97"
+     },
+     {
+      "upper": "#4A7A78",
+      "lower": "#86B2AC"
+     }
+    ],
+    "bud": "#B8D6D0",
+    "bud_rib": "#4E9A4F",
+    "snow": "#FFFFFF",
+    "note": "draw snow caps on top edge of every branch + trunk top"
+   }
+  },
+  {
+   "id": "decor_stones",
+   "type": "decor",
+   "name": "Stone cluster",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/decor/stones.svg",
+   "thumb": "shop/thumbs/decor_stones.svg",
+   "colors": {
+    "anchor": "viewBox origin (0,0) = bottom-centre; place at (x, soil_y)",
+    "viewBox": [
+     -34,
+     -24,
+     68,
+     28
+    ],
+    "best_on": "any",
+    "glow": null
+   }
+  },
+  {
+   "id": "decor_lantern",
+   "type": "decor",
+   "name": "Lantern",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/decor/lantern.svg",
+   "thumb": "shop/thumbs/decor_lantern.svg",
+   "colors": {
+    "anchor": "viewBox origin (0,0) = bottom-centre; place at (x, soil_y)",
+    "viewBox": [
+     -16,
+     -54,
+     32,
+     56
+    ],
+    "best_on": "any",
+    "glow": "#F6C95D"
+   }
+  },
+  {
+   "id": "decor_fence",
+   "type": "decor",
+   "name": "Picket fence",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/decor/fence.svg",
+   "thumb": "shop/thumbs/decor_fence.svg",
+   "colors": {
+    "anchor": "viewBox origin (0,0) = bottom-centre; place at (x, soil_y)",
+    "viewBox": [
+     -42,
+     -44,
+     84,
+     48
+    ],
+    "best_on": "any",
+    "glow": null
+   }
+  },
+  {
+   "id": "decor_mushrooms",
+   "type": "decor",
+   "name": "Mushroom pair",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/decor/mushrooms.svg",
+   "thumb": "shop/thumbs/decor_mushrooms.svg",
+   "colors": {
+    "anchor": "viewBox origin (0,0) = bottom-centre; place at (x, soil_y)",
+    "viewBox": [
+     -24,
+     -30,
+     46,
+     32
+    ],
+    "best_on": "any",
+    "glow": null
+   }
+  },
+  {
+   "id": "decor_watering_can",
+   "type": "decor",
+   "name": "Watering can",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/decor/watering_can.svg",
+   "thumb": "shop/thumbs/decor_watering_can.svg",
+   "colors": {
+    "anchor": "viewBox origin (0,0) = bottom-centre; place at (x, soil_y)",
+    "viewBox": [
+     -18,
+     -38,
+     52,
+     40
+    ],
+    "best_on": "any",
+    "glow": null
+   }
+  },
+  {
+   "id": "decor_bench",
+   "type": "decor",
+   "name": "Little bench",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/decor/bench.svg",
+   "thumb": "shop/thumbs/decor_bench.svg",
+   "colors": {
+    "anchor": "viewBox origin (0,0) = bottom-centre; place at (x, soil_y)",
+    "viewBox": [
+     -34,
+     -36,
+     68,
+     38
+    ],
+    "best_on": "any",
+    "glow": null
+   }
+  },
+  {
+   "id": "decor_fireflies",
+   "type": "decor",
+   "name": "Fireflies",
+   "price": 600,
+   "rarity": "epic",
+   "default": false,
+   "svg": "shop/decor/fireflies.svg",
+   "thumb": "shop/thumbs/decor_fireflies.svg",
+   "colors": {
+    "anchor": "viewBox origin (0,0) = bottom-centre; place at (x, soil_y)",
+    "viewBox": [
+     -48,
+     -90,
+     96,
+     92
+    ],
+    "best_on": "night",
+    "glow": "#F6E27A"
+   }
+  },
+  {
+   "id": "pot_terracotta",
+   "type": "pot",
+   "name": "Terracotta",
+   "price": 0,
+   "rarity": "common",
+   "default": true,
+   "svg": "shop/pot/terracotta.svg",
+   "thumb": "shop/thumbs/pot_terracotta.svg",
+   "colors": {
+    "body": "#C46A43",
+    "rim": "#B35B36",
+    "pattern": null,
+    "geometry": {
+     "rim_h": 30,
+     "rim_over": 8,
+     "wall": 18,
+     "taper": 26,
+     "radius": 40,
+     "rim_above": 12
+    },
+    "inner_clip": "clip soil band + roots to the inner path (see STYLE.md)"
+   },
+   "store_key": "pot_terracotta"
+  },
+  {
+   "id": "pot_cream",
+   "type": "pot",
+   "name": "Cream stripe",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/pot/cream.svg",
+   "thumb": "shop/thumbs/pot_cream.svg",
+   "colors": {
+    "body": "#EFE7D8",
+    "rim": "#E2D7C3",
+    "pattern": "stripes",
+    "geometry": {
+     "rim_h": 30,
+     "rim_over": 8,
+     "wall": 18,
+     "taper": 26,
+     "radius": 40,
+     "rim_above": 12
+    },
+    "inner_clip": "clip soil band + roots to the inner path (see STYLE.md)"
+   },
+   "store_key": "pot_cream"
+  },
+  {
+   "id": "pot_speckle",
+   "type": "pot",
+   "name": "Speckled",
+   "price": 150,
+   "rarity": "common",
+   "default": false,
+   "svg": "shop/pot/speckle.svg",
+   "thumb": "shop/thumbs/pot_speckle.svg",
+   "colors": {
+    "body": "#E6D6B8",
+    "rim": "#D8C6A4",
+    "pattern": "speckle",
+    "geometry": {
+     "rim_h": 30,
+     "rim_over": 8,
+     "wall": 18,
+     "taper": 26,
+     "radius": 40,
+     "rim_above": 12
+    },
+    "inner_clip": "clip soil band + roots to the inner path (see STYLE.md)"
+   },
+   "store_key": "pot_speckle"
+  },
+  {
+   "id": "pot_sage",
+   "type": "pot",
+   "name": "Sage drip",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/pot/sage.svg",
+   "thumb": "shop/thumbs/pot_sage.svg",
+   "colors": {
+    "body": "#9DB59A",
+    "rim": "#86A083",
+    "pattern": "drip",
+    "geometry": {
+     "rim_h": 30,
+     "rim_over": 8,
+     "wall": 18,
+     "taper": 26,
+     "radius": 40,
+     "rim_above": 12
+    },
+    "inner_clip": "clip soil band + roots to the inner path (see STYLE.md)"
+   },
+   "store_key": "pot_sage"
+  },
+  {
+   "id": "pot_wave",
+   "type": "pot",
+   "name": "Wave",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/pot/wave.svg",
+   "thumb": "shop/thumbs/pot_wave.svg",
+   "colors": {
+    "body": "#F2ECE0",
+    "rim": "#E5DCCB",
+    "pattern": "wave",
+    "geometry": {
+     "rim_h": 30,
+     "rim_over": 8,
+     "wall": 18,
+     "taper": 26,
+     "radius": 40,
+     "rim_above": 12
+    },
+    "inner_clip": "clip soil band + roots to the inner path (see STYLE.md)"
+   },
+   "store_key": "pot_wave"
+  },
+  {
+   "id": "pot_basket",
+   "type": "pot",
+   "name": "Woven basket",
+   "price": 300,
+   "rarity": "rare",
+   "default": false,
+   "svg": "shop/pot/basket.svg",
+   "thumb": "shop/thumbs/pot_basket.svg",
+   "colors": {
+    "body": "#D2B48A",
+    "rim": "#BE9C6E",
+    "pattern": "weave",
+    "geometry": {
+     "rim_h": 30,
+     "rim_over": 8,
+     "wall": 18,
+     "taper": 26,
+     "radius": 40,
+     "rim_above": 12
+    },
+    "inner_clip": "clip soil band + roots to the inner path (see STYLE.md)"
+   },
+   "store_key": "pot_basket"
+  },
+  {
+   "id": "pot_forest",
+   "type": "pot",
+   "name": "Forest glaze",
+   "price": 600,
+   "rarity": "epic",
+   "default": false,
+   "svg": "shop/pot/forest.svg",
+   "thumb": "shop/thumbs/pot_forest.svg",
+   "colors": {
+    "body": "#2F5D46",
+    "rim": "#264D3A",
+    "pattern": "glaze",
+    "geometry": {
+     "rim_h": 30,
+     "rim_over": 8,
+     "wall": 18,
+     "taper": 26,
+     "radius": 40,
+     "rim_above": 12
+    },
+    "inner_clip": "clip soil band + roots to the inner path (see STYLE.md)"
+   },
+   "store_key": "pot_forest"
+  },
+  {
+   "id": "pot_kintsugi",
+   "type": "pot",
+   "name": "Kintsugi",
+   "price": 600,
+   "rarity": "legendary",
+   "default": false,
+   "svg": "shop/pot/kintsugi.svg",
+   "thumb": "shop/thumbs/pot_kintsugi.svg",
+   "colors": {
+    "body": "#3A3A36",
+    "rim": "#2E2E2A",
+    "pattern": "gold",
+    "geometry": {
+     "rim_h": 30,
+     "rim_over": 8,
+     "wall": 18,
+     "taper": 26,
+     "radius": 40,
+     "rim_above": 12
+    },
+    "inner_clip": "clip soil band + roots to the inner path (see STYLE.md)"
+   },
+   "store_key": "pot_kintsugi",
+   "tier": "legendary"
+  },
+  {
+   "id": "species_default",
+   "type": "species",
+   "name": "Classic tree",
+   "price": 0,
+   "rarity": "common",
+   "default": true,
+   "svg": "species/default_preview.svg",
+   "thumb": "shop/thumbs/species_default.svg",
+   "colors": {
+    "id": "default",
+    "leaf_color": "#2F6B3A",
+    "flower_color": "#F08A6C",
+    "bark_color": "#6B4A2F",
+    "leaf_shape": "species/default_leaf.svg",
+    "flower_shape": "species/default_flower.svg",
+    "bark": {
+     "lit": "#A87B55",
+     "base": "#6B4A2F",
+     "shadow": "#3B2A1E"
+    },
+    "leaf": {
+     "path": "species/default_leaf.svg",
+     "symbol": "classic",
+     "base": "#2F6B3A",
+     "tip": "#4E9A4F",
+     "midrib": "#E6F2D8",
+     "scale": 1.0
+    },
+    "flower": {
+     "path": "species/default_flower.svg",
+     "symbol": "classic5",
+     "petal": "#F08A6C",
+     "center": "#F4C95D",
+     "density": 1.0,
+     "scale": 1.0
+    },
+    "leafDensity": 1.0,
+    "blooms": true,
+    "bloom_color": "#F08A6C",
+    "bloom_stages": [
+     "shop/bloom/default_closed.svg",
+     "shop/bloom/default_cracking.svg",
+     "shop/bloom/default_half.svg",
+     "shop/bloom/default_open.svg"
+    ],
+    "mini": {
+     "leaf_scale_mult": 1.3,
+     "leaf_density_mult": 0.7
+    }
+   }
+  },
+  {
+   "id": "species_cherry_blossom",
+   "type": "species",
+   "name": "Cherry blossom",
+   "price": 600,
+   "rarity": "epic",
+   "svg": "species/cherry_blossom_preview.svg",
+   "thumb": "shop/thumbs/species_cherry_blossom.svg",
+   "colors": {
+    "id": "cherry_blossom",
+    "leaf_color": "#6FA552",
+    "flower_color": "#F6B3C6",
+    "bark_color": "#5E3229",
+    "leaf_shape": "species/cherry_blossom_leaf.svg",
+    "flower_shape": "species/cherry_blossom_flower.svg",
+    "bark": {
+     "lit": "#9A5A4A",
+     "base": "#5E3229",
+     "shadow": "#2E1712"
+    },
+    "leaf": {
+     "path": "species/cherry_blossom_leaf.svg",
+     "symbol": "small_oval",
+     "base": "#6FA552",
+     "tip": "#A9D37F",
+     "midrib": "#F2F8E6",
+     "scale": 0.7
+    },
+    "flower": {
+     "path": "species/cherry_blossom_flower.svg",
+     "symbol": "sakura5",
+     "petal": "#F6B3C6",
+     "center": "#C2466B",
+     "density": 2.4,
+     "scale": 1.05
+    },
+    "leafDensity": 0.55,
+    "blooms": true,
+    "bloom_color": "#F6B3C6",
+    "bloom_stages": [
+     "shop/bloom/cherry_blossom_closed.svg",
+     "shop/bloom/cherry_blossom_cracking.svg",
+     "shop/bloom/cherry_blossom_half.svg",
+     "shop/bloom/cherry_blossom_open.svg"
+    ],
+    "mini": {
+     "leaf_scale_mult": 1.3,
+     "leaf_density_mult": 0.7
+    }
+   }
+  },
+  {
+   "id": "species_pine",
+   "type": "species",
+   "name": "Pine",
+   "price": 600,
+   "rarity": "epic",
+   "thumb": "shop/thumbs/species_pine.png",
+   "colors": {
+    "id": "pine",
+    "leaf_color": "#7FA650",
+    "flower_color": "#C9D98A",
+    "bark_color": "#5A4632",
+    "leaf_shape": "narrow",
+    "blooms": false
+   }
+  },
+  {
+   "id": "species_maple",
+   "type": "species",
+   "name": "Maple",
+   "price": 300,
+   "rarity": "rare",
+   "svg": "species/maple_preview.svg",
+   "thumb": "shop/thumbs/species_maple.svg",
+   "colors": {
+    "id": "maple",
+    "leaf_color": "#C2401F",
+    "flower_color": "#E85A3A",
+    "bark_color": "#7A4B2C",
+    "leaf_shape": "species/maple_leaf.svg",
+    "flower_shape": "species/maple_flower.svg",
+    "bark": {
+     "lit": "#B07A4E",
+     "base": "#7A4B2C",
+     "shadow": "#3F2615"
+    },
+    "leaf": {
+     "path": "species/maple_leaf.svg",
+     "symbol": "palmate",
+     "base": "#C2401F",
+     "tip": "#F08A3C",
+     "midrib": "#FFE2C2",
+     "scale": 1.0
+    },
+    "flower": {
+     "path": "species/maple_flower.svg",
+     "symbol": "classic5",
+     "petal": "#E85A3A",
+     "center": "#F4C95D",
+     "density": 0.0,
+     "scale": 0.8
+    },
+    "leafDensity": 1.0,
+    "blooms": false,
+    "bloom_color": null,
+    "bloom_stages": [
+     "shop/bloom/maple_leaf_1.svg",
+     "shop/bloom/maple_leaf_2.svg",
+     "shop/bloom/maple_leaf_3.svg",
+     "shop/bloom/maple_leaf_4.svg"
+    ],
+    "mini": {
+     "leaf_scale_mult": 1.3,
+     "leaf_density_mult": 0.7
+    }
+   }
+  },
+  {
+   "id": "species_olive",
+   "type": "species",
+   "name": "Olive",
+   "price": 300,
+   "rarity": "rare",
+   "svg": "species/olive_preview.svg",
+   "thumb": "shop/thumbs/species_olive.svg",
+   "colors": {
+    "id": "olive",
+    "leaf_color": "#6F8466",
+    "flower_color": "#F3EBCB",
+    "bark_color": "#6E6658",
+    "leaf_shape": "species/olive_leaf.svg",
+    "flower_shape": "species/olive_flower.svg",
+    "bark": {
+     "lit": "#9C9282",
+     "base": "#6E6658",
+     "shadow": "#3A352D"
+    },
+    "leaf": {
+     "path": "species/olive_leaf.svg",
+     "symbol": "narrow",
+     "base": "#6F8466",
+     "tip": "#A9B8A0",
+     "midrib": "#EEF2E8",
+     "scale": 0.9
+    },
+    "flower": {
+     "path": "species/olive_flower.svg",
+     "symbol": "tiny4",
+     "petal": "#F3EBCB",
+     "center": "#C9B25A",
+     "density": 1.4,
+     "scale": 0.55
+    },
+    "leafDensity": 1.5,
+    "blooms": false,
+    "bloom_color": null,
+    "bloom_stages": [
+     "shop/bloom/olive_leaf_1.svg",
+     "shop/bloom/olive_leaf_2.svg",
+     "shop/bloom/olive_leaf_3.svg",
+     "shop/bloom/olive_leaf_4.svg"
+    ],
+    "mini": {
+     "leaf_scale_mult": 1.3,
+     "leaf_density_mult": 0.7
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,440 @@
+{% extends 'base.html' %}{% block title %}Zen{% endblock %}
+{% block head %}<script>document.documentElement.classList.add('is-zen')</script><link rel="stylesheet" href="{{ url_for('static', filename='css/pages_coder.css') }}?v=5">{% endblock %}
+{% block content %}
+<div class="zen" id="zen">
+  <div class="zen-side">
+    <h1 class="zen-head">Zen <span><i class="zen-dot">· </i>one quiet thing</span></h1>
+    <p class="zen-meta"><span><span class="ms">eco</span><span id="zPts">{{ '{:,}'.format(stats.points) }}</span> pts</span></p>
+    <div data-fbloom-host></div>
+    <p class="zen-stat" id="zStat"></p><span class="zen-finrow"><button class="btn zen-again" id="zAgain" type="button"><span class="ms">play_arrow</span>Another round</button><button class="btn btn-ghost zen-again" id="zBrk" type="button"><span class="ms">wb_twilight</span>5 min break</button></span>
+    <div class="zen-bloom" id="zBloom" data-flower="tulip"><div class="zfl-win"><img class="zfl-grow zfl-a on" id="zGrowImg" data-fl="tulip" src="{{ url_for('static', filename='zen/tulip/tulip_0001.webp') }}" alt="Your flower, growing with this session" width="540" height="720" decoding="async"><img class="zfl-grow zfl-back" id="zGrowImgB" alt="" width="540" height="720" decoding="async" aria-hidden="true"></div>
+      <div class="zfl-pick" role="radiogroup" aria-label="Your flower"><button type="button" class="zfl-b on" role="radio" aria-checked="true" data-fl="tulip">Yellow tulip</button></div></div>
+    <div class="zen-timer"><div class="zen-dial"><span class="zen-state" aria-hidden="true"></span><b class="zen-clock" id="zClock" role="timer" aria-live="off">25:00</b><span class="zen-of" id="zOf" aria-hidden="true">of 25:00</span></div><p class="zen-note" id="zNote">Just you, {{ st.name }}, and one thing to work on.</p></div>
+    <div class="zen-intent"><span class="ms" aria-hidden="true">edit</span><input class="zen-task" id="zTask" maxlength="80" placeholder="What are you working on?"><select class="zen-course" id="zCourse" aria-label="Class"><option value="">General</option>{% for c in courses %}<option value="{{ c.course_id }}" data-c="{{ c.color or '' }}">{{ c.course_name }}</option>{% endfor %}</select></div>
+    <div class="zen-row zen-len">
+      <div class="zseg" role="group" aria-label="Focus length"><span class="zseg-l">Focus</span>{% for m in [15,25,50] %}<button type="button" class="zlen{{ ' on' if m==25 }}" data-m="{{ m }}">{{ m }}<small>m</small></button>{% endfor %}<button type="button" class="zlen" data-m="custom" id="zCustomBtn" aria-haspopup="dialog" aria-controls="zSheet" title="Custom length (5–180 min)">Custom</button></div>
+      <div class="zseg zseg-brk" role="group" aria-label="Break length"><span class="zseg-l">Break</span><button type="button" class="zlen" data-m="5" data-break>5<small>m</small></button><button type="button" class="zlen" data-m="15" data-break>15<small>m</small></button></div>
+    </div>
+    <div class="zen-row zen-main">
+      <button class="btn zen-ic" id="zRain" type="button" aria-pressed="false" title="Rain sound"><span class="ms" aria-hidden="true">water_drop</span><span class="zic-l">Rain</span></button>
+      <button class="btn" id="zGo"><span class="ms">play_arrow</span>Begin</button>
+      <button class="btn" id="zPause" hidden aria-pressed="false"><span class="ms">pause</span><span class="zp-l">Pause</span></button>
+      <button class="btn zen-ic" id="zFull" type="button" aria-pressed="false" title="Full screen"><span class="ms" aria-hidden="true">fullscreen</span><span class="zf-l zic-l">Full screen</span></button>
+    </div>
+    <p class="small muted zen-foot">Finished blocks are logged as study time, so {{ st.name }} grows from them too. Stop logs the minutes so far.</p>
+    <details class="zen-more"><summary>Recent sessions and manual log</summary>
+      {% if recent %}<ul class="list">{% for s in recent %}<li><span class="dot" style="background:{{ (s.color|class_dot) or 'var(--sage)' }}"></span><div class="grow"><div class="title">{{ s.label }}</div><div class="small muted">{{ s.course_name or 'General' }} · {{ s.started_at|nice_stamp }}</div></div><span class="time-pill">{{ s.minutes|int }}m</span></li>{% endfor %}</ul>{% else %}<p class="small muted">No sessions yet. Your first block tends the tree.</p>{% endif %}
+      <form method="POST" action="{{ url_for('study_bp.log_session') }}" class="zen-row"><input type="number" name="minutes" min="1" max="600" placeholder="Minutes" required style="width:110px;min-height:44px"><input type="hidden" name="label" value="Manual entry"><button class="btn btn-ghost">Log time</button></form>
+    </details>
+  </div>
+  <div class="zsheet-scrim" id="zScrim" hidden></div>
+  <div class="zsheet" id="zSheet" role="dialog" aria-modal="true" aria-labelledby="zSheetT" hidden>
+    <div class="zsheet-grab" aria-hidden="true"></div>
+    <h2 id="zSheetT">Custom focus length</h2>
+    <p class="zsheet-sub">Pick 5 to 180 minutes.</p>
+    <div class="zsheet-row"><button type="button" class="zsheet-step" data-d="-5" aria-label="5 minutes less">−</button><label class="zsheet-in"><input id="zCustom" type="number" min="5" max="180" step="1" value="30" inputmode="numeric" aria-label="Custom focus length in minutes (5 to 180)"><span>min</span></label><button type="button" class="zsheet-step" data-d="5" aria-label="5 minutes more">+</button></div>
+    <div class="zsheet-acts"><button type="button" class="btn btn-ghost" id="zSheetX">Cancel</button><button type="button" class="btn" id="zSheetOk">Set length</button></div>
+  </div>
+  <button class="btn zen-exit" id="zExit" type="button" aria-label="Exit full screen"><span class="ms">close</span>Exit</button>
+  <div class="zen-hint" id="zHint" role="note" hidden><span>For true full screen, tap Share then Add to Home Screen.</span><button type="button" id="zHintX" aria-label="Dismiss hint"><span class="ms">close</span></button></div>
+</div>
+<style>
+.zen{display:grid;grid-template-columns:minmax(220px,1fr) 1.2fr;gap:48px;align-items:center;min-height:70vh;max-width:980px;margin:0 auto;padding:24px}
+.zen:fullscreen{background:var(--bg);max-width:none;padding:6vw}
+.zen-sill{max-width:340px;justify-self:center;width:100%}
+.zen-note{font-size:17px;color:var(--muted);margin:0 0 6px}
+.zen-clock{display:block;font-weight:300;font-size:clamp(80px,12vw,140px);line-height:1;letter-spacing:-3px;font-variant-numeric:tabular-nums}
+.zen-task{border:0;border-bottom:1px solid var(--line);background:none;border-radius:0;font-size:18px;padding:8px 0;margin:14px 0 18px;width:100%;max-width:380px}
+.zen-task:focus{outline:none;border-bottom-color:var(--green)}
+.zen-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.zlen.on{background:var(--sage-soft);border-color:var(--green);color:var(--green-ink)}
+#zPause[hidden]{display:none!important}
+.zen-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.zen-course{min-height:44px;max-width:380px;width:100%;margin:-6px 0 16px}.zen-row .chip{min-height:44px}.zen-more{margin-top:18px;max-width:520px}.zen-more summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--muted)}.zen.running .zen-more,.zen.fin .zen-more,.zen.fin .zen-chips,html.zen-full .zen-more,.zen.running .zen-course{display:none}.zen.brk .zen-clock{color:var(--muted)}.zen-finrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.zen-custom{display:inline-flex;align-items:center;gap:6px}
+.zen-custom input{width:68px;min-height:36px;padding:4px 8px;font-size:16px}
+.zen.running .zlen,.zen.running .zen-task,.zen.running .zen-custom input{opacity:.4;pointer-events:none}
+.zen-side{grid-column:1/-1}/* v30: the bloom is the only plant on Zen */
+.zen .fbloom{margin:56px auto 40px}.zen .fb2 svg{transform-origin:50% 100%;transition:transform 1.2s cubic-bezier(.34,1.3,.64,1)}.zen .fb2.open svg{transform:none}
+@media(prefers-reduced-motion:reduce){.zen .fb2 svg{transition:opacity .6s}}
+.zen-stat,.zen-again{display:none}.zen.fin .zen-clock,.zen.fin .zen-task,.zen.fin .zen-row,.zen.fin .zen-foot{display:none}.zen.fin .zen-side{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:calc(100dvh - 220px)}.zen.fin .zen-stat{display:block;margin:0 0 16px;color:var(--muted,#7a7066);font-size:15px;animation:zfin .6s .4s both}.zen.fin .zen-again{display:inline-flex;animation:zfin .6s .6s both}@keyframes zfin{from{transform:translateY(6px)}to{transform:none}}@media(prefers-reduced-motion:reduce){.zen.fin .zen-stat,.zen.fin .zen-again{animation:none}}/* v39 finish screen: line, flower, stat, one button */
+.zen .fb2::after{content:'';position:absolute;left:calc(43.75% - 60px);bottom:-4px;width:120px;height:40px;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%' cy='35%' r='65%'%3E%3Cstop offset='0' stop-color='%23b08d68'/%3E%3Cstop offset='.7' stop-color='%238f6e4f'/%3E%3Cstop offset='1' stop-color='%238f6e4f' stop-opacity='0'/%3E%3C/radialGradient%3E%3Cfilter id='b' x='-10%' y='-30%' width='120%' height='160%'%3E%3CfeGaussianBlur stdDeviation='.8'/%3E%3C/filter%3E%3C/defs%3E%3Cg fill='none' stroke='%237a5a40' stroke-width='2.2' stroke-linecap='round' opacity='.85'%3E%3Cpath d='M58 22c-3 6-9 9-17 12'/%3E%3Cpath d='M62 22c3 6 8 9 16 11'/%3E%3Cpath d='M60 24c0 5-1 9-2 13'/%3E%3Cpath d='M45 31c-4 1-6 3-8 5'/%3E%3Cpath d='M74 32c4 1 6 2 8 5'/%3E%3C/g%3E%3Cellipse cx='60' cy='18' rx='50' ry='13' fill='url(%23g)' filter='url(%23b)'/%3E%3Cpath d='M38 13c8-3 16-4 26-4' stroke='%23c4a580' stroke-width='1.4' fill='none' stroke-linecap='round' opacity='.55'/%3E%3C/svg%3E") no-repeat center/contain}html[data-theme=dark] .zen .fb2::after,.dark .zen .fb2::after{filter:brightness(.8)}/* v40 softer soil, stem from centre */
+.zen-exit{display:none}
+.zen-hint{position:fixed;left:50%;transform:translateX(-50%);top:calc(68px + env(safe-area-inset-top));z-index:1001;display:flex;gap:6px;align-items:center;max-width:min(92vw,420px);padding:8px 8px 8px 14px;border-radius:12px;background:var(--card,#fff);color:var(--ink,inherit);border:1px solid var(--line);box-shadow:0 6px 20px rgba(0,0,0,.15);font-size:13px}
+.zen-hint[hidden]{display:none}
+.zen-hint button{min-width:44px;min-height:44px;border:0;background:none;color:inherit;cursor:pointer}
+/* pseudo full screen (iPhone Safari has no Fullscreen API) */
+html.zen-full,html.zen-full body{overflow:hidden;height:100%}
+html.zen-full .topnav,html.zen-full .tabbar{display:none!important}
+html.zen-full .zen{position:fixed;inset:0;z-index:1000;height:100vh;height:100dvh;min-height:0;max-width:none;margin:0;background:var(--bg);overflow:auto;align-content:center;
+  padding:calc(24px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left))}
+html.zen-full .zen-foot{display:none}
+html.zen-full .zen-exit{display:inline-flex;position:fixed;z-index:1002;top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));min-height:44px;min-width:44px}
+@media(max-width:760px){.zen{grid-template-columns:1fr;gap:20px}.zen-sill{max-width:200px}
+  html.zen-full .zen{gap:12px;padding-top:calc(68px + env(safe-area-inset-top))}html.zen-full .zen-sill{max-width:160px}}
+
+/* Voxel polish v1 (ui_spec_final): hero, 64px timer, End + Pause 2:1 */
+.zen{--z-sky1:var(--sky1,#ecfcec);--z-sky2:var(--sky2,#ddf4e0);--z-g1:var(--g1,#a9c97a);--z-g2:var(--g2,#86ad5c);--z-pri:var(--pri,var(--green));--z-on:var(--on-green);--z-sand:var(--surface-2);--z-ink:var(--text);--z-ink2:var(--muted);font-family:Nunito,var(--font);display:block;max-width:560px;padding:12px 20px 24px;min-height:0}
+@media(max-width:760px){.zen{padding:8px 0 0}}
+.zen-head{font:600 20px/26px Fraunces,var(--display);text-align:center;margin:0 0 12px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--z-ink)}
+.zen-head span{font-family:Nunito,var(--font);font-weight:700;font-size:15px;color:var(--z-ink2)}
+.zen-hero{position:relative;height:330px;margin:0 -20px 16px;background:linear-gradient(var(--z-sky1),var(--z-sky2));overflow:hidden}
+@media(min-width:761px){.zen-hero{margin:0 0 16px;border-radius:22px;border:1px solid var(--line)}}
+.zen-ground{position:absolute;left:-8%;right:-8%;bottom:0;height:74px;border-radius:50% 50% 0 0/26px 26px 0 0;background:linear-gradient(var(--z-g1),var(--z-g2))}
+.zen-flower{position:absolute;left:50%;bottom:34px;height:250px;aspect-ratio:410/455;transform:translateX(-50%);transform-origin:50% 100%;animation:zsway 5s ease-in-out infinite}
+html[data-theme=dark] .zen-flower img{filter:brightness(.8)}
+.zen-flower img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .22s cubic-bezier(.22,1,.36,1)}.zen-flower img.on{opacity:1}
+@keyframes zsway{0%,100%{transform:translateX(-50%) rotate(-1.2deg)}50%{transform:translateX(-50%) rotate(1.2deg)}}
+.zen.paused .zen-flower{animation-duration:10s}
+.zen .fbloom,.zen [data-fbloom-host]{display:none!important}
+.zen-chips,.zen-note,.zen-foot,.zen-stat{text-align:center;justify-content:center}
+.zen-note{font-size:15px}
+.zen .zen-clock{font:800 64px/1 Nunito,var(--font);letter-spacing:0;font-variant-numeric:tabular-nums;text-align:center;color:var(--z-ink);margin:4px 0 8px}
+.zen-task,.zen-course{margin-left:auto;margin-right:auto;display:block;text-align:center}
+.zen-row{justify-content:center}
+.zen .chip{border-radius:999px}
+.zen .btn{border-radius:16px;font-weight:800}
+.zen-main{flex-wrap:nowrap}
+.zen-main .btn{height:52px;font-size:16px;border:0;box-shadow:none}
+#zGo{flex:1;background:var(--z-pri);color:var(--z-on)}
+.zen.running #zGo,.zen.paused #zGo{background:var(--z-sand);color:var(--z-ink);flex:1}
+#zPause{flex:2;background:var(--z-pri);color:var(--z-on)}
+#zPause.xf .zp-l,#zPause.xf .ms{animation:zxf .16s cubic-bezier(.22,1,.36,1)}
+@keyframes zxf{from{opacity:0}to{opacity:1}}
+.zen-extra .btn{min-height:44px;background:var(--z-sand);color:var(--z-ink);border:0}
+.zen .btn,.zen .chip{transition:transform .09s}
+.zen .btn:active,.zen .chip:active{transform:scale(.97)}
+@media(prefers-reduced-motion:reduce){.zen-flower{animation:none}.zen-flower img{transition:none}.zen .btn,.zen .chip{transition:none}.zen .btn:active,.zen .chip:active{transform:none}}
+html.zen-full .zen-hero{height:min(330px,40vh)}html.zen-full .zen-flower{height:min(250px,30vh)}
+/* stage4: fit controls above nav on short phones (no nav padding here; clearance lives on .frame) */
+@media(max-width:760px) and (max-height:960px){html:not(.zen-full) .zen-hero{height:206px;margin-bottom:10px}html:not(.zen-full) .zen-ground{height:52px}html:not(.zen-full) .zen-flower{height:166px;bottom:24px}
+html:not(.zen-full) .zen-head{margin-bottom:8px}html:not(.zen-full) .zen-chips{margin-bottom:6px}html:not(.zen-full) .zen .zen-clock{margin:2px 0 4px}html:not(.zen-full) .zen-task{margin:6px auto 8px;padding:6px 0}html:not(.zen-full) .zen-course{margin-bottom:8px}html:not(.zen-full) .zen-row{margin-bottom:8px}}
+/* v5 Mobbin polish: one timer card, grouped segments, icon side actions, state eyebrow */
+.zen{--z-card:var(--surface);--z-line:var(--line);--z-seg:var(--surface-2)}
+.zen button,.zen input,.zen select{font-family:inherit}
+.zen-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.zen-head{margin-bottom:10px}
+.zen-hero{margin-bottom:0}
+.zen-meta{display:flex;justify-content:center;align-items:center;gap:10px;margin:12px 0 2px;font:700 13px/18px Nunito,var(--font);color:var(--z-ink2)}
+.zen-meta>span{display:inline-flex;align-items:center;gap:4px}.zen-meta .ms{font-size:16px;color:var(--terra)}.zen-meta>span+i+span .ms{color:var(--green)}
+.zen-meta i{width:3px;height:3px;border-radius:50%;background:var(--faint,var(--z-ink2))}
+.zen-timer{text-align:center;margin:6px 0 12px}
+.zen-state{display:block;font:800 11px/16px Nunito,var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--green-ink)}
+.zen-state::before{content:'Ready to focus'}.zen.brk .zen-state::before{content:'Break'}.zen.running .zen-state::before{content:'Focusing'}.zen.running.brk .zen-state::before{content:'On a break'}.zen.paused .zen-state::before{content:'Paused'}
+.zen.paused .zen-state,.zen.brk .zen-state{color:var(--z-ink2)}
+.zen .zen-clock{font:800 72px/1 Nunito,var(--font);letter-spacing:-.02em;margin:2px 0 4px;transition:opacity .22s var(--ease-out,ease-out)}
+.zen.paused .zen-clock{opacity:.5}
+.zen .zen-note{font-size:14px;line-height:20px;margin:0;color:var(--z-ink2)}
+.zen-intent{display:flex;align-items:center;gap:8px;max-width:420px;margin:0 auto 12px;padding:0 6px 0 14px;min-height:48px;background:var(--z-card);border:1px solid var(--z-line);border-radius:16px}
+.zen-intent:focus-within{border-color:var(--green)}
+.zen-intent>.ms{font-size:18px;color:var(--z-ink2)}
+.zen .zen-intent .zen-task{flex:1;min-width:0;margin:0;padding:0;border:0;background:none;text-align:left;font-size:16px;color:var(--z-ink);max-width:none;display:block}
+.zen .zen-intent .zen-course{flex:0 1 auto;width:auto;max-width:42%;min-height:36px;margin:0;padding:0 26px 0 12px;border:0;border-radius:10px;background-color:var(--z-seg);color:var(--z-ink);font-size:13px;font-weight:700;text-align:left}
+.zen-len{flex-direction:column;gap:8px;margin-bottom:12px}
+.zseg{display:flex;align-items:center;gap:2px;padding:3px;background:var(--z-seg);border-radius:14px;width:100%;max-width:420px}
+.zseg-l{flex:0 0 52px;padding-left:9px;font:800 11px/1 Nunito,var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--z-ink2)}
+.zseg .zlen{flex:1;min-width:0;min-height:40px;padding:0 6px;border:1px solid transparent;border-radius:11px;background:none;color:var(--z-ink);font:700 15px/1 Nunito,var(--font);cursor:pointer;font-variant-numeric:tabular-nums;transition:background-color .18s,color .18s,transform .09s}
+.zseg .zlen small{font-size:12px;margin-left:1px;color:var(--z-ink2);font-weight:700}
+.zseg .zlen.on{background:var(--z-card);border-color:var(--z-line);color:var(--green-ink)}.zseg .zlen.on small{color:inherit}
+.zseg .zlen:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+.zseg .zen-custom{flex:1.6;display:flex;gap:2px;align-items:center}.zseg .zen-custom .zlen{flex:1}
+.zen .zseg .zen-custom input{width:46px;min-height:32px;padding:0 4px;margin-right:3px;border:1px solid var(--z-line);border-radius:9px;background:var(--z-card);color:var(--z-ink);text-align:center;font-size:15px;font-weight:700;-moz-appearance:textfield}
+.zseg .zen-custom input::-webkit-inner-spin-button{-webkit-appearance:none}
+.zen.running .zseg{opacity:.45}.zen.running .zlen{opacity:1}
+.zen-main{gap:10px;max-width:420px;margin:0 auto 12px}
+.zen-main .zen-ic{flex:0 0 52px;width:52px;padding:0;justify-content:center;border-radius:50%;background:var(--z-seg);color:var(--z-ink)}
+.zen-main .zen-ic[aria-pressed=true]{background:var(--sage-soft);color:var(--green-ink)}
+.zen-main #zGo,.zen-main #zPause{border-radius:26px}
+.zen-extra{display:none}
+.zen-foot{max-width:420px;margin:4px auto 0}
+html.zen-full .zen-intent,html.zen-full .zen-meta{display:none}
+html.zen-full .zen .zen-clock{font-size:clamp(72px,14vh,120px)}
+.zen.fin .zen-timer,.zen.fin .zen-intent,.zen.fin .zen-meta{display:none}
+@media(max-width:760px) and (max-height:960px){html:not(.zen-full) .zen-meta{margin-top:8px}html:not(.zen-full) .zen-timer{margin:2px 0 8px}html:not(.zen-full) .zen .zen-clock{font-size:64px;margin:0 0 2px}html:not(.zen-full) .zen-intent{margin-bottom:8px}html:not(.zen-full) .zen-len{gap:6px;margin-bottom:10px}}
+@media(max-width:760px){.zen-intent,.zseg,.zen-main{max-width:none}.zen-timer,.zen-meta{padding:0 4px}}
+@media(prefers-reduced-motion:reduce){.zseg .zlen,.zen .zen-clock{transition:none}}
+.zen .zen-intent input.zen-task,.zen .zen-intent input.zen-task:focus{border:0;box-shadow:none;outline:none;background:transparent;min-height:44px;border-radius:0}
+.zen .zen-intent select.zen-course{border:0;box-shadow:none}
+.zseg-brk .zlen{flex:1}
+.zen-main .zen-ic .ms{font-size:22px}
+.zen .zen-intent input.zen-task,.zen .zen-intent input.zen-task:focus{border:0!important;box-shadow:none!important;background:transparent!important;border-radius:0!important}
+.zen .zen-intent select.zen-course{border:0!important;background-color:var(--z-seg)!important;border-radius:10px!important;color:var(--z-ink)!important}
+.zen .zseg .zen-custom input{background:var(--z-card)!important;border-color:var(--z-line)!important;border-radius:9px!important}
+/* pixel1 (Leader 7-9): 28vh stage, class-colour bloom, one-row chips, Custom sheet, labelled side buttons */
+html:not(.zen-full) .zen .zen-hero{height:28vh;height:28dvh;min-height:150px}
+html:not(.zen-full) .zen .zen-ground{height:22%}
+html:not(.zen-full) .zen .zen-flower{height:calc(100% - 26px);bottom:14px}
+.zen-len{flex-direction:row;flex-wrap:nowrap;align-items:stretch;gap:6px;max-width:420px;margin:18px auto 12px;width:100%}
+@media(max-width:760px){.zen-len{max-width:none}}
+.zen-len .zseg{position:relative;width:auto;max-width:none;flex:4.2 1 0;min-width:0}
+.zen-len .zseg-brk{flex:2 1 0}
+.zen-len .zseg-l{position:absolute;left:10px;top:-15px;padding:0;font-size:10px;line-height:12px}
+.zen-len .zseg .zlen{padding:0 2px;font-size:14px}
+.zen-len #zCustomBtn{flex:1.5;font-size:13px}
+.zen-main .zen-ic{flex:0 0 auto;width:auto;padding:0 14px;gap:6px;border-radius:26px}
+.zen-main .zen-ic .ms{font-size:20px}
+.zic-l{font-size:13px;font-weight:800;white-space:nowrap}
+.zsheet-scrim{position:fixed;inset:0;z-index:1100;background:rgba(20,24,20,.38)}
+.zsheet{position:fixed;left:0;right:0;bottom:0;z-index:1101;max-width:520px;margin:0 auto;background:var(--surface,#fff);color:var(--text);border-radius:22px 22px 0 0;padding:10px 20px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.18);transform:translateY(0);transition:transform .32s cubic-bezier(.22,1,.36,1)}
+.zsheet[hidden],.zsheet-scrim[hidden]{display:none}
+.zsheet-grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.zsheet h2{font:800 18px/24px Nunito,var(--font);margin:0;text-align:center}
+.zsheet-sub{margin:2px 0 14px;text-align:center;color:var(--muted);font-size:14px}
+.zsheet-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px}
+.zsheet-step{width:52px;height:52px;border-radius:50%;border:0;background:var(--surface-2);color:var(--text);font:800 24px/1 Nunito,var(--font);cursor:pointer}
+.zsheet-in{display:flex;align-items:baseline;gap:6px;padding:6px 14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.zen .zsheet-in input,.zsheet-in input{width:84px;border:0!important;background:none!important;box-shadow:none!important;font:800 36px/1.1 Nunito,var(--font);text-align:center;color:var(--text);-moz-appearance:textfield;padding:0}
+.zsheet-in input::-webkit-inner-spin-button{-webkit-appearance:none}
+.zsheet-in span{color:var(--muted);font-weight:700}
+.zsheet-acts{display:flex;gap:10px}.zsheet-acts .btn{flex:1;height:48px;border-radius:16px;justify-content:center}
+#zSheetOk{background:var(--z-pri,var(--green));color:var(--on-green);border:0}
+
+/* ================= Clay (Design clay_shell 5_zen): one glass card over the tree scene; ring = time left ================= */
+html.clay.is-zen body{background:linear-gradient(180deg,rgba(217,198,221,.25),rgba(246,225,214,.7)),url('/static/garden/scenes/tree-scene.webp') center 30%/cover no-repeat fixed,var(--c-sky-mid)}
+html.clay.is-zen[data-theme=dark] body{background:linear-gradient(180deg,rgba(26,20,36,.62),rgba(30,24,38,.78)),url('/static/garden/scenes/tree-scene.webp') center 30%/cover no-repeat fixed,#2A2430}
+@media (min-width:901px){html.clay.is-zen body{background-position:0 0,calc(50% + var(--side-w)/2) 30%,0 0}}
+html.clay.is-zen .content{max-width:none;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:32px 24px!important}
+html.clay .zen{width:min(480px,100%);max-width:none;margin:0 auto;padding:30px 34px 22px;border-radius:34px;background:var(--c-glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--c-glass-line);box-shadow:var(--sh-soft);color:var(--c-ink);--z-card:var(--c-paper);--z-seg:var(--c-paper-2);--z-line:var(--c-edge);--z-pri:var(--c-moss);--z-on:var(--c-moss-ink);--z-ink:var(--c-ink);--z-ink2:var(--c-ink-soft)}
+html.clay .zen .zen-hero{display:none}
+html.clay .zen-head{font:600 19px/1.3 var(--f-serif);white-space:normal;margin:0 0 4px}
+html.clay .zen-head .zen-dot{display:none}
+html.clay .zen-head span{display:block;font:600 14px/1.4 var(--f-sans);color:var(--c-ink-soft)}
+html.clay .zen-meta{margin:4px 0 0}
+html.clay .zen-timer{margin:10px 0 14px}
+html.clay .zen-dial{width:230px;height:230px;margin:10px auto 12px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(closest-side,var(--c-paper) calc(100% - 15px),transparent calc(100% - 14px)),conic-gradient(var(--c-moss) calc(var(--zp,1) * 360deg),var(--c-paper-2) 0);box-shadow:var(--sh-clay)}
+html.clay .zen.brk .zen-dial{background:radial-gradient(closest-side,var(--c-paper) calc(100% - 15px),transparent calc(100% - 14px)),conic-gradient(var(--c-ripe) calc(var(--zp,1) * 360deg),var(--c-paper-2) 0)}
+html.clay .zen .zen-state{color:var(--c-ink-soft);font-size:10.5px}
+html.clay .zen .zen-clock,html.clay.zen-full .zen .zen-clock{font:600 46px/1.1 var(--f-serif);letter-spacing:0;margin:4px 0 2px;color:var(--c-ink)}
+.zen-of{display:none}.zen-dot{font-style:normal}
+html.clay .zen-of{display:block;font:600 13px/1.2 var(--f-sans);color:var(--c-ink-soft)}
+html.clay .zen .zen-note{color:var(--c-ink-soft)}
+html.clay .zen-intent{border-radius:var(--c-r-pill);background:var(--c-paper);border-color:var(--c-edge)}
+html.clay .zen .zen-intent select.zen-course{border-radius:var(--c-r-pill)!important}
+/* focus / break lengths as chips; on = pink */
+html.clay .zen-len{margin:22px auto 14px}
+html.clay .zseg{background:none;padding:0;gap:5px}
+html.clay .zseg .zlen{min-height:32px;border:1px solid var(--c-edge);border-radius:var(--c-r-pill);background:var(--c-paper);color:var(--c-ink);font:700 13px/1 var(--f-sans)}
+html.clay .zseg .zlen.on{background:var(--c-pink);border-color:transparent;color:var(--c-pink-ink)}
+html.clay .zen-len .zseg-l{color:var(--c-ink-soft)}
+/* controls: round ghost side buttons, moss pill in the middle */
+html.clay .zen-main{gap:10px;justify-content:center}
+html.clay .zen-main .btn{height:48px;box-shadow:var(--sh-soft)!important}
+html.clay .zen-main #zGo,html.clay .zen-main #zPause{flex:0 1 auto;min-width:130px;padding:0 26px;border-radius:var(--c-r-pill)}
+html.clay .zen-main .zen-ic{width:52px;flex:0 0 52px;padding:0;border-radius:50%;background:var(--c-paper);color:var(--c-ink);border:1px solid var(--c-edge)}
+html.clay .zen-main .zen-ic[aria-pressed=true]{background:var(--c-moss-soft);color:var(--c-up-ink)}
+html.clay .zen-main .zic-l{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+html.clay .zen.running #zGo,html.clay .zen.paused #zGo{background:var(--c-paper);color:var(--c-ink);border:1px solid var(--c-edge)}
+html.clay .zen-foot{font-size:12.5px}
+html.clay .zen-more summary{justify-content:center}
+html.clay.zen-full .zen{width:auto;border-radius:0;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;
+  background:linear-gradient(180deg,rgba(217,198,221,.45),rgba(246,225,214,.8)),url('/static/garden/scenes/tree-scene.webp') center 30%/cover no-repeat,var(--c-sky-mid)}
+html.clay[data-theme=dark].zen-full .zen{background:linear-gradient(180deg,rgba(26,20,36,.7),rgba(30,24,38,.85)),url('/static/garden/scenes/tree-scene.webp') center 30%/cover no-repeat,#2A2430}
+@media (max-width:760px){html.clay.is-zen .content{padding:16px 12px!important;align-items:start}html.clay .zen{padding:24px 18px 18px}html.clay .zen-dial{width:210px;height:210px}}
+/* Zen flower hero: dual imgs for ~300ms cross-fade; soil contact in art */
+.zen-bloom{text-align:center;margin:0;width:100%;display:flex;flex-direction:column;align-items:center}
+.zfl-win{position:relative;width:min(280px,100%);height:280px;margin:0 auto;overflow:hidden;display:grid;place-items:center}
+.zfl-grow{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;display:block;opacity:0;transition:opacity .3s ease;filter:drop-shadow(0 10px 14px rgba(0,0,0,.22));pointer-events:none}
+.zfl-grow.on{opacity:1}
+.zfl-pick{display:inline-flex;gap:8px;margin-top:6px;justify-content:center}
+.zfl-pick .zfl-b{min-height:32px;padding:0 14px;border:1px solid var(--c-edge,var(--line));border-radius:999px;background:var(--c-paper,var(--card));color:var(--c-ink,inherit);font:700 12.5px/1 var(--f-sans,inherit);cursor:pointer;transition:background .2s}
+.zfl-pick .zfl-b.on{background:var(--c-pink,#F3D3DD);border-color:transparent;color:var(--c-pink-ink,#5a2a3a)}
+@media (prefers-reduced-motion:reduce){.zfl-pick .zfl-b{transition:none}.zfl-grow{transition:none}}
+
+/* Hide drawer/side pull on Zen (and logged-out auth pages via shell.css) */
+html.is-zen .drawer-tab,html.is-zen .side-peek,html.is-zen .side-pull,html.is-zen .drawer-pull,html.is-zen [data-side-pull]{display:none!important}
+
+/* ---- Design zen_layout_390 (8918c39): opaque page, 16px gutters, flower 280 / ring 176 ---- */
+@media (max-width:700px){
+  html.clay.is-zen,html.clay.is-zen body{background:var(--c-bg)!important;background-image:none!important} /* no Home scene at edges */
+  html.clay.is-zen .topnav-in{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+  html.clay.is-zen .tabbar{left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right))}
+  html.clay.is-zen .content{padding:0!important;min-height:0;display:block;place-items:unset;max-width:none}
+  html.clay.is-zen .frame{padding-bottom:calc(64px + 12px + 24px + env(safe-area-inset-bottom,0px))!important} /* tab bar + its 12px offset + 24px + safe area */
+  html.clay.is-zen .zen{
+    width:auto;max-width:none;margin:4px 16px 0;padding:12px 16px 16px;border-radius:var(--c-r-lg,26px);
+    background:var(--c-paper);border:1px solid var(--c-edge);box-shadow:var(--sh-soft);
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+    display:flex;flex-direction:column;align-items:center;
+    box-sizing:border-box; /* no max-height/overflow clip: page scrolls so every control is reachable */
+  }
+  html.clay.is-zen .zen-side{width:100%;display:flex;flex-direction:column;align-items:center;min-width:0}
+  html.clay.is-zen .zen-head,html.clay.is-zen .zen-meta{display:none} /* mock: flower is the hero; pts stay via toast/elsewhere */
+  html.clay.is-zen .zen-bloom{order:0;width:100%}
+  html.clay.is-zen .zfl-win{width:100%;height:280px;max-height:42vh}
+  html.clay.is-zen .zfl-grow{object-position:center bottom}
+  html.clay.is-zen .zen-timer{margin:8px 0 0;width:100%}
+  html.clay.is-zen .zen-dial{width:176px;height:176px;margin:12px auto 8px;
+    background:radial-gradient(closest-side,var(--c-paper) calc(100% - 12px),transparent calc(100% - 11px)),conic-gradient(var(--c-moss) calc(var(--zp,1) * 360deg),var(--c-paper-2) 0)}
+  html.clay.is-zen .zen .zen-clock{font:500 40px/1.05 var(--f-serif);margin:2px 0}
+  html.clay.is-zen .zen-intent{margin-top:14px;width:100%;max-width:none}
+  html.clay.is-zen .zen-len{margin:10px auto 0;width:100%;max-width:none;gap:8px}
+  /* KEEP Focus / Break labels (10px) so 5m/15m chips are not duplicates */
+  html.clay.is-zen .zen-len .zseg-l{position:absolute;left:8px;top:-12px;padding:0;font-size:10px;line-height:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--c-ink-soft)}
+  html.clay.is-zen .zen-len .zseg{padding-top:2px}
+  html.clay.is-zen .zen-main{margin:12px auto 0;width:100%;max-width:none;gap:8px}
+  html.clay.is-zen .zen-main .btn{height:48px}
+  html.clay.is-zen .zen-foot,html.clay.is-zen .zen-more{display:none} /* fold: Pause above the fold, no scroll */
+  html.clay.is-zen .zen-finrow{order:2}
+  /* round 3: Begin above the fold at 390x664 without scroll; flower 200, ring 150, controls under ring */
+  html.clay.is-zen .zen{overflow:visible;padding-top:8px;padding-bottom:12px}
+  html.clay.is-zen .zen-timer{display:contents}
+  html.clay.is-zen .zen-bloom{order:1}
+  html.clay.is-zen .zen-dial{order:2}
+  html.clay.is-zen .zen-len{order:3}
+  html.clay.is-zen .zen-main{order:4}
+  html.clay.is-zen .zen-note{order:5;margin-top:10px}
+  html.clay.is-zen .zen-intent{order:6}
+  html.clay.is-zen .zen-stat{order:7}
+  html.clay.is-zen .zfl-win{width:200px;height:200px;max-height:none}
+  html.clay.is-zen .zfl-pick{margin-top:4px}
+  html.clay.is-zen .zen-dial{width:150px;height:150px;margin:8px auto 0}
+  html.clay.is-zen .zen .zen-clock{font-size:34px}
+  html.clay.is-zen .zen-state{font-size:9px;letter-spacing:.1em}
+  html.clay.is-zen .zen-len{margin-top:22px}
+  html.clay.is-zen .zen-main{margin-top:10px}
+}
+@media (min-width:701px){
+  html.clay.is-zen .zfl-win{width:min(320px,100%);height:min(320px,42vh)}
+  html.clay.is-zen .zen{width:min(480px,100%)}
+}
+  /* merge: solid band behind the floating tab bar so the intent line / tagline never peek through at 390x664; Begin untouched */
+  @media(max-width:760px){html.is-zen .zen::after{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(80px + env(safe-area-inset-bottom));z-index:59;pointer-events:none;
+    background:linear-gradient(to bottom,transparent 0,var(--bg) 6px,var(--bg) 100%)}}
+
+/* zen-fs-fix: full screen = stacked column in the safe area; flower 160, ring 220, End+Pause only */
+html.zen-full .zen,html.clay.zen-full .zen,html.clay.is-zen.zen-full .zen{position:fixed;inset:0;z-index:1000;margin:0;width:auto;max-width:none;height:100dvh;border:0;border-radius:0;box-shadow:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;overflow-y:auto;box-sizing:border-box;
+  padding:calc(60px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+  background:#2A2530;isolation:isolate}
+html.zen-full .zen::before{content:"";position:fixed;inset:-24px;z-index:-1;pointer-events:none;background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('/static/garden/scenes/tree-scene.webp') center 30%/cover no-repeat,#2A2530;filter:blur(12px)}
+html.zen-full .zen::after{display:none!important}
+html.zen-full .zen-side{width:100%;max-width:358px;display:flex;flex-direction:column;align-items:center;min-width:0}
+html.zen-full .zen-head,html.zen-full .zen-meta,html.zen-full .zen-intent,html.zen-full .zen-foot,html.zen-full .zen-more,html.zen-full [data-fbloom-host]{display:none!important}
+html.zen-full .zen-timer{display:contents}
+html.zen-full .zen-bloom{order:1;width:100%}
+html.zen-full .zfl-win,html.clay.is-zen.zen-full .zfl-win{width:150px;height:150px;max-height:none;border-radius:20px;background:rgba(255,255,255,.06)}
+html.zen-full .zfl-grow{object-position:center bottom}
+html.zen-full .zfl-pick{margin-top:10px;padding:6px;border-radius:999px;background:var(--c-paper,#fff);border:1px solid var(--c-edge,rgba(0,0,0,.1))}
+html.zen-full .zen-dial,html.clay.is-zen.zen-full .zen-dial{order:2;width:210px;height:210px;margin:10px auto 0;flex:none}
+html.zen-full .zen .zen-clock,html.clay.is-zen.zen-full .zen .zen-clock{font-size:44px}
+html.zen-full .zen-len{order:3;margin:22px 0 0;width:100%;padding:16px 12px 10px;border-radius:20px;background:var(--c-paper,#fff);border:1px solid var(--c-edge,rgba(0,0,0,.1));box-sizing:border-box;justify-content:center}
+html.zen-full .zen-len .zseg-l{position:static!important;display:block;width:100%;margin:0 0 4px}
+html.zen-full .zen-len{flex-direction:column;gap:6px;margin-top:12px;padding:6px 12px}html.zen-full .zen-len .zseg{width:100%;flex-wrap:nowrap;justify-content:center;align-items:center;gap:6px}html.zen-full .zen-len .zseg-l{display:inline-block!important;width:52px!important;margin:0!important;flex:none}
+html.zen-full .zen-main,html.clay.is-zen.zen-full .zen-main{order:4;width:100%;margin:12px 0 0;padding:0 16px;box-sizing:border-box;flex-wrap:nowrap;justify-content:center;gap:12px}
+html.zen-full .zen-main .zen-ic{display:none!important}
+html.zen-full .zen-main #zGo,html.zen-full .zen-main #zPause{flex:1 1 0;min-width:0;max-width:160px}
+html.zen-full .zen-note{order:5;margin:6px 0 0;color:#EDE6EF;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+@media (max-height:700px){html.zen-full .zen-note{display:none}}
+html.zen-full .zen-stat{order:6}html.zen-full .zen-finrow{order:7}
+html.zen-full .zen.running .zfl-pick,html.zen-full .zen.paused .zfl-pick,html.zen-full .zen.running .zen-len,html.zen-full .zen.paused .zen-len,html.zen-full .zen.running .zen-note,html.zen-full .zen.paused .zen-note{display:none!important}
+html.zen-full .zen-exit{display:inline-flex;position:fixed;z-index:1002;top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right))}
+</style>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/zenGrowth.js') }}?v=4"></script>
+<script>
+/* Zen flower pick: yellow tulip only (approved frames). Saved peony choice falls back to tulip. */
+(function(){var b=document.getElementById('zBloom'),img=document.getElementById('zGrowImg'),win=b&&b.querySelector('.zfl-win');if(!b||!img||!win||!window.ZenGrowth)return;
+var Z=window.ZenGrowth,ROOT="{{ url_for('static', filename='zen') }}",KEY='prody.zenGrowth',fl='tulip',g=null;
+function opts(ms){return {flower:fl,base:ROOT+'/'+fl,ext:'.webp',durationMs:ms,storageKey:KEY,fadeMs:300,preload:5};}
+function still(){var u=Z.frameUrl(ROOT+'/'+fl,fl,0,'.webp');img.src=u;img.classList.add('on');var b2=document.getElementById('zGrowImgB');if(b2){b2.classList.remove('on');b2.removeAttribute('src');}}
+function pick(f){if(f!=='tulip')f='tulip';fl=f;b.dataset.flower=f;img.dataset.fl=f;
+b.querySelectorAll('.zfl-pick .zfl-b').forEach(function(x){var on=x.dataset.fl===f;x.classList.toggle('on',on);x.setAttribute('aria-checked',on?'true':'false');});
+try{localStorage.setItem('prody.zenFlower',f);}catch(e){}if(g)g.setFlower(f,ROOT+'/'+f);else still();}
+var saved='tulip';try{saved=localStorage.getItem('prody.zenFlower')||'tulip';}catch(e){}pick(saved);
+var had=null;try{had=localStorage.getItem(KEY);}catch(e){}if(had)g=Z.mount(win,opts(0));/* reload jumps to the stored frame */
+b.querySelectorAll('.zfl-pick .zfl-b').forEach(function(x){x.addEventListener('click',function(){pick(x.dataset.fl);});});
+window.__zenGrowth={start:function(ms){if(g)g.clear();try{localStorage.removeItem(KEY);}catch(e){}g=Z.mount(win,opts(ms));},
+pause:function(){g&&g.pause();},resume:function(){g&&g.resume();},
+finish:function(){g&&g.finish();},reset:function(){if(g)g.clear();g=null;still();}};})();
+</script>
+<script>
+(()=>{const $=id=>document.getElementById(id),zen=$('zen');let len=25,total=len*60,left=total,t=null,began=0,logged=false,isBrk=false,lastFocus=25;
+window.addEventListener('focus:tick',e=>{const d=e.detail||{};if(!d.total)return;/* clay ring: remaining share of the block */zen.style.setProperty('--zp',Math.max(0,Math.min(1,d.left/d.total)).toFixed(4));
+  $('zOf').textContent='of '+Math.floor(d.total/60)+':'+String(d.total%60).padStart(2,'0');});
+const notes=['Breathe out. Start small.','One page at a time.','Phone face down?','Slow is smooth.','Halfway. Keep going.'];
+function testSecs(){/* test-only: ?focus_test_seconds=N or localStorage prody_focus_test_seconds */let q=+new URLSearchParams(location.search).get('focus_test_seconds');try{q=q||+(localStorage.getItem('prody_focus_test_seconds')||0)}catch(e){}return q>0?Math.round(q):0;}
+function customMins(){const i=$('zCustom');let v=Math.round(+i.value||30);v=Math.max(5,Math.min(180,v));i.value=v;try{localStorage.setItem('prody_focus_custom',v)}catch(e){}return v;}
+try{const cm=+localStorage.getItem('prody_focus_custom');if(cm>=5&&cm<=180)$('zCustom').value=cm;}catch(e){}
+function setLen(m,brk){isBrk=!!brk;zen.classList.toggle('brk',isBrk);if(!isBrk)lastFocus=m;len=m;total=left=(isBrk?0:testSecs())||len*60;draw();}
+const draw=()=>{const m=Math.floor(left/60),s=left%60;$('zClock').textContent=m+':'+String(s).padStart(2,'0');document.title=(t?$('zClock').textContent+' · ':'')+'Zen';
+  window.dispatchEvent(new CustomEvent('focus:tick',{detail:{left,total,isBreak:false,running:!!t,hold:!!window.__fbHold}}));};
+document.querySelectorAll('.zlen').forEach(b=>b.onclick=()=>{if(t||paused)return;if(b.dataset.m==='custom')return openSheet();document.querySelectorAll('.zlen').forEach(x=>x.classList.remove('on'));b.classList.add('on');setLen(b.dataset.m==='custom'?customMins():+b.dataset.m,b.hasAttribute('data-break'));});
+/* pixel1: Custom lives in a bottom sheet */
+let zPrevOn=null;const sheet=$('zSheet'),scrim=$('zScrim');
+function openSheet(){zPrevOn=document.querySelector('.zseg .zlen.on');sheet.hidden=scrim.hidden=false;setTimeout(()=>$('zCustom').focus({preventScroll:true}),40);}
+function closeSheet(){sheet.hidden=scrim.hidden=true;$('zCustomBtn').focus({preventScroll:true});}
+window.zenOpenCustom=openSheet;
+sheet.querySelectorAll('.zsheet-step').forEach(b=>b.onclick=()=>{const i=$('zCustom');i.value=Math.max(5,Math.min(180,(Math.round(+i.value)||30)+ +b.dataset.d));});
+$('zSheetX').onclick=closeSheet;scrim.onclick=closeSheet;
+$('zSheetOk').onclick=()=>{document.querySelectorAll('.zlen').forEach(x=>x.classList.remove('on'));$('zCustomBtn').classList.add('on');setLen(customMins(),false);$('zCustomBtn').textContent=customMins()+'m';closeSheet();};
+$('zCustom').addEventListener('keydown',e=>{if(e.key==='Enter')$('zSheetOk').click();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheet.hidden)closeSheet();});
+async function log(mins,completed){if(mins<1)return;try{const h={'Content-Type':'application/json'},c=document.querySelector('meta[name=csrf-token]');if(c)h['X-CSRFToken']=c.content;
+  const r=await fetch('{{ url_for("study_bp.log_session") }}',{method:'POST',headers:h,body:JSON.stringify({minutes:mins,course_id:$('zCourse').value,label:$('zTask').value||'Zen session',completed:!!completed,tz_offset:-new Date().getTimezoneOffset()})});
+  const j=await r.json();if(j.ok&&j.points!=null)$('zPts').textContent=j.points.toLocaleString();if(j.ok&&window.prodyToast)prodyToast(mins+' quiet minutes logged. +'+mins+' points','success');if(j.ok&&j.watered&&window.prodyToast)setTimeout(()=>prodyToast('Session done, your tree got tended.','success'),900);}catch(e){}}
+let paused=false,acc=0;const active=()=>acc+(paused||!began?0:Date.now()-began);
+function pauseUI(){const b=$('zPause');b.hidden=!(t||paused);if(b.hidden)b.blur();b.setAttribute('aria-pressed',String(paused));b.querySelector('.ms').textContent=paused?'play_arrow':'pause';b.querySelector('.zp-l').textContent=paused?'Resume':'Pause';zen.classList.toggle('paused',paused);b.classList.remove('xf');void b.offsetWidth;b.classList.add('xf');}
+function tick(){const end=Date.now()+left*1000;t=setInterval(()=>{left=Math.max(0,Math.round((end-Date.now())/1000));if(left&&left%300===0)$('zNote').textContent=notes[(left/300)%notes.length|0];draw();if(!left)stop(true);},500);}
+$('zPause').onclick=()=>{if(paused){paused=false;began=Date.now();tick();window.__zenGrowth&&!isBrk&&__zenGrowth.resume();$('zNote').textContent='Back at it.';}else if(t){clearInterval(t);t=null;acc+=Date.now()-began;window.__zenGrowth&&!isBrk&&__zenGrowth.pause();paused=true;$('zNote').textContent='Paused. Take a breath.';}pauseUI();draw();};
+function chime(){try{const A=new(window.AudioContext||window.webkitAudioContext)(),o=A.createOscillator(),g=A.createGain();o.frequency.value=660;g.gain.setValueAtTime(.12,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+1.2);o.connect(g).connect(A.destination);o.start();o.stop(A.currentTime+1.2);}catch(e){}}
+function pick(m,brk){document.querySelectorAll('.zlen').forEach(x=>x.classList.toggle('on',+x.dataset.m===m&&x.hasAttribute('data-break')===!!brk));setLen(m,brk);}
+function stop(done){if(!t&&!paused)return;/* one stop per session */clearInterval(t);t=null;zen.classList.remove('running');if(done)chime();
+  if(isBrk){paused=false;acc=0;began=0;pauseUI();$('zGo').innerHTML='<span class="ms">play_arrow</span>Begin';$('zNote').textContent=done?'Break over. Ready for the next round.':'Break ended.';pick(lastFocus,false);return;}/* breaks never log */if(window.__zenGrowth){done?__zenGrowth.finish():__zenGrowth.reset();}const mins=Math.floor(active()/60000);paused=false;acc=0;began=0;pauseUI();
+  $('zGo').innerHTML='<span class="ms">play_arrow</span>Begin';if(!logged){logged=true;log(mins,!!done);}/* actual elapsed minutes, once; <1 min logs nothing */
+  if(done){$('zStat').textContent=mins>=1?'+'+mins+' min of study time logged':'Under a minute, so nothing logged';zen.classList.add('fin');draw();window.__fbHold=true;setTimeout(()=>{window.__fbHold=false;left=total;draw();},6000);}else{window.__fbHold=true;left=total;draw();}/* early stop: plant keeps its partly-grown pose until the next Begin */
+  $('zNote').textContent=done?(mins>=1?'Nice. '+mins+' min grown.':'Nice. Session done.'):'Stopped. Every minute counts.';}
+$('zGo').onclick=()=>{if(t||paused)return stop(false);window.__fbHold=isBrk;zen.classList.remove('fin');$('zNote').textContent=isBrk?'Break. Stretch, drink water.':notes[0];logged=isBrk;if(!isBrk){window.__zenGrowth&&__zenGrowth.start(total*1000);}acc=0;paused=false;began=Date.now();zen.classList.add('running');$('zGo').innerHTML='<span class="ms">stop</span>End';
+  tick();pauseUI();draw();};
+
+/* reload: keep timer + flower from zenGrowth startedAt/banked/duration (incl. pause) */
+(function restoreZen(){
+  let raw=null;try{raw=localStorage.getItem('prody.zenGrowth');}catch(e){}
+  if(!raw)return;let s;try{s=JSON.parse(raw);}catch(e){return;}
+  if(!s||!(s.duration>0))return;
+  const now=Date.now();
+  const elapsed=(s.banked||0)+(s.running&&s.startedAt?Math.max(0,now-s.startedAt):0);
+  if(elapsed>=s.duration){try{localStorage.removeItem('prody.zenGrowth');}catch(e){}if(window.__zenGrowth&&__zenGrowth.reset)__zenGrowth.reset();return;}
+  total=Math.max(1,Math.round(s.duration/1000));
+  left=Math.max(1,Math.round((s.duration-elapsed)/1000));
+  len=Math.max(1,Math.round(total/60));
+  isBrk=false;logged=false;acc=s.banked||0;began=s.running&&s.startedAt?s.startedAt:0;
+  paused=!s.running;zen.classList.add('running');zen.classList.toggle('paused',paused);
+  $('zGo').innerHTML='<span class="ms">stop</span>End';
+  if(s.running){tick();}
+  else{t=null;}
+  pauseUI();draw();
+  $('zNote').textContent=paused?'Paused. Take a breath.':'Back at it — session kept.';
+})();
+/* full screen: real API where it works, CSS focus view otherwise (always on iPhone) */
+const de=document.documentElement,ua=navigator.userAgent,iOS=/iP(hone|od|ad)/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+const isFull=()=>!!fsEl()||de.classList.contains('zen-full');
+function label(){const on=isFull();$('zFull').querySelector('.zf-l').textContent=on?'Exit full screen':'Full screen';$('zFull').setAttribute('aria-pressed',on);$('zFull').querySelector('.ms').textContent=on?'close':'fullscreen';}
+function pseudo(on){de.classList.toggle('zen-full',on);document.body.classList.toggle('zen-full',on);label();
+  if(on){$('zExit').focus({preventScroll:true});maybeHint();}else $('zFull').focus({preventScroll:true});}
+function enter(){const req=!iOS&&(de.requestFullscreen||de.webkitRequestFullscreen);
+  if(req){try{const p=req.call(de);de.classList.add('zen-full');document.body.classList.add('zen-full');label();
+    if(p&&p.catch)p.catch(()=>pseudo(true));return;}catch(e){}}pseudo(true);}
+function exit(){if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}pseudo(false);}
+$('zFull').onclick=()=>isFull()?exit():enter();$('zExit').onclick=exit;
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!fsEl())pseudo(false);else label();}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&de.classList.contains('zen-full')&&!fsEl())exit();});
+function maybeHint(){try{if(!iOS||navigator.standalone||localStorage.getItem('prody_zen_hint_x'))return;const d=new Date().toDateString();if(localStorage.getItem('prody_zen_hint_day')===d)return;localStorage.setItem('prody_zen_hint_day',d);}catch(e){return;}$('zHint').hidden=false;}/* at most once a day until dismissed */
+$('zHintX').onclick=()=>{$('zHint').hidden=true;try{localStorage.setItem('prody_zen_hint_x','1')}catch(e){}};
+$('zRain').onclick=()=>{const r=window.prodyRain;if(!r)return;if(r.playing){r.stop();}else{r.start();}$('zRain').setAttribute('aria-pressed',String(r.playing));};
+/* class tint for ring/CSS vars only (3-stage flower DOM removed in clay) */
+let TINTS={};
+function hx2hsl(h){h=(h||'').replace('#','');if(h.length!==6)return null;const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255,M=Math.max(r,g,b),m=Math.min(r,g,b),l=(M+m)/2,d=M-m;let H=0,S=d?d/(1-Math.abs(2*l-1)):0;if(d){H=M===r?((g-b)/d)%6:M===g?(b-r)/d+2:(r-g)/d+4;H*=60;if(H<0)H+=360;}return[H,S,l];}
+function hsl2rgb(h,s,l){const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;let r=0,g=0,b=0;if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}return[(r+m)*255,(g+m)*255,(b+m)*255];}
+function tintOf(stored){if(!stored)return '#D9A441';const k=stored.toUpperCase();if(TINTS[k])return TINTS[k];const v=hx2hsl(k);if(!v)return '#D9A441';const c=hsl2rgb(v[0],.58,.60);return '#'+c.map(n=>Math.round(n).toString(16).padStart(2,'0')).join('').toUpperCase();}
+function classTint(){const sel=$('zCourse'),o=sel.options[sel.selectedIndex];let c=o&&o.dataset.c;if(!c){const f=[...sel.options].find(x=>x.dataset.c);c=f&&f.dataset.c;}return tintOf(c);}
+function recolour(){zen.style.setProperty('--zc',classTint());}
+fetch('{{ url_for("static", filename="data/class_tints.json") }}?v=2').then(r=>r.json()).then(j=>{TINTS={};for(const k in (j.tints||{}))TINTS[k.toUpperCase()]=j.tints[k];}).catch(()=>{}).finally(recolour);
+$('zCourse').addEventListener('change',recolour);
+setLen(25);$('zAgain').onclick=()=>{window.__fbHold=false;zen.classList.remove('fin');pick(lastFocus,false);$('zGo').click();};
+$('zBrk').onclick=()=>{window.__fbHold=true;zen.classList.remove('fin');pick(5,true);$('zGo').click();};})();
+</script>
+<script src="{{ url_for('static', filename='js/rain.js') }}?v=3"></script>
+<script src="{{ url_for('static', filename='js/vendor/gsap.min.js') }}?v=1" defer></script><script src="{{ url_for('static', filename='js/focus_bloom.js') }}?v=35" defer></script>
+{% endblock %}

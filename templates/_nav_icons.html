@@ -1,0 +1,10 @@
+{# Nav icon slots (owner: Ripple). Interim Prism line set from ui_spec_v1b/icons.
+   To swap for Streamline (v1c): replace the SVG strings below only; class names stay. #}
+{% set _NAV_ICONS = {
+  'home': '<svg class="nav-ico-svg" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.5h-6v5.5H5.5A1.5 1.5 0 0 1 4 19z"/></svg>',
+  'calendar': '<svg class="nav-ico-svg" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  'checklist': '<svg class="nav-ico-svg" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="m8 12 3 3 5-6"/></svg>',
+  'leaf': '<svg class="nav-ico-svg" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7"/><path d="M12 14c-4.5 0-7-3-7-8 4.5 0 7 2.5 7 8z"/><path d="M12 14c4.5 0 7-3 7-8-4.5 0-7 2.5-7 8z"/></svg>',
+  'user': '<svg class="nav-ico-svg" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.8-3.8 3.8-5.8 7.5-5.8s6.7 2 7.5 5.8"/></svg>',
+} %}
+{% macro nav_icon(name) %}<span class="nav-ico nav-ico--{{ name }}">{{ _NAV_ICONS[name]|safe }}</span>{% endmacro %}

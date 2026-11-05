@@ -1,0 +1,161 @@
+{
+ "species": "maple",
+ "kind": "leaf_unfurl",
+ "viewBox": [
+  0,
+  0,
+  120,
+  120
+ ],
+ "anchor": [
+  60,
+  100
+ ],
+ "easing": "smoothstep",
+ "progress": "p = smoothstep(clamp((t - stagger) / (1 - stagger)))",
+ "transform": "translate(tx,ty) rotate(rotate) scale(sx,sy) about pivot (CSS: transform-origin = pivot)",
+ "blooms": false,
+ "leaf_color": "#C2401F",
+ "parts": [
+  {
+   "id": "lobe_1",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": -6.4,
+    "scale": [
+     0.35,
+     0.5
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": -80,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.25
+  },
+  {
+   "id": "lobe_5",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 6.4,
+    "scale": [
+     0.35,
+     0.5
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 80,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.25
+  },
+  {
+   "id": "lobe_2",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": -3.2,
+    "scale": [
+     0.35,
+     0.5
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": -40,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.12
+  },
+  {
+   "id": "lobe_4",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 3.2,
+    "scale": [
+     0.35,
+     0.5
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 40,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.12
+  },
+  {
+   "id": "lobe_3",
+   "pivot": [
+    60,
+    48
+   ],
+   "closed": {
+    "rotate": 0.0,
+    "scale": [
+     0.35,
+     0.5
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "open": {
+    "rotate": 0,
+    "scale": [
+     1,
+     1
+    ],
+    "opacity": 1,
+    "tx": 0,
+    "ty": 0
+   },
+   "stagger": 0.0
+  }
+ ]
+}

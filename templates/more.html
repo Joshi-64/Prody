@@ -1,0 +1,26 @@
+{% extends 'base.html' %}{% block title %}More{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
+{% block content %}
+<main class="more-page" style="max-width:560px;margin:0 auto">
+  <div class="ph" style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><h1 style="margin:0;flex:1">More</h1></div>
+  <div class="mgrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+    <a class="card mt" href="{{ url_for('buddy_bp.chat') }}"><span class="mi" style="--t:#DDE7D3"><span class="ms">smart_toy</span></span>Study buddy</a>
+    <a class="card mt" href="{{ url_for('study_bp.analytics') }}"><span class="mi" style="--t:#E7E1EE"><span class="ms">insights</span></span>Analytics</a>
+    <a class="card mt" href="{{ url_for('grades_bp.grades') }}"><span class="mi" style="--t:#F2E2CB"><span class="ms">grade</span></span>Grades</a>
+    <a class="card mt" href="{{ url_for('profile_bp.whiteboard') }}"><span class="mi" style="--t:#F5E0E3"><span class="ms">draw</span></span>Whiteboard</a>
+    <a class="card mt" href="{{ url_for('study_bp.achievements') }}"><span class="mi" style="--t:#F2E2CB"><span class="ms">emoji_events</span></span>Achievements</a>
+    <a class="card mt" href="{{ url_for('profile_bp.store') }}"><span class="mi" style="--t:#DDE7D3"><span class="ms">storefront</span></span>Store</a>
+    <a class="card mt" href="{{ url_for('dm_bp.inbox') }}"><span class="mi" style="--t:#F5E0E3"><span class="ms">forum</span></span>Messages</a>
+    <a class="card mt" href="{{ url_for('forums_bp.index') }}"><span class="mi" style="--t:#E7E1EE"><span class="ms">edit</span></span>Boards</a>
+    <a class="card mt" href="{{ url_for('rooms_bp.rooms') }}"><span class="mi" style="--t:#DDE7D3"><span class="ms">videocam</span></span>Study rooms</a>
+    <a class="card mt" href="{{ url_for('calendar_bp.view_calendar') }}"><span class="mi" style="--t:#F2E2CB"><span class="ms">calendar_today</span></span>Calendar sync</a>
+    {% if is_admin %}<a class="card mt admin" data-role="admin" href="{{ url_for('admin') }}"><span class="mi" style="--t:var(--c-paper-2,var(--surface-2))"><span class="ms">check_circle</span></span>Admin<em>admins only</em></a>{% endif %}
+  </div>
+</main>
+<style>
+.mt{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 6px;font-size:12.5px;font-weight:700;color:var(--c-ink,var(--ink));text-align:center;border-radius:16px;text-decoration:none}
+.mi{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;background:var(--t)}.mi .ms{font-size:22px}
+.admin{border-style:dashed}.admin em{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:-5px}
+@media(min-width:701px){.mgrid{grid-template-columns:repeat(4,1fr)!important}}
+</style>
+{% endblock %}

@@ -1,0 +1,42 @@
+{
+ "id": "cherry_blossom",
+ "leaf_color": "#6FA552",
+ "flower_color": "#F6B3C6",
+ "bark_color": "#5E3229",
+ "leaf_shape": "species/cherry_blossom_leaf.svg",
+ "flower_shape": "species/cherry_blossom_flower.svg",
+ "bark": {
+  "lit": "#9A5A4A",
+  "base": "#5E3229",
+  "shadow": "#2E1712"
+ },
+ "leaf": {
+  "path": "species/cherry_blossom_leaf.svg",
+  "symbol": "small_oval",
+  "base": "#6FA552",
+  "tip": "#A9D37F",
+  "midrib": "#F2F8E6",
+  "scale": 0.7
+ },
+ "flower": {
+  "path": "species/cherry_blossom_flower.svg",
+  "symbol": "sakura5",
+  "petal": "#F6B3C6",
+  "center": "#C2466B",
+  "density": 2.4,
+  "scale": 1.05
+ },
+ "leafDensity": 0.55,
+ "blooms": true,
+ "bloom_color": "#F6B3C6",
+ "bloom_stages": [
+  "shop/bloom/cherry_blossom_closed.svg",
+  "shop/bloom/cherry_blossom_cracking.svg",
+  "shop/bloom/cherry_blossom_half.svg",
+  "shop/bloom/cherry_blossom_open.svg"
+ ],
+ "mini": {
+  "leaf_scale_mult": 1.3,
+  "leaf_density_mult": 0.7
+ }
+}

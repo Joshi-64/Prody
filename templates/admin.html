@@ -1,26 +1,23 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %}{% block title %}Admin Console{% endblock %}
 {% block content %}
-<div class="card">
-  <p>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a> | 
-    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a> | 
-    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a> | 
-    <a href="{{ url_for('tasks_bp.manage_tasks') }}">Tasks</a> | 
-    <a href="{{ url_for('logout') }}">Log Out</a>
-  </p>
-  <hr>
-  <h3>Registered Users</h3>
-  <table border="1" cellpadding="6" style="width:100%; border-collapse: collapse;">
-    <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Created At</th></tr>
-    {% for u in users %}
-      <tr>
-        <td>{{ u['id'] }}</td>
-        <td>{{ u['username'] }}</td>
-        <td>{{ u['email'] }}</td>
-        <td>{{ u['role'] }}</td>
-        <td>{{ u['created_at'] }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+<div class="page-head"><div><span class="eyebrow">Admin</span><h1>Admin Console</h1><p class="muted">Manage accounts and see platform activity.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-ghost" href="{{ url_for('admin_mod_bp.courses') }}">Verify courses</a><a class="btn btn-ghost" href="{{ url_for('forums_bp.index') }}">Boards</a></div></div>
+<div class="grid g-4" style="margin-bottom:20px">
+  <div class="card stat"><div class="stat-icon tint-indigo"><span class="ms">group</span></div><div><div class="stat-val">{{ counts.users }}</div><div class="stat-label">Accounts</div></div></div>
+  <div class="card stat"><div class="stat-icon tint-teal"><span class="ms">school</span></div><div><div class="stat-val">{{ counts.students }}</div><div class="stat-label">Students</div></div></div>
+  <div class="card stat"><div class="stat-icon tint-pink"><span class="ms">event</span></div><div><div class="stat-val">{{ counts.events }}</div><div class="stat-label">Calendar events</div></div></div>
+  <div class="card stat"><div class="stat-icon tint-amber"><span class="ms">timer</span></div><div><div class="stat-val">{{ counts.sessions }}</div><div class="stat-label">Study sessions</div></div></div>
+</div>
+<div class="card" style="overflow-x:auto">
+  <table class="table"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th style="text-align:right">Actions</th></tr></thead><tbody>
+  {% for u in users %}<tr>
+    <td><div style="display:flex;gap:10px;align-items:center"><div class="avatar" style="width:30px;height:30px;font-size:13px">{{ u.username[:1]|upper }}</div><b>{{ u.username }}</b></div></td>
+    <td class="muted">{{ u.email }}</td>
+    <td><span class="badge {{ 'b-purple' if u.role=='admin' else 'b-gray' }}">{{ u.role }}</span></td>
+    <td class="muted">{{ u.created_at|nice_stamp('%b %d, %Y') if u.created_at else '—' }}</td>
+    <td style="text-align:right">{% if u.id != session['user_id'] %}
+      <form class="inline" method="POST" action="{{ url_for('admin_set_role', user_id=u.id) }}"><input type="hidden" name="role" value="{{ 'student' if u.role=='admin' else 'admin' }}"><button class="btn btn-ghost btn-sm">Make {{ 'student' if u.role=='admin' else 'admin' }}</button></form>
+      <form class="inline" method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}"><button class="btn btn-sm btn-danger" data-confirm="Delete {{ u.username }} and all their data?">Delete</button></form>
+    {% else %}<span class="small muted">You</span>{% endif %}</td>
+  </tr>{% endfor %}</tbody></table>
 </div>
 {% endblock %}

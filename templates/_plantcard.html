@@ -1,0 +1,11 @@
+{# My plant card (Functionality). Static composite: equipped sky, species tree in colours, flowers, pot art. #}
+{% macro plant_card(c, size=150, label=True, flowers=True) %}{% set sp = c.species %}
+<figure class="fp-plantcard tier-{{ c.tier }}{{ ' fp-plantcard-sm' if size < 80 }}" style="--pc-size:{{ size }}px;--pc-sky:linear-gradient(180deg, {{ c.sky }})" title="{{ c.species_name }} in {{ c.pot_name }}">
+  <div class="fp-pc-stage"><svg class="fp-pc-tree" viewBox="0 0 120 100" aria-hidden="true" focusable="false">
+    <path d="M60 100V58M60 72l-14-12M60 66l13-11" stroke="{{ sp.bark_color }}" stroke-width="6" stroke-linecap="round" fill="none"/>
+    {% for x, y in [(60,30),(38,46),(82,46),(46,24),(74,24),(60,48)] %}{% if sp.leaf_shape == 'narrow' %}<ellipse cx="{{ x }}" cy="{{ y }}" rx="8" ry="15" fill="{{ sp.leaf_color }}"/>{% elif sp.leaf_shape == 'maple' %}<path d="M{{ x }} {{ y-15 }}l5 9 9-3-4 10 6 6-12 1-4 7-4-7-12-1 6-6-4-10 9 3z" fill="{{ sp.leaf_color }}"/>{% elif sp.leaf_shape == 'ellipse' %}<ellipse cx="{{ x }}" cy="{{ y }}" rx="15" ry="11" fill="{{ sp.leaf_color }}"/>{% else %}<circle cx="{{ x }}" cy="{{ y }}" r="14" fill="{{ sp.leaf_color }}"/>{% endif %}{% endfor %}
+    {% if flowers and sp.blooms %}{% for x, y in [(50,32),(70,28),(60,44),(40,48),(80,46)] %}<circle cx="{{ x }}" cy="{{ y }}" r="3.6" fill="{{ c.flower }}"/>{% endfor %}{% endif %}
+  </svg>
+  {% if c.pot_svg %}<img class="fp-pc-pot" loading="lazy" decoding="async" src="{{ url_for('static', filename=c.pot_svg) }}" alt="">{% else %}<span class="fp-pc-pot fp-pc-potfill" style="background:{{ c.pot_color }}"></span>{% endif %}</div>
+  {% if label %}<figcaption><b>{{ c.species_name }}</b><span>{{ c.pot_name }}</span></figcaption>{% endif %}
+</figure>{% endmacro %}

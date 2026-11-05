@@ -1,37 +1,24 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="card">
-  <h3>Create an Account</h3>
-  <form method="POST">
-    <label>Username</label>
-    <input type="text" name="username" required>
-    
-    <label>Email</label>
-    <input type="email" name="email" required>
-    
-    <label>Password</label>
-    <input type="password" id="password" name="password" required>
-    
-    <div style="margin: -8px 0 16px; display: flex; align-items: center; gap: 8px;">
-      <input type="checkbox" id="togglePw" onclick="togglePasswordVisibility()" style="width: auto; margin: 0;">
-      <label for="togglePw" style="font-size: 0.9em; cursor: pointer;">Show Password</label>
-    </div>
-
-    <label>Account Role</label>
-    <select name="role">
-      <option value="student">Student</option>
-      <option value="admin">Administrator</option>
-    </select>
-    
-    <button type="submit">Register</button>
-  </form>
-  <p>Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+{% extends 'base.html' %}{% block title %}Sign up{% endblock %}
+{% macro f(name, label, type='text', ph='') %}
+<div class="field {{ 'err' if errors.get(name) }}"><label for="{{ name }}">{{ label }}</label>
+  <input id="{{ name }}" name="{{ name }}" type="{{ type }}" placeholder="{{ ph }}" value="{{ form.get(name, '') if type != 'password' }}" required>
+  {% if errors.get(name) %}<div class="err-msg"><span class="ms" style="font-size:16px">error</span>{{ errors[name] }}</div>{% endif %}
 </div>
-
-<script>
-function togglePasswordVisibility() {
-  const pwInput = document.getElementById("password");
-  pwInput.type = pwInput.type === "password" ? "text" : "password";
-}
-</script>
+{% endmacro %}
+{% block auth %}
+<div class="auth">
+  {% include '_auth_art.html' %}
+  <div class="auth-form"><div class="auth-card">
+    <h2>Create your account</h2>
+    <p class="muted" style="margin:0 0 24px">Free for students. Takes about 30 seconds.</p>
+    <form method="POST" novalidate>
+      {{ f('username', 'Username', ph='jdoe') }}
+      {{ f('email', 'Email', 'email', 'jdoe@student.gsu.edu') }}
+      {{ f('password', 'Password', 'password', 'At least 8 characters') }}
+      {{ f('confirm', 'Confirm password', 'password', 'Repeat password') }}
+      <button class="btn btn-block" type="submit">Create account</button>
+    </form>
+    <p class="muted" style="text-align:center;margin-top:22px">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+  </div></div>
+</div>
 {% endblock %}

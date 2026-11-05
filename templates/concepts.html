@@ -1,0 +1,71 @@
+{% extends 'base.html' %}{% block title %}Concepts · {{ course.course_name }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">
+<style>
+.concept-page{max-width:720px;margin:0 auto}
+.ph{display:flex;align-items:center;gap:10px;margin-bottom:14px}.ph h1{margin:0;flex:1}
+.ib{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--c-paper,var(--surface));border:1px solid var(--c-edge,var(--line));box-shadow:var(--sh-soft,var(--shadow));color:inherit;text-decoration:none}
+.crs{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:99px;background:var(--c-paper,var(--surface));border:1px solid var(--c-edge,var(--line));box-shadow:var(--sh-soft,var(--shadow));font-weight:800;width:max-content;text-decoration:none;color:inherit}
+.crs .ms:last-child{transform:rotate(90deg);color:var(--c-ink-soft,var(--muted))}
+.prog{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:13px;color:var(--c-ink-soft,var(--muted));font-weight:700}
+.bar{flex:1;height:10px;border-radius:9px;background:var(--c-paper-2,var(--surface-2));box-shadow:inset 0 1px 2px rgba(90,60,60,.15)}.bar i{display:block;height:100%;border-radius:9px;background:var(--c-moss,var(--sage))}
+.seg{display:flex;gap:4px;padding:4px;border-radius:99px;background:var(--c-paper-2,var(--surface-2));border:1px solid var(--c-edge,var(--line));margin-bottom:12px;max-width:300px}
+.seg a{flex:1;text-align:center;padding:7px 0;border-radius:99px;font-weight:700;font-size:13.5px;color:var(--c-ink-soft,var(--muted));text-decoration:none}
+.seg a.on{background:var(--c-paper,var(--surface));color:var(--c-ink,var(--ink));box-shadow:var(--sh-soft,var(--shadow))}
+.wks{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wk{padding:12px 16px}.wk h3{margin:0 0 4px;font:500 15px var(--f-serif,serif);color:var(--c-ink-soft,var(--muted))}
+.cc{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:14.5px;border-top:1px solid var(--c-edge,var(--line))}
+.cc:first-of-type{border:0}
+.cb{width:24px;height:24px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--c-paper-2,var(--surface-2));border:1px solid var(--c-edge,var(--line));box-shadow:inset 0 1px 2px rgba(90,60,60,.15);cursor:pointer;padding:0}
+.cb.on{background:var(--c-moss,var(--sage));border:0}.cb .ms{font-size:17px;color:var(--c-moss-ink,#fff)}
+.concept-add{margin-top:14px}
+.cc-actions{margin-left:auto;display:flex;gap:4px}
+@media(max-width:700px){.wks{grid-template-columns:1fr;gap:10px}.prog{margin:10px 0}}
+</style>{% endblock %}
+{% block content %}
+<main class="concept-page">
+  <div class="ph"><h1>Concepts</h1></div>
+  <a class="crs" href="{{ url_for('user_courses_bp.add_courses') }}"><span class="ms">school</span>{{ course.course_name }}<span class="ms">chevron_right</span></a>
+  <div class="prog"><div class="bar"><i style="width:{{ (100 * mastered / total) if total else 0 }}%"></i></div><span>{{ mastered }} of {{ total }} mastered</span></div>
+  <div class="seg" role="tablist">
+    <a href="?filter=mastered" class="{{ 'on' if filter=='mastered' }}" role="tab">Mastered</a>
+    <a href="?filter=review" class="{{ 'on' if filter!='mastered' }}" role="tab">To review</a>
+  </div>
+  <div class="wks">
+    <section class="card wk">
+      <h3>{% if filter=='mastered' %}Mastered{% else %}To review{% endif %}</h3>
+      {% set rows = concepts|selectattr('status','equalto','Mastered')|list if filter=='mastered' else concepts|rejectattr('status','equalto','Mastered')|list %}
+      {% if rows %}
+        {% for c in rows %}
+        <label class="cc">
+          <form method="POST" style="margin:0;display:contents">
+            <input type="hidden" name="action" value="toggle"><input type="hidden" name="concept_id" value="{{ c.concept_id }}">
+            <button type="submit" class="cb {{ 'on' if c.status=='Mastered' }}" aria-label="Toggle {{ c.name }}">{% if c.status=='Mastered' %}<span class="ms">check</span>{% endif %}</button>
+          </form>
+          <span style="flex:1">{{ c.name }}</span>
+          <span class="cc-actions">
+            <form method="POST" class="inline" style="display:inline" onsubmit="var n=prompt('Rename concept', this.querySelector('[name=name]').value); if(!n) return false; this.querySelector('[name=name]').value=n;">
+              <input type="hidden" name="action" value="rename"><input type="hidden" name="concept_id" value="{{ c.concept_id }}">
+              <input type="hidden" name="name" value="{{ c.name }}">
+              <button class="btn-icon" type="submit" title="Rename"><span class="ms" style="font-size:18px">edit</span></button>
+            </form>
+            <form method="POST" class="inline" style="display:inline" onsubmit="return confirm('Delete this concept?')">
+              <input type="hidden" name="action" value="delete"><input type="hidden" name="concept_id" value="{{ c.concept_id }}">
+              <button class="btn-icon" type="submit" title="Delete"><span class="ms" style="font-size:18px">delete</span></button>
+            </form>
+          </span>
+        </label>
+        {% endfor %}
+      {% else %}
+        <p class="muted small" style="margin:8px 0 0">Nothing here yet.</p>
+      {% endif %}
+    </section>
+  </div>
+  <div class="card concept-add">
+    <h2 style="margin:0 0 12px;font-size:17px">Add a concept</h2>
+    <form method="POST" class="row" style="align-items:flex-end">
+      <input type="hidden" name="action" value="add">
+      <div class="field" style="flex:1;margin:0"><label>Name</label><input name="name" placeholder="e.g. Osmosis" required maxlength="255"></div>
+      <button class="btn"><span class="ms">add</span>Add</button>
+    </form>
+  </div>
+</main>
+{% endblock %}

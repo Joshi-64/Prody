@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prody. Study. Grow.</title>
+<link rel="preconnect" href="https://rsms.me/"><link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+:root{--bg:#000;--fg:#f5f5f7;--mute:#86868b;--accent:#3ddc84;--line:#1d1d1f}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--fg);font-family:InterDisplay,Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:24px;padding:14px 5vw;background:rgba(0,0,0,.8);backdrop-filter:saturate(180%) blur(20px);font-size:13px}
+nav b{font-size:17px;letter-spacing:-.02em;margin-right:auto}nav a{text-decoration:none;color:var(--mute)}nav a:hover{color:var(--fg)}
+.cta{display:inline-block;background:var(--accent);color:#000!important;text-decoration:none;font-weight:600;border-radius:980px;padding:12px 24px;font-size:17px}
+.link{color:var(--accent);text-decoration:none;font-size:17px}.link:hover{text-decoration:underline}
+section{min-height:92vh;display:grid;place-items:center;text-align:center;padding:14vh 6vw;border-top:1px solid var(--line)}
+section:first-of-type{border:0}
+h1,h2{margin:0;font-weight:700;letter-spacing:-.045em;line-height:1.02}h1{font-size:clamp(56px,10vw,112px)}h2{font-size:clamp(44px,7vw,88px)}
+.eyebrow{color:var(--accent);font-weight:600;font-size:clamp(17px,2vw,21px);margin-bottom:12px;letter-spacing:-.01em}
+p.lead{color:var(--mute);font-size:clamp(19px,2.2vw,24px);line-height:1.35;max-width:640px;margin:22px auto 34px;letter-spacing:-.01em}
+.row{display:flex;gap:28px;justify-content:center;align-items:center;flex-wrap:wrap}
+.stage{width:min(420px,80vw);aspect-ratio:1;margin:56px auto 0;position:relative}
+.stage .shot{position:absolute;inset:0;display:grid;place-items:center}
+.stages{display:flex;gap:4vw;justify-content:center;margin-top:56px;flex-wrap:wrap}.stages div{color:var(--mute);font-size:15px}.stages i{display:block;margin:0 auto 14px;background:var(--accent);border-radius:50% 50% 50% 0;transform:rotate(-45deg)}
+.stats{display:flex;gap:6vw;justify-content:center;margin-top:48px;flex-wrap:wrap}.stats b{display:block;font-size:clamp(40px,5vw,64px);letter-spacing:-.04em}.stats span{color:var(--mute)}
+kbd{font:600 15px Inter;border:1px solid #333;border-radius:6px;padding:2px 8px;color:var(--fg)}
+footer{padding:40px 6vw;color:var(--mute);font-size:12px;border-top:1px solid var(--line);text-align:center}
+.reveal{transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}html.js .reveal:not(.in){opacity:0;transform:translateY(28px)}.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+</style><script>document.documentElement.classList.add('js')</script></head><body>
+<nav><b>Prody</b><a href="#grow">Grow</a><a href="#focus">Focus</a><a href="#plan">Plan</a><a href="#yours">Make it yours</a><a href="{{ url_for('login') }}">Sign in</a></nav>
+
+<section><div>
+  <h1 class="reveal">Study.<br>Grow.</h1>
+  <p class="lead reveal">A planner, a focus timer, and a tree that grows every time you do the work.</p>
+  <div class="row reveal"><a class="cta" href="{{ url_for('register') }}">Start growing, free</a><a class="link" href="#grow">See how it works ›</a></div>
+  <div class="stage reveal"><div class="shot" id="heroPlant" data-landing-plant></div></div>
+</div></section>
+
+<section id="grow"><div>
+  <div class="eyebrow reveal">Your tree</div>
+  <h2 class="reveal">Every minute<br>counts. Literally.</h2>
+  <p class="lead reveal">Log a focus session and your tree grows. Skip a few days and it droops. Water it once a day to keep it happy.</p>
+  <div class="stages reveal">{% for n, s in [('Seed',10),('Bud',18),('Young',28),('Blooming',38),('Flourishing',50)] %}<div><i style="width:{{ s }}px;height:{{ s }}px;opacity:{{ 0.35 + loop.index0 * 0.16 }}"></i>{{ n }}</div>{% endfor %}</div>
+</div></section>
+
+<section id="focus"><div>
+  <div class="eyebrow reveal">Focus</div>
+  <h2 class="reveal">One timer.<br>No noise.</h2>
+  <p class="lead reveal">Zen Mode goes full screen with soft rain and your plant beside you. When the session ends, it grows a new leaf.</p>
+  <div class="stats reveal"><div><b>25</b><span>minute blocks</span></div><div><b>+1</b><span>leaf per session</span></div><div><b>0</b><span>tabs to manage</span></div></div>
+</div></section>
+
+<section id="plan"><div>
+  <div class="eyebrow reveal">Plan</div>
+  <h2 class="reveal">Your whole semester.<br>One place.</h2>
+  <p class="lead reveal">Classes, deadlines, grades, and to-dos, all in one place. Press <kbd>Ctrl</kbd> <kbd>K</kbd> and type “essay due fri”. That's all it takes.</p>
+</div></section>
+
+<section id="yours"><div>
+  <div class="eyebrow reveal">Make it yours</div>
+  <h2 class="reveal">Earn it.<br>Wear it.</h2>
+  
+</div></section>
+
+<section><div>
+  <h2 class="reveal">Plant something<br>this semester.</h2>
+  <p class="lead reveal">Free for students.</p>
+  <div class="row reveal"><a class="cta" href="{{ url_for('register') }}">Create your account</a><a class="link" href="{{ url_for('login') }}">Sign in ›</a></div>
+</div></section>
+
+<footer>Prody · Built for students.</footer>
+<script>
+(()=>{const io='IntersectionObserver' in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.2,rootMargin:'0px 0px -8% 0px'}):null;
+document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(i%4)*90+'ms';io?io.observe(el):el.classList.add('in')})})();
+</script>
+</body></html>

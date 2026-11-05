@@ -1,0 +1,42 @@
+{
+  "id": "olive",
+  "leaf_color": "#6F8466",
+  "flower_color": "#F3EBCB",
+  "bark_color": "#6E6658",
+  "leaf_shape": "species/olive_leaf.svg",
+  "flower_shape": "species/olive_flower.svg",
+  "bark": {
+    "lit": "#9C9282",
+    "base": "#6E6658",
+    "shadow": "#3A352D"
+  },
+  "leaf": {
+    "path": "species/olive_leaf.svg",
+    "symbol": "narrow",
+    "base": "#6F8466",
+    "tip": "#A9B8A0",
+    "midrib": "#EEF2E8",
+    "scale": 0.9
+  },
+  "flower": {
+    "path": "species/olive_flower.svg",
+    "symbol": "tiny4",
+    "petal": "#F3EBCB",
+    "center": "#C9B25A",
+    "density": 1.4,
+    "scale": 0.55
+  },
+  "leafDensity": 1.5,
+  "blooms": false,
+  "bloom_color": null,
+  "bloom_stages": [
+    "shop/bloom/olive_leaf_1.svg",
+    "shop/bloom/olive_leaf_2.svg",
+    "shop/bloom/olive_leaf_3.svg",
+    "shop/bloom/olive_leaf_4.svg"
+  ],
+  "mini": {
+    "leaf_scale_mult": 1.3,
+    "leaf_density_mult": 0.7
+  }
+}

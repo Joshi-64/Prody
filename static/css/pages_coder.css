@@ -1,0 +1,55 @@
+/* Coder: page styles for Calendar, Classes, To-Do, Focus. Uses app.css theme variables only. */
+.pc-spot{display:inline-flex;line-height:0}.pc-spot img{max-width:100%;height:auto}
+.pc-spot .pc-d{display:none}[data-theme="dark"] .pc-spot .pc-d{display:inline}[data-theme="dark"] .pc-spot .pc-l{display:none}
+.pc-head{display:flex;gap:14px;align-items:flex-start}.pc-head .pc-spot img{width:48px;height:48px}
+@media (max-width:600px){.pc-head .pc-spot img{width:36px;height:36px}}
+.pc-empty{padding:20px 16px 28px}.pc-empty .pc-spot{margin-bottom:6px}.pc-empty .pc-spot img{width:160px;height:120px}
+/* Calendar: themed empty list view (replaces FullCalendar's grey box) */
+.fc .fc-list-empty{background:var(--surface)!important;border:0}.fc .fc-list{border-color:var(--line)!important}
+.fc .fc-list-empty-cushion{margin:0;padding:8px 0}
+.fc .fc-list-day-cushion,.fc .fc-list-table th{background:var(--surface-2)!important;color:var(--text)}
+.fc .fc-list-event:hover td{background:var(--surface-2)!important}
+.fc .fc-list-table td{border-color:var(--line)!important}
+.fc .ev-ai .fc-list-event-dot,.fc .ev-ai .fc-daygrid-event-dot{border-color:var(--green)!important}
+.pc-dot-ai{background:var(--green)!important}
+/* Focus: one-line session rows */
+.pc-sessions li{flex-wrap:nowrap;min-width:0}.pc-sessions .grow{min-width:0}
+.pc-sessions .title,.pc-sessions .small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-sessions .time-pill{flex:none;white-space:nowrap}
+.pc-tree{display:grid;place-items:end center;height:300px;padding:16px 16px 0;background:var(--surface-2);overflow:hidden}
+.pc-tree .pc-spot img{width:240px;height:220px}
+/* To-Do: completed toggle */
+.pc-done{margin-top:6px;border-top:1px solid var(--line);padding-top:8px}
+.pc-done summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:600;font-size:14px;padding:6px 0}
+.pc-done summary::-webkit-details-marker{display:none}.pc-done summary .ms{transition:transform .2s}.pc-done[open] summary .ms{transform:rotate(90deg)}
+@media (prefers-reduced-motion:reduce){.pc-done summary .ms{transition:none}}
+/* v26 Focus bloom (continuous) */
+.fbloom{width:120px;height:120px;margin:8px auto 0;position:relative;--fb-dur:1s}
+.fbloom .fb-head,.fbloom .fb-rig{position:absolute;inset:0}
+.fbloom .fb-head{transform:scale(var(--fb-s,.85));transform-origin:60px 46px;transition:transform var(--fb-dur) linear}
+.fbloom .fb-st,.fbloom .fb-part{position:absolute;inset:0;width:120px;height:120px;opacity:0;transition:opacity var(--fb-dur) linear,transform var(--fb-dur) linear}
+.fbloom .fb-part{opacity:1}
+.fbloom.open .fb-st,.fbloom.open .fb-part,.fbloom.open .fb-head{transition-timing-function:cubic-bezier(.34,1.4,.64,1)}
+.fbloom.rm .fb-head{transform:none!important}
+.fbloom .fb-rigsvg{display:block;width:120px;height:120px;overflow:visible}
+.fbloom .fb-rigsvg [id]{transition:transform var(--fb-dur) linear,opacity var(--fb-dur) linear}
+.fbloom.open .fb-rigsvg [id]{transition-timing-function:cubic-bezier(.34,1.3,.64,1)}
+.fbloom.rm .fb-rigsvg [id]{transition:opacity 1.2s ease}
+.mode-tabs .fb-custom{display:inline-flex;align-items:center;gap:6px}
+.mode-tabs .fb-custom input{width:4.2em;font:inherit;padding:2px 6px;border-radius:8px;border:1px solid var(--line,rgba(0,0,0,.2));background:var(--surface,#fff);color:var(--text,#1F2420)}
+
+/* owner-fb: planner output — per-class groups, readable day/time, empty state, inline-SVG busy icon */
+.ico-svg{flex:none;display:inline-block;vertical-align:-3px}
+.btn[aria-busy=true] .ico-svg{animation:pc-hg 1.2s ease-in-out infinite}
+@keyframes pc-hg{50%{transform:rotate(180deg)}}
+.plan-sum{margin:2px 0 10px}
+.plan-group+.plan-group{margin-top:14px}
+.plan-class{display:flex;align-items:center;gap:8px;font-size:15px;margin:0 0 4px}
+.plan-count{margin-left:auto;font-size:12px;font-weight:700;color:var(--muted);background:var(--cream-2);border-radius:99px;padding:1px 8px}
+.plan-item{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.plan-when{display:flex;flex-direction:column;min-width:96px;line-height:1.25}
+.plan-when b{font-size:13.5px;color:var(--text)}.plan-when span{font-size:12.5px;color:var(--muted)}
+.plan-acts{display:flex;gap:6px}
+@media (max-width:480px){.plan-acts{width:100%;justify-content:flex-end}}
+.plan-empty{display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin-top:14px;padding:12px 14px;border:1px dashed var(--line-strong);border-radius:12px;font-size:13.5px;color:var(--muted)}
+.plan-empty b{color:var(--text)}

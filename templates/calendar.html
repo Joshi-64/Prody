@@ -1,102 +1,179 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %}{% from "_spot.html" import spot, empty, css %}{% from "_urgency.html" import urgency_chip %}{% block title %}My Calendar{% endblock %}
+{% block head %}<script src="/static/vendor/fullcalendar-6.1.15.min.js?v=6.1.15" defer></script>{{ css() }}<link rel="stylesheet" href="/static/css/pages_pixelcraft.css?v=4"><link rel="stylesheet" href="/static/css/caltodo.css?v=7">{% endblock %}
 {% block content %}
-<div class="card" style="max-width: 800px; margin: 0 auto;">
-  <p>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a> | 
-    <a href="{{ url_for('calendar_bp.view_calendar') }}">My Calendar</a> | 
-    <a href="{{ url_for('user_courses_bp.add_courses') }}">Add Courses/Deadlines</a> | 
-    <a href="{{ url_for('tasks_bp.manage_tasks') }}">Tasks</a> | 
-    <a href="{{ url_for('logout') }}">Log Out</a>
-  </p>
-
-
-  <hr>
-
-  <!-- AUTOMATIC ICAL SYNC INPUT FORM -->
-  <h3>View/Add Schedule</h3>
-  <p style="font-size: 0.9em; color: #555;">
-    Add course deadlines and events yourself here.
-  </p>
-  <form action="{{ url_for('calendar_bp.add_manual') }}" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <input type="text" name="event_name" placeholder="Dinner with Janice" style="margin: 0; flex-grow: 1;" required>
-        <input type="datetime-local" name="event_date" placeholder="10/12/2026" style="margin: 0; flex-grow: 1;" required>
-    <button type="submit" style="white-space: nowrap;">Add Schedule Manually</button>
-  </form>
-  <p style="font-size: 0.9em; color: #555;">
-    Paste your secret Google Calendar or Outlook iCal address (ending in <code>.ics</code>) below to securely auto-import your events.
-  </p>
-  <form action="{{ url_for('calendar_bp.automatic_add') }}" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px;">
-    <input type="url" name="calendar_url" placeholder="https://google.com" style="margin: 0; flex-grow: 1;" required>
-    <button type="submit" style="white-space: nowrap;">Add Schedule</button>
-  </form>
-  <p style="font-size: 0.9em; color: #555;">
-    Optionally, use AI to optimize your schedule here! This could take a while so don't close your browser!
-  </p>
-  <div style="margin-bottom: 20px;">
- <details style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa;">
-    <summary style="cursor: pointer; font-weight: bold;">Optimize with AI Options</summary>
-    
-    <form action="{{ url_for('calendar_bp.ai_recomended_schedule') }}" method="POST" style="margin-top: 10px;">
-        <label>List any scheduling restrictions or preferences:</label>
-        <!-- Defaulting to N/A if left blank -->
-        <input type="text" name="user_constraints" value="N/A" required>
-        
-        <button type="submit">Analyze & Pitch Plan</button>
-    </form>
-     
-</details>
-{% if session.get('review_mode_active') %}
-<div class="alert" style="background-color: #fff3cd; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba;">
-    <strong>Review Pitched Schedule:</strong> Do you want to save these proposed slots?
-    <div style="margin-top: 10px; display: flex; gap: 10px;">
-        <a href="{{ url_for('calendar_bp.accept_route') }}" style="background-color: green; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px;">Keep Changes</a>
-        <a href="{{ url_for('calendar_bp.reject_route') }}" style="background-color: red; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px;">Discard Plan</a>
-    </div>
+<style>.cls-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;flex:none}</style>
+<div class="pp pp-cal">
+<div class="page-head ct-head">
+  <div><h1 id="ctTitle">{{ today.strftime('%B %Y') }}</h1><p class="ct-sub" id="ctSub">Calendar{% if events %} · {{ events|length }} {{ 'item' if events|length == 1 else 'items' }}{% endif %}</p></div>
+  <div class="ct-acts">
+    <button type="button" class="ct-ibtn ct-ibtn-2 ct-mnav" id="ctPrev" aria-label="Previous month" title="Previous"><span class="ms">arrow_back</span></button>
+    <button type="button" class="ct-ibtn ct-ibtn-2 ct-mnav" id="ctNext" aria-label="Next month" title="Next"><span class="ms">arrow_forward</span></button>
+    {% if events %}<button type="button" class="ct-ibtn" aria-label="New event" title="New event" onclick="ctNewEvent()"><span class="ms">add</span></button>{% endif %}
+  </div>
+</div>
+<div class="ct-sync" id="ctSync">
+  <button type="button" class="btn btn-ghost ct-sync-btn" id="ctSyncBtn" onclick="openModal('importModal')"><span class="ms" aria-hidden="true">link</span>Sync Google / iCollege</button>
+  <details class="ct-sync-help"><summary>Where do I find my .ics link?</summary>
+    <ol><li><b>Google Calendar:</b> Settings &gt; your calendar &gt; &ldquo;Secret address in iCal format&rdquo;.</li>
+    <li><b>iCollege:</b> Calendar &gt; Subscribe, then copy the iCal feed link.</li></ol>
+  </details>
+</div>
+<style>.ct-sync{margin:0 0 16px}html.clay .pp-cal>.ct-sync{order:0}.ct-sync-btn{width:100%;min-height:44px;justify-content:center;gap:8px}.ct-sync-help{margin-top:6px;font-size:13px;color:var(--muted)}.ct-sync-help summary{cursor:pointer;min-height:32px;display:flex;align-items:center;justify-content:center}.ct-sync-help ol{margin:6px 0 0;padding-left:20px;line-height:1.5}@media(min-width:761px){.ct-sync-btn{width:auto}.ct-sync-help summary{justify-content:flex-start}}</style>
+{% if pending %}
+<div class="card ai-panel" style="margin-bottom:20px">
+  <div class="card-head"><h2>Suggested study blocks</h2>
+    <div style="display:flex;gap:8px">
+      <form class="inline" method="POST" action="{{ url_for('calendar_bp.accept_route') }}"><button class="btn btn-success btn-sm"><span class="ms" aria-hidden="true">done_all</span>Keep all</button></form>
+      <form class="inline" method="POST" action="{{ url_for('calendar_bp.reject_route') }}"><button class="btn btn-ghost btn-sm"><span class="ms" aria-hidden="true">close</span>Reject all</button></form>
+    </div></div>
+  <p class="muted small plan-sum">{{ pending|length }} block{{ '' if pending|length == 1 else 's' }} across {{ pending_groups|length }} class{{ '' if pending_groups|length == 1 else 'es' }}. Keep the ones that fit, reject the rest.</p>
+  {% for g in pending_groups %}<div class="plan-group">
+    <h3 class="plan-class"><span class="dot" style="background:{{ g.dot or 'var(--sage)' }}"></span>{{ g.course }}<span class="plan-count">{{ g['items']|length }}</span></h3>
+    <ul class="list plan-list">{% for e in g['items'] %}
+    <li class="plan-item"><div class="plan-when"><b>{{ e.extendedProps.day }}</b><span>{{ e.extendedProps.range }}</span></div><div class="grow"><div class="title">{{ e.extendedProps.label or e.title }}</div><div class="small muted">Study block · {{ e.extendedProps.minutes }} min</div></div>
+      <div class="plan-acts"><form class="inline" method="POST" action="{{ url_for('calendar_bp.accept_route', event_id=e.id) }}"><button class="btn btn-sm btn-ai" aria-label="Keep {{ e.title }}">Keep</button></form>
+      <form class="inline" method="POST" action="{{ url_for('calendar_bp.reject_route', event_id=e.id) }}"><button class="btn btn-sm btn-ghost" style="background:var(--cream-2)" aria-label="Reject {{ e.title }}">Reject</button></form></div></li>
+    {% endfor %}</ul></div>{% endfor %}
 </div>
 {% endif %}
-  <hr>
 
-  <!-- INTERACTIVE FULLCALENDAR CONTAINER -->
-<h3>My Schedule Grid</h3>
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+{% if not events %}<div class="card ct-monthcard ct-monthcard-empty" id="ctMonthCard"><div id="calendar"></div><template id="pcCalEmpty"><div class="ct-empty ct-empty-sm"><p class="ct-empty-t">Nothing scheduled this stretch.</p></div></template></div>
+<div class="card ct-empty ct-cal-empty" id="ctCalEmpty">{{ spot('empty_calendar_leaf', 120, 90) }}<h3>Your calendar is empty</h3><p>Add a deadline and Prody will plan around it.</p><a class="ct-btn" data-add-deadline href="{{ url_for('tasks_bp.manage_tasks', add=1, due=today.isoformat()) }}"><span class="ms">add</span>Add a deadline</a></div>
+{% else %}<div class="card pp-week ct-week" aria-label="This week"><div class="pp-week-strip" id="ppWeek" role="tablist" aria-label="Pick a day"></div>
+  <h2 class="ct-agenda-h" id="ctAgendaH"></h2>
+  <div class="ct-agenda" id="ctAgenda" aria-live="polite"></div>
+  <template id="ctDayEmpty"><div class="ct-empty ct-empty-sm">{{ spot('empty_calendar_leaf', 96, 72) }}<p class="ct-empty-t"></p><button type="button" class="ct-btn" data-add-day><span class="ms">add</span>Add event</button></div></template>
+</div>
 
-<div id="calendar" style="margin-top: 20px;"></div>
+<span class="eyebrow ct-sec">Deadlines</span>
+{% set dls = events|selectattr('extendedProps.kind', 'equalto', 'deadline')|selectattr('start', 'ge', today.isoformat())|list %}
+{% if dls %}<ul class="ct-dl pp-dl">{% for e in dls[:8] %}{% set dot = e.extendedProps.color|class_dot %}<li class="ct-dcard" data-start="{{ e.start }}" data-kind="deadline"><span class="ct-rail" aria-hidden="true"{% if dot %} style="background:{{ dot }}"{% endif %}></span><div class="grow"><div class="ct-dt">{{ e.title }}</div><div class="ct-ds">{% if dot %}<span class="cls-dot" style="background:{{ dot }}"></span>{% endif %}{% if e.extendedProps.course %}{{ e.extendedProps.course }} · {% endif %}{{ e.extendedProps.when.split(',')[0] }}</div></div>{{ urgency_chip(e.extendedProps.days) }}</li>{% endfor %}</ul>
+{% else %}<div class="card ct-empty">{{ spot('empty_seed_packet', 120, 90) }}<h3>No deadlines ahead</h3><p>Add your class deadlines and they’ll line up here by urgency.</p><a class="ct-btn" id="ctAddDl" data-add-deadline href="{{ url_for('tasks_bp.manage_tasks', add=1, due=today.isoformat()) }}"><span class="ms">add</span>Add a deadline</a></div>{% endif %}
 
+<span class="eyebrow ct-sec ct-desk">Full calendar</span>
+<button type="button" class="ct-mtoggle" id="ctMonthToggle" aria-expanded="false" aria-controls="ctMonthCard"><svg class="ct-mico" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span class="grow">Month view</span><svg class="ct-chev" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+<div class="grid g-main">
+  <div class="card ct-monthcard" id="ctMonthCard">
+    <div class="legend" style="margin-bottom:12px"><span><i class="dot" style="background:#E9DFCB"></i>Event</span><span><i class="dot" style="background:#F1D5C7;box-shadow:inset 0 0 0 2px #B4593A"></i>Deadline</span><span><i class="dot" style="background:#D6E3CF;box-shadow:inset 0 0 0 2px #2F5D46"></i>Study block</span><span><i class="dot" style="background:repeating-linear-gradient(-45deg,#D6E3CF 0 3px,#F7F4EE 3px 6px);box-shadow:inset 0 0 0 1px #2F5D46"></i>Suggested, needs review</span></div>
+    <div id="calendar"></div><template id="pcCalEmpty"><div class="ct-empty ct-empty-sm">{{ spot('empty_calendar_leaf', 96, 72) }}<p class="ct-empty-t">Nothing scheduled this stretch.</p></div></template>
+  </div>
+  <div class="grid" style="align-content:start">
+    <div class="card ai-panel">
+      <h2 style="display:flex;gap:8px;align-items:center;margin-bottom:6px">Plan my study time</h2>
+      <p class="muted small" style="margin:0 0 14px">Prody scans your deadlines and free time, then pitches study blocks. Keep the ones you like.</p>
+      <form method="POST" action="{{ url_for('calendar_bp.ai_recomended_schedule') }}" onsubmit="var b=this.querySelector('button');b.disabled=true;b.setAttribute('aria-busy','true');b.innerHTML='<svg class=ico-svg viewBox=&quot;0 0 24 24&quot; width=18 height=18 aria-hidden=true><path fill=currentColor d=&quot;M6 2h12v6l-4 4 4 4v6H6v-6l4-4-4-4V2zm2 2v3.2l4 4 4-4V4H8z&quot;/></svg>Planning…'">
+        <div class="field"><label>Preferences (optional)</label><input name="user_constraints" placeholder="e.g. evenings only, no Fridays"></div>
+        <button class="btn btn-ai btn-block"><span class="ms">bolt</span>Suggest study blocks</button>
+      </form>
+      {% if not upcoming_deadlines %}<div class="plan-empty" data-plan-empty><b>Nothing to plan yet</b><span>Add a deadline to one of your classes and Prody will pitch study blocks before it.</span><a class="btn btn-ghost btn-sm" href="{{ url_for('user_courses_bp.add_courses') }}">Add a deadline</a></div>{% endif %}
+    </div>
+  </div>
+</div>
+
+{% endif %}
+<div class="modal-bg" id="addModal"><div class="modal">
+  <h2 style="margin-bottom:16px">New event</h2>
+  <form method="POST" action="{{ url_for('calendar_bp.add_manual') }}">
+    <div class="field"><label>Name</label><input name="event_name" placeholder="Dinner with Janice" required maxlength="255"></div>
+    <div class="row"><div class="field"><label>Date &amp; time</label><input type="datetime-local" name="event_date" id="evDate" required></div>
+      <div class="field" style="max-width:120px"><label>Minutes</label><input type="number" name="duration_minutes" value="60" min="5" max="1440"></div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button type="button" class="btn btn-ghost" onclick="closeModals()">Cancel</button><button class="btn">Add event</button></div>
+  </form>
+</div></div>
+<div class="modal-bg" id="importModal"><div class="modal">
+  <h2 style="margin-bottom:6px">Import a calendar</h2>
+  <p class="muted small" style="margin:0 0 16px">Paste your secret Google Calendar, Outlook, or iCollege iCal address (ending in <code>.ics</code>). Re-syncing skips duplicates.</p>
+  <form method="POST" action="{{ url_for('calendar_bp.automatic_add') }}">
+    <div class="field"><label>iCal URL</label><input type="url" name="calendar_url" placeholder="https://calendar.google.com/…/basic.ics" required></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button type="button" class="btn btn-ghost" onclick="closeModals()">Cancel</button><button class="btn">Import</button></div>
+  </form>
+</div></div>
+<div class="modal-bg" id="evModal"><div class="modal">
+  <span class="badge" id="evKind"></span>
+  <h2 id="evTitle" style="margin:10px 0 4px"></h2><p class="muted" id="evWhen" style="margin:0 0 18px"></p>
+  <div style="display:flex;gap:10px;justify-content:flex-end" id="evActions"></div>
+</div></div>
+</div>
+{% endblock %}
+{% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function(){
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            height: 'auto', 
-            events: [
-                {% for ev in events %}
-                    {
-                        title: '{{ ev.event_name | replace("'", "\\'") }}',
-                        start: '{{ ev.event_date }}',
-                        color: {% if ev.is_ai_recommended %}'#800080'{% else %}'#0078D4'{% endif %},
-                        extendedProps: {
-                            recordId: '{{ ev.event_id }}',
-                            is_ai_recommended: {{ 'true' if ev.is_ai_recommended else 'false' }}
-                        }
-                    },
-                {% endfor %}
-            ],
-            eventClick: function(info) {
-                var scheduledTime = info.event.start ? info.event.start.toLocaleString() : 'N/A';
-                var aiRecommended = (info.event.extendedProps && info.event.extendedProps.is_ai_recommended ? 'Yes' : 'No');
-                alert(
-                    "Title / Event Name: " + info.event.title +
-                    "\nScheduled Time: " + scheduledTime +
-                    "\nAI Recommended: " + aiRecommended
-                );
-                if (confirm("Event: " + info.event.title + "\nTime: " + (info.event.start ? info.event.start.toLocaleString() : 'N/A') + "\n\nWould you like to delete this event?")) {
-                    var uniqueRowId = info.event.extendedProps.recordId;
-                    window.location.href = "/calendar/delete/" + uniqueRowId;
-                }
-            }
-        });
-        calendar.render();
-    });
+function ctNewEvent(v){const e=document.getElementById('evDate');if(e)e.value=v||'';openModal('addModal');setTimeout(()=>document.querySelector('#addModal [name=event_name]').focus(),50);}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModals(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open'))}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModals()}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals()});
+function post(url){const f=document.createElement('form');f.method='POST';f.action=url;const m=document.querySelector('meta[name=csrf-token]');if(m){const i=document.createElement('input');i.type='hidden';i.name='csrf_token';i.value=m.content;f.appendChild(i);}document.body.appendChild(f);f.submit();}
+document.addEventListener('DOMContentLoaded', function(){
+  if(!document.getElementById('calendar')) return; /* critic-5: empty state, no planner */
+  const evs={{ events|tojson }};
+  function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  const cal = new FullCalendar.Calendar(document.getElementById('calendar'), {
+    initialView: 'dayGridMonth', /* a real month grid on phones too (clay 4_calendar_390); events become dots there */
+    buttonText:{today:'Today',month:'Month',week:'Week',list:'List'},
+    headerToolbar:{left:'prev,next today',center:'title',right:'dayGridMonth,timeGridWeek,listWeek'},
+    height:'auto', nowIndicator:true, firstDay:1, dayMaxEvents:3, slotMinTime:'07:00:00', slotMaxTime:'23:00:00',
+    events: {{ events|tojson }},
+    noEventsContent: {html: document.getElementById('pcCalEmpty').innerHTML}, /*pc1*/
+    dateClick(info){if(window.matchMedia('(max-width:820px)').matches&&info.view.type==='dayGridMonth'&&document.getElementById('ctAgenda')){showDay(info.date);document.getElementById('ctAgenda').scrollIntoView({behavior:'smooth',block:'center'});return;}const d=info.dateStr.length>10?info.dateStr.slice(0,16):info.dateStr+'T18:00';document.getElementById('evDate').value=d;openModal('addModal');},
+    datesSet(info){ /* clay: the page title follows the month; the sub line counts what is in view */
+      document.getElementById('ctTitle').textContent=info.view.title;
+      const a=info.view.activeStart, b=info.view.activeEnd, n=evs.filter(e=>{const d=new Date(e.start);return d>=a&&d<b&&!e.extendedProps.pending;}).length;
+      document.getElementById('ctSub').textContent=n+(n===1?' item':' items')+' in view';
+    },
+    dayCellDidMount(arg){ /* phones: one dot per item under the day number, tone = urgency (overdue stays --g-care lilac) */
+      if(arg.isOther) return; const k=iso(arg.date), list=evs.filter(e=>String(e.start).slice(0,10)===k&&!e.extendedProps.pending);
+      if(!list.length) return; const box=document.createElement('span'); box.className='ct-mdots'; box.setAttribute('aria-hidden','true');
+      list.slice(0,3).forEach(e=>{const p=e.extendedProps,dd=p.days,i=document.createElement('i');
+        i.className=p.kind==='deadline'?(dd<0?'cu-over':dd<=1?'cu-soon':'cu-up'):p.kind==='ai'?'cu-up':(dd<0?'cu-done':'cu-ev');box.appendChild(i);});
+      const top=arg.el.querySelector('.fc-daygrid-day-frame'); if(top) top.appendChild(box);
+    },
+    eventDidMount(info){ /* class dot before title (type colours stay as legend) */
+      const pr=info.event.extendedProps, dd=pr.days; /* clay chip tone: overdue lilac, soon ripe, later moss, past brown */
+      info.el.classList.add(pr.kind==='deadline'?(dd<0?'cu-over':dd<=1?'cu-soon':'cu-up'):pr.kind==='ai'?'cu-up':(dd<0?'cu-done':'cu-ev'));
+      const c=pr.classDot; if(!c) return;
+      const t=info.el.querySelector('.fc-event-title,.fc-list-event-title a,.fc-list-event-title');
+      if(!t||t.querySelector('.cls-dot')) return;
+      const d=document.createElement('span'); d.className='cls-dot'; d.style.background=c; t.prepend(d);
+    },
+    eventClick(info){
+      const p=info.event.extendedProps, id=info.event.id;
+      const kinds={ai:['Study block','b-purple'],deadline:['Deadline','b-red'],event:['Event','b-amber']};
+      const k=kinds[p.kind]; const kind=document.getElementById('evKind');
+      kind.textContent=k[0]+(p.pending?' · pending review':''); kind.className='badge '+k[1];
+      document.getElementById('evTitle').textContent=info.event.title;
+      document.getElementById('evWhen').textContent=p.when;
+      const a=document.getElementById('evActions'); a.innerHTML='';
+      const btn=(t,c,fn)=>{const b=document.createElement('button');b.className='btn '+c;b.textContent=t;b.onclick=fn;a.appendChild(b);};
+      btn('Close','btn-ghost',closeModals);
+      if(p.pending){btn('Reject','btn-ghost',()=>post('/ai_reject/'+id));btn('Keep','btn-ai',()=>post('/ai_accept/'+id));}
+      else if(!String(id).startsWith('dl-')) btn('Delete','btn-danger',()=>{if(confirm('Delete this event?'))post('/calendar/delete/'+id)});
+      openModal('evModal');
+    }
+  });
+  cal.render(); window.ppCal=cal;
+  document.getElementById('ctPrev').onclick=()=>cal.prev(); document.getElementById('ctNext').onclick=()=>cal.next();
+  const mt=document.getElementById('ctMonthToggle'), root=document.querySelector('.pp-cal');
+  if(!mt||!document.getElementById('ppWeek')) return; /* empty calendar: month grid + empty message only */
+  mt.onclick=()=>{const open=mt.getAttribute('aria-expanded')!=='true';mt.setAttribute('aria-expanded',open);root.classList.toggle('month-open',open);
+    if(open){if(cal.view.type!=='dayGridMonth')cal.changeView('dayGridMonth');requestAnimationFrame(()=>cal.updateSize());}};
+  const wk=document.getElementById('ppWeek'), t=new Date(); t.setHours(0,0,0,0);
+  const mon=new Date(t); mon.setDate(t.getDate()-((t.getDay()+6)%7));
+  const ag=document.getElementById('ctAgenda'), esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function showDay(d){const k=iso(d); document.querySelectorAll('[data-add-deadline]').forEach(a=>a.href='/tasks?add=1&due='+k); const list=evs.filter(e=>String(e.start).slice(0,10)===k && !e.extendedProps.pending);
+    const name=k===iso(t)?'today':d.toLocaleDateString(undefined,{weekday:'long'});
+    document.getElementById('ctAgendaH').textContent=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+    if(!list.length){ag.innerHTML=document.getElementById('ctDayEmpty').innerHTML;ag.querySelector('.ct-empty-t').textContent=name+' is wide open. Enjoy the breather, or plant a focus block.';
+      ag.querySelector('[data-add-day]').onclick=()=>ctNewEvent(k+'T18:00');return;}
+    ag.innerHTML='<ul class="ct-day">'+list.map(e=>{const p=e.extendedProps,tm=String(e.start).slice(11,16);
+      return '<li class="k-'+p.kind+'"><span class="ct-time">'+(tm&&tm!=='00:00'?new Date(e.start).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):'All day')+'</span><span class="ct-kbar"></span><span class="grow"><b>'+(p.classDot?'<span class="cls-dot" style="background:'+esc(p.classDot)+'"></span>':'')+esc(e.title)+'</b>'+(p.course?'<small>'+esc(p.course)+'</small>':'')+'</span></li>'}).join('')+'</ul>';}
+  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);const k=iso(d);
+    const b=document.createElement('button');b.type='button';b.className='pp-day'+(k===iso(t)?' on':'');b.setAttribute('role','tab');b.setAttribute('aria-selected',k===iso(t));
+    const n=evs.filter(e=>String(e.start).slice(0,10)===k).length;
+    b.setAttribute('aria-label',d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})+(n?', '+n+' item'+(n>1?'s':''):''));
+    b.innerHTML='<small>'+d.toLocaleDateString(undefined,{weekday:'narrow'})+'</small><b>'+d.getDate()+'</b><i class="'+(n?'has':'')+'"></i>';
+    b.onclick=()=>{wk.querySelectorAll('.pp-day').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-selected','false')});b.classList.add('on');b.setAttribute('aria-selected','true');showDay(d);cal.gotoDate(d);};
+    wk.appendChild(b);}
+  showDay(t);
+});
 </script>
 {% endblock %}

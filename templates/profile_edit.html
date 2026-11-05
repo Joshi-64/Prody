@@ -1,0 +1,45 @@
+{% extends 'base.html' %}{% from '_macros.html' import avatar, uname %}{% block title %}Edit profile{% endblock %}
+{% block head %}<style>
+.pe-oak{display:flex;gap:18px;align-items:center;padding:16px}
+.pe-oak-art{width:140px;height:110px;border-radius:var(--r-md,16px);background:center 32%/cover var(--surface-2);flex:none;box-shadow:var(--shadow)}
+.pe-save{margin-top:18px}
+.pe-page{padding-bottom:calc(72px + 24px + env(safe-area-inset-bottom,0px))}
+@media (min-width:901px){.pe-page{padding-bottom:24px}}
+@media (max-width:700px){.pe-oak{flex-direction:column;align-items:stretch}.pe-oak-art{width:auto;height:150px}}
+</style>{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">Profile</span><h1>Edit profile</h1><p class="muted">Avatar, display name, and your tree.</p></div>
+  <a class="btn btn-ghost" href="{{ url_for('profile_bp.my_profile') }}">View profile</a></div>
+<form method="POST" enctype="multipart/form-data" id="pf">
+<div class="grid pe-page" style="align-content:start;max-width:560px">
+  <div class="card">
+    <div class="card-head"><h2><span class="ms">person</span>About you</h2></div>
+    <div style="display:flex;gap:18px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+      <span id="avPrev">{{ avatar(me, 84) }}</span>
+      <div><label class="btn btn-ghost btn-sm" style="margin:0;color:var(--text)"><span class="ms">photo_camera</span>Upload photo<input type="file" name="avatar" accept="image/png,image/jpeg,image/gif,image/webp" hidden id="avFile"></label>
+        <div class="small muted" style="margin-top:6px">PNG, JPG, GIF or WebP · max 2 MB.</div>
+        {% if p.avatar_path %}<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:550"><input type="checkbox" class="toggle" name="remove_avatar" value="1">Remove photo</label>{% endif %}</div>
+    </div>
+    <div class="field"><label>Display name</label><input name="display_name" value="{{ p.display_name }}" maxlength="80" placeholder="{{ session['username'] }}"></div>
+  </div>
+  {% set _sk = (p.species_key or '')|lower %}{% set _scene = 'cherry' if 'cherry' in _sk else ('pine' if 'pine' in _sk else 'tree') %}
+  <div class="card pe-oak">
+    <div class="pe-oak-art" style="background-image:url('/static/garden/scenes/{{ _scene }}-scene.webp')" role="img" aria-label="Your oak scene"></div>
+    <div class="grow">
+      <p class="sub muted" style="margin:0">Your tree</p>
+      <h2 style="margin:4px 0 10px;font-size:22px">{% if 'cherry' in _sk %}Cherry{% elif 'pine' in _sk %}Pine{% else %}Oak{% endif %}</h2>
+      <div class="field" style="margin:0"><label>Tree name</label><input name="plant_name" value="{{ p.plant_name or 'Prody' }}" maxlength="40" placeholder="Name your tree"></div>
+    </div>
+  </div>
+  <div class="pe-save"><button type="submit" class="btn btn-block" style="padding:14px"><span class="ms">check</span>Save profile</button></div>
+</div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('avFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
+  if(f.size>2*1024*1024){prodyToast('Avatar must be 2 MB or smaller.','danger');e.target.value='';return;}
+  if(!/^image\/(png|jpeg|gif|webp)$/.test(f.type)){prodyToast('Avatar must be a PNG, JPG, GIF or WebP image.','danger');e.target.value='';return;}
+  const url=URL.createObjectURL(f);document.querySelectorAll('#avPrev .avatar').forEach(a=>a.innerHTML='<img src="'+url+'">');});
+</script>
+{% endblock %}

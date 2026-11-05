@@ -1,0 +1,17 @@
+{
+ "note": "Single source of truth for class colours shown as dots/chips AND tulip crown tints (Python: profiles.class_dot_colour; JS: window.PRODY_TINTS from base.html). Keys = stored pastel COURSE_COLORS. Unmapped colours: keep hue, HSL S=0.58 L=0.60.",
+ "changes": {
+  "v2": "yellow #F0E6B8 -> ochre #D9A441; tan #AA8541 -> #8F783E and peach #D4885E -> #D68866 so every pair is >= 15 dE2000 as rendered on the crown",
+  "v1": "green #CFDCC6 -> lime #C6D93B"
+ },
+ "tints": {
+  "#CFDCC6": "#C6D93B",
+  "#EADCC2": "#8F783E",
+  "#F0D3C3": "#D68866",
+  "#C9DAEC": "#5E97D4",
+  "#DCCFEA": "#975ED4",
+  "#F0CBD6": "#D45E81",
+  "#C4E0DC": "#5ED4C3",
+  "#F0E6B8": "#D9A441"
+ }
+}

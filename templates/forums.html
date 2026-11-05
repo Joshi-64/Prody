@@ -1,0 +1,58 @@
+{% extends 'base.html' %}{% block title %}Boards{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_fn.css') }}?v=4">{% endblock %}
+{% block content %}
+<div class="fnx">
+  <div class="ph">
+    <h1>Boards</h1>
+    {% if demo_label %}<span class="chip demo">Demo only</span>{% endif %}
+  </div>
+  <div class="seg">
+    <a class="{{ 'on' if tab=='global' }}" href="{{ url_for('forums_bp.index', tab='global') }}">Global</a>
+    <a class="{{ 'on' if tab=='university' }}" href="{{ url_for('forums_bp.index', tab='university') }}">University</a>
+    <a class="{{ 'on' if tab=='course' }}" href="{{ url_for('forums_bp.index', tab='course') }}">Course</a>
+  </div>
+  {% if tab=='course' and courses %}
+  <form method="GET" style="margin-bottom:12px">
+    <input type="hidden" name="tab" value="course">
+    <select name="course_id" onchange="this.form.submit()" style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface)">
+      {% for c in courses %}<option value="{{ c.course_id }}" {{ 'selected' if c.course_id==course_id }}>{{ c.course_name }}{% if c.verified %} · verified{% endif %}</option>{% endfor %}
+    </select>
+  </form>
+  {% elif tab=='course' %}
+  <p class="muted">Add a class first to use course boards.</p>
+  {% elif tab=='university' and not university %}
+  <p class="muted">Set your university on your profile to see this board.</p>
+  {% endif %}
+
+  <details class="card newpost">
+    <summary><span class="ms" aria-hidden="true">add</span> Write a post</summary>
+    <form method="POST" action="{{ url_for('forums_bp.create') }}">
+      <input type="hidden" name="scope" value="{{ tab }}">
+      {% if tab=='course' and course_id %}<input type="hidden" name="course_id" value="{{ course_id }}">{% endif %}
+      <div class="field" style="margin:0"><label>Title</label><input name="title" maxlength="200" required></div>
+      <div class="field" style="margin:0"><label>Post</label><textarea name="body" rows="4" maxlength="4000" required></textarea></div>
+      <button class="btn" type="submit">Post</button>
+    </form>
+  </details>
+
+  {% if threads %}
+  <div class="lst">
+    {% for t in threads %}
+    <div class="card li">
+      <a class="fn-author" href="{{ url_for('profile_bp.public_profile', username=t.author.username) }}" aria-label="{{ t.author.username }}'s profile">
+        <span class="av av-init" style="--a:{{ t.author.av }}" aria-hidden="true">{{ t.author.initial }}</span>
+        <span class="fn-author-name">{{ t.author.username }}</span>
+      </a>
+      <a class="li-main" href="{{ url_for('forums_bp.thread', thread_id=t.id) }}">
+        <b>{% if t.pinned %}<span class="chip pin">Pinned</span>{% endif %}{{ t.title }}</b>
+        <p>{% if t.scope=='course' %}Course{% elif t.scope=='university' %}{{ t.university or 'University' }}{% else %}Global{% endif %}{% if t.hidden %} · hidden{% endif %}</p>
+      </a>
+      <a class="rc" href="{{ url_for('forums_bp.thread', thread_id=t.id) }}" aria-label="{{ t.reply_n }} replies"><span class="ms">forum</span>{{ t.reply_n }}</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;padding:24px"><p class="muted">No posts yet. Be the first.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

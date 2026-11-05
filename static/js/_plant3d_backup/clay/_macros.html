@@ -1,0 +1,16 @@
+{% macro avatar(d, size=36) -%}
+<span class="av-wrap {{ d.frame }}"><span class="avatar" style="--av:{{ d.av }};width:{{ size }}px;height:{{ size }}px;font-size:{{ (size*0.4)|int }}px">{% if d.avatar %}<img src="{{ d.avatar }}" alt="">{% else %}{{ d.initials }}{% endif %}</span></span>
+{%- endmacro %}
+{% macro uname(d) -%}<span class="{{ d.name_cls }}">{{ d.display }}</span>{%- endmacro %}
+{% macro banner_style(d) -%}{%- endmacro %}
+{% macro leaf(cls='brand-leaf') -%}
+<svg class="{{ cls }}" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14-.5 9-5.5 14-13 14" fill="currentColor" opacity=".9"/><path d="M5 19c3-4 6-7 10-10" stroke="var(--bg)" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>
+{%- endmacro %}
+{% macro star(cls='', style='', size=40) -%}{%- endmacro %}
+{% macro sparkle(cls='', style='', size=28) -%}{%- endmacro %}
+{% macro squiggle(cls='', style='', w=120) -%}{%- endmacro %}
+{% macro flower(cls='', style='', size=46) -%}{%- endmacro %}
+{% macro mini(uid, size=40) -%}<span class="mini-wrap" style="width:{{ size }}px;height:{{ size }}px">{{ mini_plant(uid) }}</span>{%- endmacro %}
+{# 3D plant: render_plant() already wraps large plants in .plant3d and loads the script once per page.
+   Use this macro only for a hand-built mount point, e.g. a live preview: plant3d_mount(state_3d(st)) #}
+{% macro plant3d_mount(state, style='') -%}<div class="plant3d" data-plant="{{ state|tojson|forceescape }}" style="position:relative;width:100%;aspect-ratio:240/300;{{ style }}"></div><script type="module" src="/static/js/plant3d.js"></script>{%- endmacro %}
