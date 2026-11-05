@@ -1,6 +1,6 @@
 {% extends 'base.html' %}{% from '_macros.html' import avatar, uname %}{% from '_plantcard.html' import plant_card %}{% block title %}{{ d.display }}{% endblock %}
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21"><link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}?v=15">{% endblock %}
-{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='ui/css/pages_func.css') }}?v=21"><link rel="stylesheet" href="{{ url_for('static', filename='ui/css/profile.css') }}?v=15">{% endblock %}
+{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='ui/icons/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='ui/icons/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
 {% block content %}
 {% set _sk = (d.profile.species_key or '')|lower %}{% set _scene = 'cherry' if 'cherry' in _sk else ('pine' if 'pine' in _sk else 'tree') %}
 <header class="me-head" style="--me-scene:url('/static/garden/scenes/{{ _scene }}-scene.webp')">

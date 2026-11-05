@@ -1,6 +1,6 @@
 {% extends 'base.html' %}{% block title %}Insights{% endblock %}
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
-{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='ui/css/pages_func.css') }}?v=21">{% endblock %}
+{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='ui/icons/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='ui/icons/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
 {% macro hm2(mins) %}{% set mi = (mins or 0)|round|int %}{% if mi >= 60 %}{{ '{:,}'.format(mi // 60) }}h{% if mi % 60 %} {{ mi % 60 }}m{% endif %}{% else %}{{ mi }}m{% endif %}{% endmacro %}
 {% block content %}
 <div class="page-head"><div class="fp-head"><span class="fp-icon">{{ spot('icon_insights',48,48) }}</span><div><span class="eyebrow">Insights</span><h1>Look how far you've come.</h1><p class="muted">Where your focus time goes, and when you're at your best.</p></div></div>

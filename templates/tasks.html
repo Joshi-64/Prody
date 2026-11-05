@@ -1,4 +1,4 @@
-{% extends 'base.html' %}{% from "_spot.html" import spot, empty, css %}{% from "_urgency.html" import urgency_chip %}{% block title %}To-Do & Concepts{% endblock %}{% block head %}{{ css() }}<link rel="stylesheet" href="/static/css/pages_pixelcraft.css?v=4"><link rel="stylesheet" href="/static/css/caltodo.css?v=7">{% endblock %}
+{% extends 'base.html' %}{% from "_spot.html" import spot, empty, css %}{% from "_urgency.html" import urgency_chip %}{% block title %}To-Do & Concepts{% endblock %}{% block head %}{{ css() }}<link rel="stylesheet" href="/static/ui/css/pages_pixelcraft.css?v=4"><link rel="stylesheet" href="/static/ui/css/caltodo.css?v=7">{% endblock %}
 {% block content %}
 {% set open_t = tasks|rejectattr('is_completed')|list %}{% set done_t = tasks|selectattr('is_completed')|list %}
 <div class="pp pp-tasks" data-filter="all">
@@ -26,7 +26,7 @@
   {% for label, rows in [('Today & overdue', g_now), ('This week', g_week), ('Later', g_later), ('Anytime', g_none)] if rows %}
   <section class="ct-group ct-open"><span class="eyebrow ct-sec">{{ label }}</span><ul class="ct-list card">{% for task in rows %}{{ trow(task) }}{% endfor %}</ul></section>
   {% endfor %}
-{% elif done_t %}<div class="card ct-empty ct-open"><img class="ct-nap" src="/static/spot/nap_A_potted_drowsy_bud.png?v=1" width="120" height="90" alt="" decoding="async"><h3>All done</h3><p>Every task is checked off. Your tree is resting easy.</p><button type="button" class="ct-btn" onclick="ctAdd()"><span class="ms">add</span>Add another</button></div>
+{% elif done_t %}<div class="card ct-empty ct-open"><img class="ct-nap" src="/static/ui/icons/nap_A_potted_drowsy_bud.png?v=1" width="120" height="90" alt="" decoding="async"><h3>All done</h3><p>Every task is checked off. Your tree is resting easy.</p><button type="button" class="ct-btn" onclick="ctAdd()"><span class="ms">add</span>Add another</button></div>
 {% else %}<div class="card ct-empty ct-open">{{ spot('empty_sprout', 120, 90) }}<h3>No tasks yet</h3><p>Add your first task and watch your tree grow.</p><button type="button" class="ct-btn" onclick="ctAdd()"><span class="ms">add</span>Add a task</button></div>{% endif %}
 {% if done_t %}<section class="ct-group ct-donegrp"><span class="eyebrow ct-sec">Harvested · {{ done_t|length }}</span><ul class="ct-list card">{% for task in done_t %}{{ trow(task) }}{% endfor %}</ul></section>
 {% else %}<div class="card ct-empty ct-empty-sm ct-donegrp ct-only-done">{{ spot('empty_seed', 96, 72) }}<p class="ct-empty-t">Nothing checked off yet. Tick a task to see it here.</p></div>{% endif %}

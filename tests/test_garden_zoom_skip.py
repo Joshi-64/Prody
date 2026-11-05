@@ -1,6 +1,6 @@
 """Garden zoom: second tap during open cutscene must skip to end state."""
 import os, re
-HERE = os.path.join(os.path.dirname(__file__), '..', 'static', 'js', 'garden.js')
+HERE = os.path.join(os.path.dirname(__file__), '..', 'static', 'ui', 'js', 'garden.js')
 
 
 def test_open_branches_second_tap_skips():

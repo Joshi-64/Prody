@@ -19,3 +19,5 @@ scripts/mysql_env.sh
 venv/
 __pycache__/
 .env*
+
+.vercel/

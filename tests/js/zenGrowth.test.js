@@ -1,4 +1,4 @@
-const t = require('node:test'), a = require('node:assert'), Z = require('../../static/js/zenGrowth.js');
+const t = require('node:test'), a = require('node:assert'), Z = require('../../static/ui/js/zenGrowth.js');
 const M = 60000, N = 220, CONTACT = 14, FPS = 30;
 const INTRO_MS = CONTACT / FPS * 1000; // ≈466.67ms
 
@@ -31,12 +31,14 @@ t.test('clock skew and bad input are safe', () => {
 });
 t.test('frame urls match flower_grow names', () => {
   a.equal(Z.frameUrl('/static/zen/tulip_png', 'tulip', 0), '/static/zen/tulip_png/tulip_0001.png');
-  a.equal(Z.frameUrl('x', 'peony', 219), 'x/peony_0220.png');
+  a.equal(Z.frameUrl('x', 'tulip', 219), 'x/tulip_0220.png');
+  a.equal(Z.frameUrl('x', 'camellia', 219), 'x/camellia_0220.png');
 });
 
-t.test('soil contact N=14 for tulip and peony at 30fps', () => {
+t.test('soil contact N=14 for tulip and camellia at 30fps', () => {
   a.equal(Z.SOIL_CONTACT.tulip, 14);
-  a.equal(Z.SOIL_CONTACT.peony, 14);
+  a.equal(Z.SOIL_CONTACT.camellia, 14);
+  a.equal(Z.SOIL_CONTACT.peony, undefined);
   a.equal(Z.INTRO_FPS, 30);
   a.equal(Z.soilContact('tulip'), 14);
   a.ok(Math.abs(Z.introMs('tulip') - INTRO_MS) < 0.01);

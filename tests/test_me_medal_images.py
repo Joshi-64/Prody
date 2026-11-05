@@ -20,7 +20,7 @@ def _medal_imgs_from_profiles():
 
 
 def test_every_medal_image_exists_on_disk():
-    spot = os.path.join(ROOT, 'static', 'spot')
+    spot = os.path.join(ROOT, 'static', 'ui', 'icons')
     imgs = _medal_imgs_from_profiles()
     assert len(imgs) >= 5
     missing = []

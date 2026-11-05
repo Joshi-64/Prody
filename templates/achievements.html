@@ -1,5 +1,5 @@
 {% extends 'base.html' %}{% from '_macros.html' import avatar, uname, mini %}{% from '_plantcard.html' import plant_card as pcard %}{% block title %}Achievements{% endblock %}
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='ui/css/pages_func.css') }}?v=21">{% endblock %}
 {% block content %}
 <div class="page-head"><div><span class="eyebrow">Achievements</span><h1>Trophy case.</h1><p class="muted">Study and finish tasks to earn points, then spend them in the Store.</p></div>
   <a class="btn btn-warm" href="{{ url_for('profile_bp.store') }}"><span class="ms">storefront</span>Spend {{ '{:,}'.format(stats.points) }} pts</a></div>

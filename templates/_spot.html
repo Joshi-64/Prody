@@ -1,4 +1,4 @@
 {# Spot art as <img> pairs (files share gradient ids, so never inline). Dark file shows under [data-theme=dark]. #}
-{% macro spot(name, w=160, h=120, cls='') -%}<span class="pc-spot {{ cls }}"><img class="pc-l" src="/static/spot/{{ name }}.svg?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="pc-d" src="/static/spot/{{ name }}_dark.svg?v=1" width="{{ w }}" height="{{ h }}" alt=""></span>{%- endmacro %}
+{% macro spot(name, w=160, h=120, cls='') -%}<span class="pc-spot {{ cls }}"><img class="pc-l" src="/static/ui/icons/{{ name }}.svg?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="pc-d" src="/static/ui/icons/{{ name }}_dark.svg?v=1" width="{{ w }}" height="{{ h }}" alt=""></span>{%- endmacro %}
 {% macro empty(name, title, text='') -%}<div class="empty pc-empty">{{ spot(name) }}<h3>{{ title }}</h3>{% if text %}<p>{{ text }}</p>{% endif %}</div>{%- endmacro %}
-{% macro css() -%}<link rel="stylesheet" href="/static/css/pages_coder.css?v=5">{%- endmacro %}
+{% macro css() -%}<link rel="stylesheet" href="/static/ui/css/pages_coder.css?v=5">{%- endmacro %}

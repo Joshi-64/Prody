@@ -1,5 +1,5 @@
 {% extends 'base.html' %}{% block title %}Friends{% endblock %}
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='ui/css/pages_func.css') }}?v=21">{% endblock %}
 {% macro av(name) %}{% set pal = ['#F3D9CC','#DCE8D6','#E9DFC9','#D9E3EE','#EADCEB','#F2E4C2'] %}<span class="frx-av" aria-hidden="true" style="--av:{{ pal[(name|length) % 6] }}">{{ name[:1]|upper }}</span>{% endmacro %}
 {% block content %}
 <div class="frx">

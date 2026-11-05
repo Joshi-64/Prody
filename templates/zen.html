@@ -1,5 +1,5 @@
 {% extends 'base.html' %}{% block title %}Zen{% endblock %}
-{% block head %}<script>document.documentElement.classList.add('is-zen')</script><link rel="stylesheet" href="{{ url_for('static', filename='css/pages_coder.css') }}?v=5">{% endblock %}
+{% block head %}<script>document.documentElement.classList.add('is-zen')</script><link rel="stylesheet" href="{{ url_for('static', filename='ui/css/pages_coder.css') }}?v=5">{% endblock %}
 {% block content %}
 <div class="zen" id="zen">
   <div class="zen-side">
@@ -8,7 +8,7 @@
     <div data-fbloom-host></div>
     <p class="zen-stat" id="zStat"></p><span class="zen-finrow"><button class="btn zen-again" id="zAgain" type="button"><span class="ms">play_arrow</span>Another round</button><button class="btn btn-ghost zen-again" id="zBrk" type="button"><span class="ms">wb_twilight</span>5 min break</button></span>
     <div class="zen-bloom" id="zBloom" data-flower="tulip"><div class="zfl-win"><img class="zfl-grow zfl-a on" id="zGrowImg" data-fl="tulip" src="{{ url_for('static', filename='zen/tulip/tulip_0001.webp') }}" alt="Your flower, growing with this session" width="540" height="720" decoding="async"><img class="zfl-grow zfl-back" id="zGrowImgB" alt="" width="540" height="720" decoding="async" aria-hidden="true"></div>
-      <div class="zfl-pick" role="radiogroup" aria-label="Your flower"><button type="button" class="zfl-b on" role="radio" aria-checked="true" data-fl="tulip">Yellow tulip</button></div></div>
+      <div class="zfl-pick" role="radiogroup" aria-label="Your flower"><button type="button" class="zfl-b on" role="radio" aria-checked="true" data-fl="tulip">Yellow tulip</button><button type="button" class="zfl-b" role="radio" aria-checked="false" data-fl="camellia">Pink rose</button></div></div>
     <div class="zen-timer"><div class="zen-dial"><span class="zen-state" aria-hidden="true"></span><b class="zen-clock" id="zClock" role="timer" aria-live="off">25:00</b><span class="zen-of" id="zOf" aria-hidden="true">of 25:00</span></div><p class="zen-note" id="zNote">Just you, {{ st.name }}, and one thing to work on.</p></div>
     <div class="zen-intent"><span class="ms" aria-hidden="true">edit</span><input class="zen-task" id="zTask" maxlength="80" placeholder="What are you working on?"><select class="zen-course" id="zCourse" aria-label="Class"><option value="">General</option>{% for c in courses %}<option value="{{ c.course_id }}" data-c="{{ c.color or '' }}">{{ c.course_name }}</option>{% endfor %}</select></div>
     <div class="zen-row zen-len">
@@ -312,7 +312,7 @@ html.zen-full .zen-side{width:100%;max-width:358px;display:flex;flex-direction:c
 html.zen-full .zen-head,html.zen-full .zen-meta,html.zen-full .zen-intent,html.zen-full .zen-foot,html.zen-full .zen-more,html.zen-full [data-fbloom-host]{display:none!important}
 html.zen-full .zen-timer{display:contents}
 html.zen-full .zen-bloom{order:1;width:100%}
-html.zen-full .zfl-win,html.clay.is-zen.zen-full .zfl-win{width:150px;height:150px;max-height:none;border-radius:20px;background:rgba(255,255,255,.06)}
+html.zen-full .zfl-win,html.clay.is-zen.zen-full .zfl-win{width:150px;height:150px;max-height:none;border-radius:0;background:transparent}
 html.zen-full .zfl-grow{object-position:center bottom}
 html.zen-full .zfl-pick{margin-top:10px;padding:6px;border-radius:999px;background:var(--c-paper,#fff);border:1px solid var(--c-edge,rgba(0,0,0,.1))}
 html.zen-full .zen-dial,html.clay.is-zen.zen-full .zen-dial{order:2;width:210px;height:210px;margin:10px auto 0;flex:none}
@@ -331,14 +331,15 @@ html.zen-full .zen-exit{display:inline-flex;position:fixed;z-index:1002;top:calc
 </style>
 {% endblock %}
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/zenGrowth.js') }}?v=4"></script>
+<script src="{{ url_for('static', filename='ui/js/zenGrowth.js') }}?v=4"></script>
 <script>
-/* Zen flower pick: yellow tulip only (approved frames). Saved peony choice falls back to tulip. */
+/* Zen flower pick: yellow tulip + pink rose (camellia frames from approved peony set). */
 (function(){var b=document.getElementById('zBloom'),img=document.getElementById('zGrowImg'),win=b&&b.querySelector('.zfl-win');if(!b||!img||!win||!window.ZenGrowth)return;
-var Z=window.ZenGrowth,ROOT="{{ url_for('static', filename='zen') }}",KEY='prody.zenGrowth',fl='tulip',g=null;
+var Z=window.ZenGrowth,ROOT="{{ url_for('static', filename='zen') }}",KEY='prody.zenGrowth',ALLOWED={tulip:1,camellia:1},fl='tulip',g=null;
 function opts(ms){return {flower:fl,base:ROOT+'/'+fl,ext:'.webp',durationMs:ms,storageKey:KEY,fadeMs:300,preload:5};}
 function still(){var u=Z.frameUrl(ROOT+'/'+fl,fl,0,'.webp');img.src=u;img.classList.add('on');var b2=document.getElementById('zGrowImgB');if(b2){b2.classList.remove('on');b2.removeAttribute('src');}}
-function pick(f){if(f!=='tulip')f='tulip';fl=f;b.dataset.flower=f;img.dataset.fl=f;
+function normalize(f){if(f==='peony')f='camellia';/* migrate old saved peony -> camellia */return ALLOWED[f]?f:'tulip';}
+function pick(f){f=normalize(f);fl=f;b.dataset.flower=f;img.dataset.fl=f;
 b.querySelectorAll('.zfl-pick .zfl-b').forEach(function(x){var on=x.dataset.fl===f;x.classList.toggle('on',on);x.setAttribute('aria-checked',on?'true':'false');});
 try{localStorage.setItem('prody.zenFlower',f);}catch(e){}if(g)g.setFlower(f,ROOT+'/'+f);else still();}
 var saved='tulip';try{saved=localStorage.getItem('prody.zenFlower')||'tulip';}catch(e){}pick(saved);
@@ -430,11 +431,11 @@ function hsl2rgb(h,s,l){const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1
 function tintOf(stored){if(!stored)return '#D9A441';const k=stored.toUpperCase();if(TINTS[k])return TINTS[k];const v=hx2hsl(k);if(!v)return '#D9A441';const c=hsl2rgb(v[0],.58,.60);return '#'+c.map(n=>Math.round(n).toString(16).padStart(2,'0')).join('').toUpperCase();}
 function classTint(){const sel=$('zCourse'),o=sel.options[sel.selectedIndex];let c=o&&o.dataset.c;if(!c){const f=[...sel.options].find(x=>x.dataset.c);c=f&&f.dataset.c;}return tintOf(c);}
 function recolour(){zen.style.setProperty('--zc',classTint());}
-fetch('{{ url_for("static", filename="data/class_tints.json") }}?v=2').then(r=>r.json()).then(j=>{TINTS={};for(const k in (j.tints||{}))TINTS[k.toUpperCase()]=j.tints[k];}).catch(()=>{}).finally(recolour);
+fetch('{{ url_for("static", filename="ui/data/class_tints.json") }}?v=2').then(r=>r.json()).then(j=>{TINTS={};for(const k in (j.tints||{}))TINTS[k.toUpperCase()]=j.tints[k];}).catch(()=>{}).finally(recolour);
 $('zCourse').addEventListener('change',recolour);
 setLen(25);$('zAgain').onclick=()=>{window.__fbHold=false;zen.classList.remove('fin');pick(lastFocus,false);$('zGo').click();};
 $('zBrk').onclick=()=>{window.__fbHold=true;zen.classList.remove('fin');pick(5,true);$('zGo').click();};})();
 </script>
-<script src="{{ url_for('static', filename='js/rain.js') }}?v=3"></script>
-<script src="{{ url_for('static', filename='js/vendor/gsap.min.js') }}?v=1" defer></script><script src="{{ url_for('static', filename='js/focus_bloom.js') }}?v=35" defer></script>
+<script src="{{ url_for('static', filename='ui/js/rain.js') }}?v=3"></script>
+<script src="{{ url_for('static', filename='ui/vendor/gsap.min.js') }}?v=1" defer></script><script src="{{ url_for('static', filename='ui/js/focus_bloom.js') }}?v=35" defer></script>
 {% endblock %}

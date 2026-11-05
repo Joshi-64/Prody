@@ -38,7 +38,7 @@ def test_prefetch_request_gets_short_private_cache():
 
 
 def test_shell_js_has_fetch_fallback():
-    js = open(os.path.join(app.static_folder, 'js', 'shell.js')).read()
+    js = open(os.path.join(app.static_folder, 'ui', 'js', 'shell.js')).read()
     assert "'X-Prody-Prefetch':'1'" in js and "credentials:'same-origin'" in js and 'no-store' not in js
 
 
@@ -83,6 +83,6 @@ def test_server_ignores_prefetch_header_off_allowlist():
 
 
 def test_shell_js_clears_prefetch_on_writes():
-    js = open(os.path.join(app.static_folder, 'js', 'shell.js')).read()
+    js = open(os.path.join(app.static_folder, 'ui', 'js', 'shell.js')).read()
     assert "addEventListener('submit',stale,true)" in js and "cache:'reload'" in js and "m!=='GET'" in js
     assert 'logout' not in js.split('var OK=')[1].split(',K=')[0]

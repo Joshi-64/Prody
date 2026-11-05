@@ -843,22 +843,21 @@
    "price": 0,
    "rarity": "common",
    "default": true,
-   "svg": "species/default_preview.svg",
    "thumb": "shop/thumbs/species_default.svg",
    "colors": {
     "id": "default",
     "leaf_color": "#2F6B3A",
     "flower_color": "#F08A6C",
     "bark_color": "#6B4A2F",
-    "leaf_shape": "species/default_leaf.svg",
-    "flower_shape": "species/default_flower.svg",
+    "leaf_shape": "trees/species/default_leaf.svg",
+    "flower_shape": "trees/species/default_flower.svg",
     "bark": {
      "lit": "#A87B55",
      "base": "#6B4A2F",
      "shadow": "#3B2A1E"
     },
     "leaf": {
-     "path": "species/default_leaf.svg",
+     "path": "trees/species/default_leaf.svg",
      "symbol": "classic",
      "base": "#2F6B3A",
      "tip": "#4E9A4F",
@@ -866,7 +865,7 @@
      "scale": 1.0
     },
     "flower": {
-     "path": "species/default_flower.svg",
+     "path": "trees/species/default_flower.svg",
      "symbol": "classic5",
      "petal": "#F08A6C",
      "center": "#F4C95D",
@@ -894,22 +893,21 @@
    "name": "Cherry blossom",
    "price": 600,
    "rarity": "epic",
-   "svg": "species/cherry_blossom_preview.svg",
    "thumb": "shop/thumbs/species_cherry_blossom.svg",
    "colors": {
     "id": "cherry_blossom",
     "leaf_color": "#6FA552",
     "flower_color": "#F6B3C6",
     "bark_color": "#5E3229",
-    "leaf_shape": "species/cherry_blossom_leaf.svg",
-    "flower_shape": "species/cherry_blossom_flower.svg",
+    "leaf_shape": "trees/species/cherry_blossom_leaf.svg",
+    "flower_shape": "trees/species/cherry_blossom_flower.svg",
     "bark": {
      "lit": "#9A5A4A",
      "base": "#5E3229",
      "shadow": "#2E1712"
     },
     "leaf": {
-     "path": "species/cherry_blossom_leaf.svg",
+     "path": "trees/species/cherry_blossom_leaf.svg",
      "symbol": "small_oval",
      "base": "#6FA552",
      "tip": "#A9D37F",
@@ -917,7 +915,7 @@
      "scale": 0.7
     },
     "flower": {
-     "path": "species/cherry_blossom_flower.svg",
+     "path": "trees/species/cherry_blossom_flower.svg",
      "symbol": "sakura5",
      "petal": "#F6B3C6",
      "center": "#C2466B",
@@ -961,22 +959,21 @@
    "name": "Maple",
    "price": 300,
    "rarity": "rare",
-   "svg": "species/maple_preview.svg",
    "thumb": "shop/thumbs/species_maple.svg",
    "colors": {
     "id": "maple",
     "leaf_color": "#C2401F",
     "flower_color": "#E85A3A",
     "bark_color": "#7A4B2C",
-    "leaf_shape": "species/maple_leaf.svg",
-    "flower_shape": "species/maple_flower.svg",
+    "leaf_shape": "trees/species/maple_leaf.svg",
+    "flower_shape": "trees/species/maple_flower.svg",
     "bark": {
      "lit": "#B07A4E",
      "base": "#7A4B2C",
      "shadow": "#3F2615"
     },
     "leaf": {
-     "path": "species/maple_leaf.svg",
+     "path": "trees/species/maple_leaf.svg",
      "symbol": "palmate",
      "base": "#C2401F",
      "tip": "#F08A3C",
@@ -984,7 +981,7 @@
      "scale": 1.0
     },
     "flower": {
-     "path": "species/maple_flower.svg",
+     "path": "trees/species/maple_flower.svg",
      "symbol": "classic5",
      "petal": "#E85A3A",
      "center": "#F4C95D",
@@ -1012,22 +1009,21 @@
    "name": "Olive",
    "price": 300,
    "rarity": "rare",
-   "svg": "species/olive_preview.svg",
    "thumb": "shop/thumbs/species_olive.svg",
    "colors": {
     "id": "olive",
     "leaf_color": "#6F8466",
     "flower_color": "#F3EBCB",
     "bark_color": "#6E6658",
-    "leaf_shape": "species/olive_leaf.svg",
-    "flower_shape": "species/olive_flower.svg",
+    "leaf_shape": "trees/species/olive_leaf.svg",
+    "flower_shape": "trees/species/olive_flower.svg",
     "bark": {
      "lit": "#9C9282",
      "base": "#6E6658",
      "shadow": "#3A352D"
     },
     "leaf": {
-     "path": "species/olive_leaf.svg",
+     "path": "trees/species/olive_leaf.svg",
      "symbol": "narrow",
      "base": "#6F8466",
      "tip": "#A9B8A0",
@@ -1035,7 +1031,7 @@
      "scale": 0.9
     },
     "flower": {
-     "path": "species/olive_flower.svg",
+     "path": "trees/species/olive_flower.svg",
      "symbol": "tiny4",
      "petal": "#F3EBCB",
      "center": "#C9B25A",

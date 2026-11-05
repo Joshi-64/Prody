@@ -60,7 +60,7 @@ def test_harvest_requires_login():
 
 
 def test_garden_js_harvest_uses_set_done():
-    js = open(os.path.join(ROOT, 'static/js/garden.js')).read()
+    js = open(os.path.join(ROOT, 'static/ui/js/garden.js')).read()
     assert "'/tasks/done/'" in js and "'/tasks/complete/'" not in js
 
 
@@ -104,7 +104,7 @@ def test_set_done_rejects_garbage():
 
 
 def _norm(payload):
-    js = open(os.path.join(ROOT, 'static/js/garden.js')).read()
+    js = open(os.path.join(ROOT, 'static/ui/js/garden.js')).read()
     body = js[js.index('  var DUE_SOON_DAYS'):js.index('  function summaryLine(')]
     stubs = "var localStorage={getItem:function(){return null}},location={search:''},document={},ASSETS='';\n"
     prog = stubs + body + '\nprocess.stdout.write(JSON.stringify(normalize(' + json.dumps(payload) + ')));'
@@ -219,18 +219,18 @@ def test_heavy_user_feed_keeps_newest_bloom():
 
 
 def test_undo_toast_sits_above_branches_overlay():
-    css = open(os.path.join(ROOT, 'static/css/garden.css')).read()
+    css = open(os.path.join(ROOT, 'static/ui/css/garden.css')).read()
     toast = re.search(r'\.g-toast\{([^}]*)\}', css).group(1)
     br = re.search(r'\.g-branches\{([^}]*)\}', css).group(1)
     assert 'position:fixed' in toast
     z = lambda s: int(re.search(r'z-index:(\d+)', s).group(1))
     assert z(toast) > 80 and z(toast) > z(br)
-    js = open(os.path.join(ROOT, 'static/js/garden.js')).read()
+    js = open(os.path.join(ROOT, 'static/ui/js/garden.js')).read()
     assert 'document.body.appendChild(toastEl)' in js   # out of the scene's stacking context
 
 
 def test_harvest_and_undo_update_limb_label_immediately():
-    js = open(os.path.join(ROOT, 'static/js/garden.js')).read()
+    js = open(os.path.join(ROOT, 'static/ui/js/garden.js')).read()
     assert 'function markItem(it, done)' in js
     h = js[js.index('function harvest(it)'):js.index('var toastEl')]
     u = js[js.index('function undo(it)'):js.index('function harvest(it)')]
@@ -244,7 +244,7 @@ def test_harvest_and_undo_update_limb_label_immediately():
 
 def test_branches_cutscene_has_no_one_time_seen_flag():
     """Item 9: garden cutscene must play every tree tap — no sessionStorage seen flag."""
-    js = Path('static/js/garden.js').read_text()
+    js = Path('static/ui/js/garden.js').read_text()
     assert 'prody-branches-cut' not in js
     assert 'cutSeen' not in js and 'markCut' not in js
     assert "sessionStorage.setItem('prody-branches-cut'" not in js
@@ -263,7 +263,7 @@ def test_branches_cutscene_has_no_one_time_seen_flag():
 
 def test_roots_grow_in_has_no_one_time_seen_flag():
     """Item 9: roots grow-in plays every mount — no prody_roots_grown sessionStorage."""
-    js = Path('static/js/roots.js').read_text()
+    js = Path('static/ui/js/roots.js').read_text()
     assert 'prody_roots_grown' not in js
     assert 'var SEEN' not in js
     # reduced-motion still gets a fade intro

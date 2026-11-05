@@ -410,7 +410,7 @@ def public_profile(username):
     zen_sessions = query('SELECT COUNT(*) AS n FROM studysessions WHERE user_id = %s AND COALESCE(completed,1) = 1', (u['id'],), one=True)['n']
     tasks_done = stats.get('tasks_done') or 0
     total_min = stats.get('total_minutes') or 0
-    # Medal keys stay stable; img maps to existing static/spot/badge_*.svg (light+dark).
+    # Medal keys stay stable; img maps to existing static/ui/icons/badge_*.svg (light+dark).
     medals = [
         ('first_focus', 'badge_first_seed', 'First focus', 'Completed a Zen session', zen_sessions >= 1),
         ('first_bloom', 'badge_first_bloom', 'First bloom', 'Finished a deadline', done > 0),
@@ -593,7 +593,7 @@ def _static_exists(rel):
 def _with_art(it):
     """Garden items: the shop thumb from items.json if the file is there, else colour data for an inline SVG swatch."""
     if it['type'] == 'park':
-        lt, dk = (f"img/park/items/park_{it['css']}_{v}.svg" for v in ('light', 'dark'))
+        lt, dk = (f"ui/park/{str(it['css']).replace('_','-')}-{v}.svg" for v in ('light', 'dark'))
         it['thumb'] = lt if _static_exists(lt) else None
         it['thumb_dark'] = dk if _static_exists(dk) else None
         return it
@@ -666,15 +666,15 @@ def park_layers(prof, stage_idx, owned):
         on.discard('v_dog')
     def _f(k):
         n = 'v_reader_walk_phone_open' if (walk_open and k == 'v_reader_walk_phone') else k
-        return {'key': k, 'light': f'img/park/items/park_{n}_light.svg', 'dark': f'img/park/items/park_{n}_dark.svg'}
+        return {'key': k, 'light': f"ui/park/{str(n).replace('_','-')}-light.svg", 'dark': f"ui/park/{str(n).replace('_','-')}-dark.svg"}
     return [_f(k) for k in PARK_ORDER if k in on]
 
 
 def park_scene(prof, stage_idx, owned, owner_id=None, show_friends=False):
     under = None
     if (stage_idx or 0) >= PARK_STAGE['mature']:
-        under = {'key': 'v_under_tree', 'light': 'img/park/items/park_v_under_tree_canvas_light.svg',
-                 'dark': 'img/park/items/park_v_under_tree_canvas_dark.svg'}
+        under = {'key': 'v_under_tree', 'light': 'ui/park/v-under-tree-canvas-light.svg',
+                 'dark': 'ui/park/v-under-tree-canvas-dark.svg'}
     layers = park_layers(prof, stage_idx, owned)
     if under:
         layers.append(under)  # full-canvas layer: roots.js rewrites .fp-banner-tree, so he lives in .fp-park
@@ -686,7 +686,7 @@ def park_scene(prof, stage_idx, owned, owner_id=None, show_friends=False):
     if 'v_reader_bench' in slots and slots.index('v_reader_bench') >= len(friends):
         # nobody on the bench: show the bought bench itself instead of an empty spot
         i = slots.index('v_reader_bench'); slots.pop(i)
-        layers = [({'key': 'bench', 'light': 'img/park/items/park_bench_light.svg', 'dark': 'img/park/items/park_bench_dark.svg'}
+        layers = [({'key': 'bench', 'light': 'ui/park/bench-light.svg', 'dark': 'ui/park/bench-dark.svg'}
                    if L['key'] == 'v_reader_bench' else L) for L in layers]
     return {'layers': layers, 'under_tree': under, 'friends': friends, 'visitor_slots': slots}
 
@@ -1080,10 +1080,10 @@ def quick_add():
 
 # r7g: the sage course tint's dot was #68AB3A (read as crown green); it is yellow-lime so chip dot + flower stand out
 def _load_class_tints():
-    """ONE source for class colours: static/data/class_tints.json (also fetched by zen.html ?v=2)."""
+    """ONE source for class colours: static/ui/data/class_tints.json (also fetched by zen.html ?v=2)."""
     import json as _json
     try:
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'data', 'class_tints.json')) as fh:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'ui', 'data', 'class_tints.json')) as fh:
             return {k.upper(): v.upper() for k, v in _json.load(fh)['tints'].items()}
     except Exception:
         return {}

@@ -8,15 +8,13 @@ inside a stylesheet also changes the stylesheet's URL. File hashes are cached by
 CSS entry also records the hash of every /static file it references, and is reused only while the
 CSS file's own key and each dependency's (stat-cached, so cheap) hash are unchanged.
 
-Tree kit art is loaded by tree_kit.js from kit.json file names, so it can't be rewritten in HTML:
-pages get `window.__AV={dir:hash}` (one hash per kit dir, over every file in it) and tree_kit.js
-appends ?v=<dir hash>. The static handler accepts that dir hash for files inside that dir.
+Optional dir-hash manifest for hashed kit folders (none currently). Pages still get window.__AV for forward compatibility.
 """
 import hashlib, os, re, time
 from flask import request
 
 STATIC_ROOT = None
-KIT_DIRS = ('img/oak_kit', 'img/soil_v1f')
+KIT_DIRS = ()  # oak pixel kit removed; clay garden is Home
 _URL_RE = re.compile(r'''(?<=["'(=\s])/static/([A-Za-z0-9_./@-]+\.[A-Za-z0-9]+)(\?v=[A-Za-z0-9._-]*)?(?=["')\s&>])''')
 _cache = {}
 DIR_TTL = 2.0
@@ -91,11 +89,6 @@ def dir_hash(rel):
 
 def manifest():
     m = {d: dir_hash(d) for d in KIT_DIRS if os.path.isdir(os.path.join(STATIC_ROOT, d))}
-    # nav-perf: kit.json by its own file hash, the same ?v= the HTML rewrite gives the dashboard preload,
-    # so tree_kit.js and the preload share one immutable cache entry on every page.
-    kh = file_hash('img/oak_kit/kit.json')
-    if kh:
-        m['img/oak_kit/kit.json'] = kh
     return m
 
 

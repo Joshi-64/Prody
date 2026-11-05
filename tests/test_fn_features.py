@@ -45,6 +45,24 @@ def _client(uid, username=None, role='student'):
     return c
 
 
+def _set_demo_label(on: bool):
+    """Opt-in/out DEMO_LABEL at runtime (fn_flags is imported into dm/forums at load)."""
+    import fn_flags, dm, forums
+    os.environ['PRODY_DEMO_LABEL'] = '1' if on else '0'
+    fn_flags.DEMO_LABEL = bool(on)
+    dm.DEMO_LABEL = bool(on)
+    forums.DEMO_LABEL = bool(on)
+
+
+def _assert_demo_chrome(html: bytes | str, *, expect_on: bool):
+    raw = html if isinstance(html, str) else html.decode('utf-8', 'replace')
+    if expect_on:
+        assert 'Demo only' in raw and 'chip demo' in raw
+    else:
+        assert 'Demo only' not in raw and 'chip demo' not in raw
+
+
+
 def test_dm_requires_friendship():
     a, an = _user()
     b, bn = _user()
@@ -76,8 +94,19 @@ def test_dm_send_and_poll():
     # since_id filters
     poll2 = cb.get(f'/messages/{an}/poll?since_id={mid}', headers={'Accept': 'application/json'})
     assert poll2.get_json()['messages'] == []
-    # inbox renders
-    assert b'Demo only' in ca.get('/messages').data
+    # inbox renders — design hooks always; demo chip only when opted in
+    inbox = ca.get('/messages')
+    assert inbox.status_code == 200
+    assert b'class="fnx"' in inbox.data
+    _assert_demo_chrome(inbox.data, expect_on=False)
+    _set_demo_label(True)
+    try:
+        inbox_on = ca.get('/messages')
+        assert inbox_on.status_code == 200
+        assert b'class="fnx"' in inbox_on.data
+        _assert_demo_chrome(inbox_on.data, expect_on=True)
+    finally:
+        _set_demo_label(False)
     assert ca.get(f'/messages/{bn}').status_code == 200
 
 
@@ -90,8 +119,18 @@ def test_boards_create_reply_and_tabs():
     query("INSERT INTO userprofiles (user_id, university) VALUES (%s,'Georgia State University')",
           (uid,), commit=True)
     c = _client(uid, name)
-    assert c.get('/boards?tab=university').status_code == 200
-    assert b'Demo only' in c.get('/boards?tab=university').data
+    boards = c.get('/boards?tab=university')
+    assert boards.status_code == 200
+    assert b'class="fnx"' in boards.data
+    _assert_demo_chrome(boards.data, expect_on=False)
+    _set_demo_label(True)
+    try:
+        boards_on = c.get('/boards?tab=university')
+        assert boards_on.status_code == 200
+        assert b'class="fnx"' in boards_on.data
+        _assert_demo_chrome(boards_on.data, expect_on=True)
+    finally:
+        _set_demo_label(False)
     r = c.post('/boards/new', data={'scope': 'university', 'title': 'Hello board', 'body': 'First post'},
                follow_redirects=False)
     assert r.status_code == 302
@@ -226,14 +265,33 @@ def test_admin_pin_and_hide():
 
 
 def test_design_classes_on_pages():
+    """Production design contract: .fnx / layout hooks always; demo chip is opt-in only."""
     a, an = _user(); b, bn = _user(); _friend(a, b)
     c = _client(a, an)
+    # default DEMO_LABEL off
+    _set_demo_label(False)
     inbox = c.get('/messages').get_data(as_text=True)
-    assert 'class="fnx"' in inbox and 'chip demo' in inbox and 'card li' in inbox
+    assert 'class="fnx"' in inbox, 'inbox must expose .fnx design hook'
+    assert 'card li' in inbox
+    _assert_demo_chrome(inbox, expect_on=False)
     thread = c.get(f'/messages/{bn}').get_data(as_text=True)
+    assert 'class="fnx' in thread  # fnx or fnx fnx-thread-page
     assert 'bub' in thread and 'comp' in thread and 'arrow_back' in thread
     boards = c.get('/boards?tab=university').get_data(as_text=True)
-    assert 'seg' in boards and 'chip demo' in boards
+    assert 'class="fnx"' in boards, 'boards must expose .fnx design hook'
+    assert 'seg' in boards
+    _assert_demo_chrome(boards, expect_on=False)
+    # opt-in DEMO_LABEL shows demo chrome without losing hooks
+    _set_demo_label(True)
+    try:
+        inbox_on = c.get('/messages').get_data(as_text=True)
+        assert 'class="fnx"' in inbox_on and 'card li' in inbox_on
+        _assert_demo_chrome(inbox_on, expect_on=True)
+        boards_on = c.get('/boards?tab=university').get_data(as_text=True)
+        assert 'class="fnx"' in boards_on and 'seg' in boards_on
+        _assert_demo_chrome(boards_on, expect_on=True)
+    finally:
+        _set_demo_label(False)
 
 
 def test_turso_arg_float_is_json_number_not_string():

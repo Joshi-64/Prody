@@ -1,6 +1,6 @@
 {% extends 'base.html' %}{% block title %}Grades{% endblock %}
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
-{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='spot/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='ui/css/pages_func.css') }}?v=21">{% endblock %}
+{% macro spot(name, w, h, cls='') %}<img class="theme-light-only {{ cls }}" src="{{ url_for('static', filename='ui/icons/' ~ name ~ '.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt=""><img class="theme-dark-only {{ cls }}" src="{{ url_for('static', filename='ui/icons/' ~ name ~ '_dark.svg') }}?v=1" width="{{ w }}" height="{{ h }}" alt="">{% endmacro %}
 {% block content %}
 <div class="page-head"><div class="fp-head"><span class="fp-icon">{{ spot('icon_grades',48,48) }}</span><div><span class="eyebrow">Grades</span><h1>Know where you stand.</h1><p class="muted">Log scores with their syllabus weights. Prody does the math.</p></div></div>
   {% if overall is not none %}<div class="card tile tile-butter stat fp-stat" style="padding:16px 22px"><div class="stat-icon"><span class="ms">school</span></div><div><div class="stat-val">{{ overall }}% <span class="badge b-indigo">{{ overall_letter }}</span></div><div class="stat-label">Average across classes</div></div></div>{% endif %}</div>

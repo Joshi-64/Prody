@@ -6,7 +6,7 @@ os.environ.setdefault('PRODY_SQLITE_PATH', os.path.join(_TMP, 'cache.sqlite3'))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import app as prody_app  # noqa: E402
 
-ASSET = '/static/css/app.css'
+ASSET = '/static/ui/css/app.css'
 
 
 def client():
@@ -16,7 +16,7 @@ def client():
 
 def test_versioned_static_is_immutable_for_a_year():
     import assets  # perf_r1: only the current content hash earns the long cache
-    r = client().get(ASSET + '?v=' + assets.file_hash('css/app.css'))
+    r = client().get(ASSET + '?v=' + assets.file_hash('ui/css/app.css'))
     assert r.status_code == 200
     cc = r.headers['Cache-Control']
     assert 'max-age=31536000' in cc and 'immutable' in cc and 'public' in cc

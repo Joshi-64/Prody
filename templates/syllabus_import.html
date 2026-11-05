@@ -1,5 +1,5 @@
 {% extends 'base.html' %}{% block title %}Syllabus · {{ course.course_name }}{% endblock %}
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages_func.css') }}?v=21">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='ui/css/pages_func.css') }}?v=21">{% endblock %}
 {% block content %}
 <main style="max-width:640px;margin:0 auto">
   <div class="page-head"><div><a class="small muted" href="{{ url_for('user_courses_bp.add_courses') }}">← Classes</a>

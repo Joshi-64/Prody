@@ -1,0 +1,133 @@
+{
+ "id": "olive",
+ "name": "Olive",
+ "aspect": 0.8,
+ "opacity": 0.4,
+ "opacity_dark": 0.36,
+ "colors": {
+  "base": "#8FA187",
+  "lit": "#B1BDAB",
+  "mid": "#9AAA93",
+  "shadow": "#707E69",
+  "offset_shadow": "#40483D",
+  "gradient": {
+   "type": "radial",
+   "cx": 0.36,
+   "cy": 0.32,
+   "r": 0.72,
+   "stops": [
+    [
+     0,
+     "#B1BDAB"
+    ],
+    [
+     0.45,
+     "#9AAA93"
+    ],
+    [
+     0.75,
+     "#8FA187"
+    ],
+    [
+     1,
+     "#707E69"
+    ]
+   ]
+  }
+ },
+ "offset_shadow": {
+  "dx": 0.025,
+  "dy": 0.035,
+  "unit": "box width",
+  "opacity": 0.18,
+  "opacity_dark": 0.38
+ },
+ "sheen": {
+  "when": "cx+cy<0.9",
+  "dx": -0.32,
+  "dy": -0.36,
+  "rx": 0.42,
+  "ry": 0.26,
+  "unit": "lobe r",
+  "rotate": -25,
+  "fill": "#FFFFFF",
+  "opacity": 0.22
+ },
+ "lobes": [
+  {
+   "cx": 0.24,
+   "cy": 0.36,
+   "r": 0.12
+  },
+  {
+   "cx": 0.44,
+   "cy": 0.22,
+   "r": 0.12
+  },
+  {
+   "cx": 0.66,
+   "cy": 0.26,
+   "r": 0.12
+  },
+  {
+   "cx": 0.82,
+   "cy": 0.44,
+   "r": 0.11
+  },
+  {
+   "cx": 0.16,
+   "cy": 0.62,
+   "r": 0.1
+  },
+  {
+   "cx": 0.38,
+   "cy": 0.52,
+   "r": 0.11
+  },
+  {
+   "cx": 0.6,
+   "cy": 0.5,
+   "r": 0.12
+  },
+  {
+   "cx": 0.78,
+   "cy": 0.68,
+   "r": 0.1
+  },
+  {
+   "cx": 0.48,
+   "cy": 0.74,
+   "r": 0.1
+  },
+  {
+   "cx": 0.3,
+   "cy": 0.8,
+   "r": 0.08
+  }
+ ],
+ "svg": "trees/species/olive_canopy.svg",
+ "svg_dark": "trees/species/olive_canopy_dark.svg",
+ "stub": "trees/species/olive_stub.svg",
+ "stub_dark": "trees/species/olive_stub_dark.svg",
+ "trunk": {
+  "twisted": true,
+  "note": "centreline x += 2*sin(i/6)+8*sin(i/2.2) over 31 samples (sway \u00b18px) \u2014 see scene() in canopy.py"
+ },
+ "version": "v5-foliage",
+ "render": {
+  "mode": "standalone <image>; self-contained SVG, merged cluster <path>s (one per tone), no <use>/defs/filters/masks",
+  "viewBox": [
+   0,
+   0,
+   328,
+   268
+  ],
+  "pad_px_at_W300": 14,
+  "anchor": "(0.5,1.0) of the inner box = viewBox x=164, y=viewBoxH-14",
+  "opacity_note": "foliage is opaque art; apply 'opacity' only if Coder wants see-through (recommended 1.0 now)"
+ },
+ "lobes_note": "lobes kept for reference/hit-testing only; not needed at runtime",
+ "webp": "trees/species/olive_canopy.webp",
+ "webp_dark": "trees/species/olive_canopy_dark.webp",
+ "webp_scale": 2
+}

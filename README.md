@@ -22,6 +22,24 @@ Prody is an all-in-one study hub for students, built at Georgia State (Software 
 | Admin Console | Platform stats, change roles, delete users. |
 | Zen & Whiteboard | Zen focus room (timer + plant) and a simple whiteboard. |
 
+
+## Architecture (static assets)
+
+```
+static/
+  garden/     Clay Home scenes, branch art, tree-scene.js
+  shop/       Store catalog (items.json), thumbs, pots/sky/soil/leaves/bloom/decor
+  trees/      Species art + roots sprigs
+  zen/        Zen flower frame sequences (tulip)
+  ui/         css, js, fonts, icons, park layers, vendor, audio, data
+```
+
+Home uses the clay `garden/` scene (not the retired oak pixel kit). Manual seed scripts (`seed.py`, `seed_demo.py`, `pp_seed.py`, `seed_testers.py`) are CLI-only; preview/prod boot does not auto-seed.
+
+## Environment variable names
+
+Configure via env (values not documented here): `PRODY_DB`, `PRODY_SQLITE_PATH`, `PRODY_DB_HOST`, `PRODY_DB_USER`, `PRODY_DB_PASSWORD`, `PRODY_DB_NAME`, `PRODY_USE_TURSO`, `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `PRODY_SECRET_KEY`, `PRODY_AI_KEY`, `OPENAI_API_KEY`, `PRODY_AI_BASE_URL`, `PRODY_AI_MODEL`, `PRODY_DEMO_LABEL`, `PRODY_ADMIN_PASSWORD`, `PRODY_STUDENT_PASSWORD`, `JITSI_APP_ID`, `JITSI_API_KEY`, `JITSI_API_KEY_ID`, `VERCEL_URL`.
+
 ## Setup (MySQL — default)
 
 ```bash
@@ -84,7 +102,7 @@ grades.py           grade tracker
 profiles.py         profiles, avatar upload, decorations catalog, Store
 buddy.py            Study Buddy chat
 schema.sql          MySQL 8 schema   (schema_sqlite.sql for local mode)
-templates/, static/ UI (design system in static/css/app.css, light/dark theme)
+templates/, static/ UI (design system in static/ui/css/app.css, light/dark theme)
 ```
 
 ## Database tables
@@ -93,7 +111,7 @@ templates/, static/ UI (design system in static/css/app.css, light/dark theme)
 
 ## Design (v4: Prody the plant)
 
-Prody, the study buddy, is also each student's plant. Plant logic and the SVG renderer are in `plant.py`. Styles are in `static/css/app.css`.
+Prody, the study buddy, is also each student's plant. Plant logic and the SVG renderer are in `plant.py`. Styles are in `static/ui/css/app.css`.
 - **Growth:** `growth = 0.58 * min(hours/45, 1)^0.85 + 0.42 * course_progress`.
   - Course progress is half the share of the semester that has passed, plus half the share of deadlines and to-dos/concepts completed.
   - Hours alone top out around Bloom, so Flourishing also needs semester progress.

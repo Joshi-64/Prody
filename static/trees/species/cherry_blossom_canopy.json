@@ -1,0 +1,129 @@
+{
+ "id": "cherry_blossom",
+ "name": "Cherry blossom",
+ "aspect": 0.88,
+ "opacity": 0.5,
+ "opacity_dark": 0.42,
+ "colors": {
+  "base": "#F2AFC3",
+  "lit": "#F6C7D5",
+  "mid": "#F3B7C9",
+  "shadow": "#BD8898",
+  "offset_shadow": "#6D4F58",
+  "gradient": {
+   "type": "radial",
+   "cx": 0.36,
+   "cy": 0.32,
+   "r": 0.72,
+   "stops": [
+    [
+     0,
+     "#F6C7D5"
+    ],
+    [
+     0.45,
+     "#F3B7C9"
+    ],
+    [
+     0.75,
+     "#F2AFC3"
+    ],
+    [
+     1,
+     "#BD8898"
+    ]
+   ]
+  }
+ },
+ "offset_shadow": {
+  "dx": 0.025,
+  "dy": 0.035,
+  "unit": "box width",
+  "opacity": 0.18,
+  "opacity_dark": 0.38
+ },
+ "sheen": {
+  "when": "cx+cy<0.9",
+  "dx": -0.32,
+  "dy": -0.36,
+  "rx": 0.42,
+  "ry": 0.26,
+  "unit": "lobe r",
+  "rotate": -25,
+  "fill": "#FFFFFF",
+  "opacity": 0.22
+ },
+ "lobes": [
+  {
+   "cx": 0.16,
+   "cy": 0.62,
+   "r": 0.13
+  },
+  {
+   "cx": 0.3,
+   "cy": 0.4,
+   "r": 0.15
+  },
+  {
+   "cx": 0.46,
+   "cy": 0.3,
+   "r": 0.16
+  },
+  {
+   "cx": 0.62,
+   "cy": 0.32,
+   "r": 0.16
+  },
+  {
+   "cx": 0.78,
+   "cy": 0.42,
+   "r": 0.15
+  },
+  {
+   "cx": 0.88,
+   "cy": 0.62,
+   "r": 0.12
+  },
+  {
+   "cx": 0.36,
+   "cy": 0.66,
+   "r": 0.14
+  },
+  {
+   "cx": 0.58,
+   "cy": 0.62,
+   "r": 0.15
+  },
+  {
+   "cx": 0.73,
+   "cy": 0.7,
+   "r": 0.12
+  },
+  {
+   "cx": 0.5,
+   "cy": 0.5,
+   "r": 0.17
+  }
+ ],
+ "svg": "trees/species/cherry_blossom_canopy.svg",
+ "svg_dark": "trees/species/cherry_blossom_canopy_dark.svg",
+ "stub": "trees/species/cherry_blossom_stub.svg",
+ "stub_dark": "trees/species/cherry_blossom_stub_dark.svg",
+ "version": "v5-foliage",
+ "render": {
+  "mode": "standalone <image>; self-contained SVG, merged cluster <path>s (one per tone), no <use>/defs/filters/masks",
+  "viewBox": [
+   0,
+   0,
+   328,
+   292
+  ],
+  "pad_px_at_W300": 14,
+  "anchor": "(0.5,1.0) of the inner box = viewBox x=164, y=viewBoxH-14",
+  "opacity_note": "foliage is opaque art; apply 'opacity' only if Coder wants see-through (recommended 1.0 now)"
+ },
+ "lobes_note": "lobes kept for reference/hit-testing only; not needed at runtime",
+ "webp": "trees/species/cherry_blossom_canopy.webp",
+ "webp_dark": "trees/species/cherry_blossom_canopy_dark.webp",
+ "webp_scale": 2
+}

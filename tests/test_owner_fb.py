@@ -17,21 +17,22 @@ def test_dashboard_has_only_current_tree():
     # garden home (clay scene) replaced the kit tree: one live tree, none of the retired roots / kit views
     html = client_for(make_user()).get('/dashboard').get_data(as_text=True)
     assert 'data-garden' in html and 'roots-slot' not in html and 'data-roots-src' not in html
-    assert '/static/js/roots.js' not in html and 'branch_kit.js' not in html and '/static/js/tree_kit.js' not in html
+    assert '/static/ui/js/roots.js' not in html and 'branch_kit.js' not in html and '/static/ui/js/tree_kit.js' not in html
     assert re.search(r'data-garden(?![^>]*\bhidden\b)', html)
 
 
-def test_tree_kit_no_old_tree_fallback_and_handles_bfcache():
-    js = read('static/js/tree_kit.js')
-    assert 'roots-slot' not in js and 'keeping old dashboard tree' not in js
-    assert "addEventListener('pageshow'" in js and 'e.persisted' in js
+def test_oak_pixel_kit_removed_from_tree():
+    # Leader drop: clay garden Home replaced the oak pixel kit stack.
+    assert not os.path.exists(os.path.join(ROOT, 'static', 'ui', 'js', 'tree_kit.js'))
+    assert not os.path.exists(os.path.join(ROOT, 'static', 'img', 'oak_kit'))
+    assert not os.path.exists(os.path.join(ROOT, 'static', 'trees', 'oak'))
 
 
 # 2 — prefetch + caching
 def test_prefetch_rules_and_hover_prefetch():
     html = client_for(make_user()).get('/dashboard').get_data(as_text=True)
     assert 'speculationrules' not in html  # r3: cost WebKit ~25-30ms/page, never fired headless
-    js = read('static/js/shell.js')
+    js = read('static/ui/js/shell.js')
     assert "relList.supports('prefetch')" in js and 'var OK=/^\\/(dashboard|tasks|calendar' in js  # nav-perf: allowlist, not denylist
     assert "'touchstart'" in js and "'pointerenter'" in js and "rel='prefetch'" in js
 
@@ -39,7 +40,7 @@ def test_prefetch_rules_and_hover_prefetch():
 def test_spot_art_urls_are_versioned_and_immutable():
     u = make_user(); c = client_for(u)
     html = c.get('/calendar').get_data(as_text=True) + c.get('/tasks').get_data(as_text=True)
-    for src in re.findall(r'src="(/static/spot/[^"]+)"', html):
+    for src in re.findall(r'src="(/static/ui/icons/[^"]+)"', html):
         assert '?v=' in src, src
         r = c.get(src)
         assert 'immutable' in r.headers.get('Cache-Control', ''), src
@@ -48,30 +49,30 @@ def test_spot_art_urls_are_versioned_and_immutable():
 
 # 3 — atomic theme switch
 def test_theme_switch_is_atomic():
-    css = read('static/css/app.css'); base = read('templates/base.html'); js = read('static/js/app.js')
+    css = read('static/ui/css/app.css'); base = read('templates/base.html'); js = read('static/ui/js/app.js')
     body = re.search(r'\nbody\{[^}]*\}', css).group(0)
     assert 'transition' not in body
     assert ':root.theme-switching *' in css and 'transition:none!important' in css
     head = base.split('</head>')[0]
     assert 'prodySetTheme' in head and "localStorage.getItem('prody-theme')" in head
-    assert head.index('prody-theme') < head.index('css/app.css')  # applied before first paint
+    assert head.index('prody-theme') < head.index('ui/css/app.css')  # applied before first paint
     assert 'prodySetTheme(' in js and 'root.dataset.theme=n' not in js
 
 
 # 4 — icons + planner output
 def _subset():
-    return set(re.search(r'icon_names=([a-z_0-9,]+)', read('static/css/fonts.css')).group(1).split(','))
+    return set(re.search(r'icon_names=([a-z_0-9,]+)', read('static/ui/css/fonts.css')).group(1).split(','))
 
 
 def test_every_literal_material_icon_is_in_font_subset():
     names = _subset(); miss = set()
-    files = glob.glob(os.path.join(ROOT, 'templates', '**', '*.html'), recursive=True) + glob.glob(os.path.join(ROOT, 'static/js/*.js'))
+    files = glob.glob(os.path.join(ROOT, 'templates', '**', '*.html'), recursive=True) + glob.glob(os.path.join(ROOT, 'static/ui/js/*.js'))
     for f in files:
         for m in re.finditer(r'class=["\']?[^"\'>]*\bms\b[^"\'>]*["\']?[^>]*>\s*([a-z_0-9]+)\s*<', open(f, encoding='utf-8').read()):
             if m.group(1) not in names:
                 miss.add((m.group(1), os.path.basename(f)))
     assert not miss, miss
-    subs = re.findall(r'icon_names=([a-z_0-9,]+)', read('static/css/fonts.css'))  # perf_r1: self-hosted subset
+    subs = re.findall(r'icon_names=([a-z_0-9,]+)', read('static/ui/css/fonts.css'))  # perf_r1: self-hosted subset
     assert len(subs) == 1 and subs[0].split(',') == sorted(subs[0].split(','))
 
 
@@ -113,7 +114,7 @@ def test_tree_placeholder_is_skeleton_with_reserved_height():
     # 0px shift: the stage is fixed full-screen and paints the still artwork before WebGL is ready
     html = client_for(make_user()).get('/dashboard').get_data(as_text=True)
     assert 'class="g-stage"' in html
-    css = read('static/css/garden.css')
+    css = read('static/ui/css/garden.css')
     assert '.garden{position:fixed;inset:0' in css
     # perf: the fallback JPG is no longer a CSS placeholder; TreeScene loads it only when WebGL/scene loading fails
     assert "fallback.jpg'" not in css and "fallback.jpg)" not in css
@@ -121,7 +122,7 @@ def test_tree_placeholder_is_skeleton_with_reserved_height():
 
 
 def test_prefetch_skips_writing_get_routes():
-    js = read('static/js/shell.js'); base = read('templates/base.html')
+    js = read('static/ui/js/shell.js'); base = read('templates/base.html')
     ok = js.split('var OK=')[1].split(',K=')[0]  # nav-perf: allowlist of read-only pages only
     assert 'ai_' not in ok and 'automatic_add' not in ok and 'logout' not in ok
     assert 'speculationrules' not in base
@@ -132,7 +133,7 @@ def test_dashboard_r3_assets():
     html = client_for(make_user()).get('/dashboard').get_data(as_text=True)
     assert 'roots.css' not in html and 'rel="preload"' not in html   # WebKit fetched as=fetch preloads twice
     assert html.count("fetch('/api/tree'") == 1                       # one tree-data fetch, started while parsing
-    js = read('static/js/garden.js')
+    js = read('static/ui/js/garden.js')
     assert 'window.__gardenP' in js
 
 

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}{% block title %}Home{% endblock %}
 {% from '_macros.html' import avatar %}
 {% block head %}<script>document.documentElement.classList.add('is-garden');/* start the garden fetch while the page parses */window.__gardenP=fetch('/api/tree',{credentials:'same-origin',headers:{Accept:'application/json'},redirect:'manual'});</script>
-<link rel="stylesheet" href="/static/css/garden.css?v=12">{% endblock %}
+<link rel="stylesheet" href="/static/ui/css/garden.css?v=12">{% endblock %}
 {% block content %}
 <div class="garden" data-garden data-assets="/static/garden/" data-tasks-url="{{ url_for('tasks_bp.manage_tasks') }}" data-classes-url="{{ url_for('user_courses_bp.add_courses') }}">
   <div class="g-wash" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
@@ -80,7 +80,7 @@
   </div>
 </template>
 <script src="/static/garden/tree-scene.js?v=4" defer></script>
-<script src="/static/js/garden.js?v=8" defer></script>
+<script src="/static/ui/js/garden.js?v=8" defer></script>
 <script>document.addEventListener('DOMContentLoaded',function(){var b=document.querySelector('[data-g-almanac]'),s=document.querySelector('[data-g-sheet]');if(!b||!s)return;
 b.addEventListener('click',function(){if(!window.prodyOpenSheet)return;window.prodyOpenSheet(function(body){body.appendChild(document.getElementById('g-almanac').content.cloneNode(true));
 var m=body.querySelector('[data-g-mode]');m.checked=window.prodyHomeMode()==='garden';m.addEventListener('change',function(){window.prodyHomeMode(m.checked?'garden':'clean');});

@@ -29,7 +29,7 @@ def test_missing_due_saves_with_nudge():
 def test_quickadd_js_shows_error_inline_and_cache_bumped():
     import os
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    js = open(os.path.join(root, 'static/js/quickadd.js')).read()
+    js = open(os.path.join(root, 'static/ui/js/quickadd.js')).read()
     assert 'qa-err' in js and 'err.textContent=d.error' in js
     assert 'quickadd.js?v=2' in open(os.path.join(root, 'templates/base.html')).read()
 

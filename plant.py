@@ -352,7 +352,7 @@ def render_plant(st, size=None, scene=True, cls='', grow=False, fit=False):
     name = escape((st or {}).get('name') or 'Prody')
     if (st or {}).get('_show_pot'):
         return Markup(_sprig_in_pot(st, n, px, style, name, cls))
-    return Markup(f'<img class="sprig sprig-{n} {escape(cls)}{" sprig-grow" if grow else ""}" src="/static/img/roots/sprig_{n}.svg?v=1" '
+    return Markup(f'<img class="sprig sprig-{n} {escape(cls)}{" sprig-grow" if grow else ""}" src="/static/trees/roots/sprig_{n}.svg?v=1" '
                   f'width="{px}" height="{px}" style="{style};display:block;margin:0 auto" alt="{name}, growth stage {n} of 3">')
 
 
@@ -379,7 +379,7 @@ def _sprig_in_pot(st, n, px, style, name, cls):
     return (f'<svg class="sprig sprig-pot sprig-{n} {escape(cls)}" viewBox="0 0 120 120" width="{px}" height="{px}" '
             f'style="{style};display:block;margin:0 auto" role="img" aria-label="{name}, growth stage {n} of 3">'
             f'<ellipse cx="60" cy="113" rx="30" ry="3.5" fill="#3A2A1E" opacity=".12"/>'
-            f'<image href="/static/img/roots/sprig_{n}.svg?v=1" x="22" y="6" width="76" height="76"/>'
+            f'<image href="/static/trees/roots/sprig_{n}.svg?v=1" x="22" y="6" width="76" height="76"/>'
             f'<path d="M33,79 H87 L80,108 Q79,112 75,112 H45 Q41,112 40,108 Z" fill="{body}"/>'
             f'{deco}'
             f'<rect x="28" y="71" width="64" height="10" rx="3" fill="{rim}"/>'
@@ -527,11 +527,11 @@ def _render_clay_plant(st, size=None, scene=True, cls='', grow=False, fit=False)
 
 
 # ------------------------------------------------------------------ 3D (Three.js) progressive enhancement
-PLANT3D_JS = '/static/js/plant3d.js'
+PLANT3D_JS = '/static/ui/js/plant3d.js'
 
 
 def state_3d(st, scene=True, grow=False):
-    """The JSON-safe subset of a plant state that static/js/plant3d.js needs."""
+    """The JSON-safe subset of a plant state that static/ui/js/plant3d.js needs."""
     return {'seed': int(st.get('seed') or 1), 'growth': float(st.get('growth') or 0), 'stage_idx': int(st.get('stage_idx') or 0),
             'vitality': float(st.get('vitality', 1)), 'mood': st.get('mood') or 'okay', 'pot': st.get('pot') or 'pot_terracotta',
             'accs': list(st.get('accs') or []), 'scene': (st.get('scene') or '') if scene else '',

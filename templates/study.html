@@ -42,7 +42,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/session_moment.js"></script>
+<script src="/static/ui/js/session_moment.js"></script>
 <script>
 let total=25*60,left=total,timer=null,isBreak=false,startedLeft=total;
 const $=id=>document.getElementById(id), C=791.7;
@@ -67,5 +67,5 @@ try{const cm=+localStorage.getItem('prody_focus_custom');if(cm>=5&&cm<=180)$('cu
 {const ts=testSecs();if(ts){total=left=ts;}}$('customMin').addEventListener('change',()=>{customMins();$('customBtn').click();});
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('on'));b.classList.add('on');clearInterval(timer);timer=null;isBreak=b.hasAttribute('data-break');total=left=b.dataset.mode==='custom'?customMins()*60:+b.dataset.mode*60;if(!isBreak){const ts=testSecs();if(ts)total=left=ts;}$('phase').textContent=isBreak?'Take a breather':'Ready to focus';setRunning(false);draw();});
 draw();
-</script><script src="/static/js/vendor/gsap.min.js?v=1" defer></script><script src="/static/js/focus_bloom.js?v=35" defer></script>
+</script><script src="/static/ui/vendor/gsap.min.js?v=1" defer></script><script src="/static/ui/js/focus_bloom.js?v=35" defer></script>
 {% endblock %}

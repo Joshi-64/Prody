@@ -6,7 +6,7 @@ from unittest import mock  # noqa: E402
 from _jobs_helpers import client_for, make_user, query  # noqa: E402
 
 GONE = ('video study', 'fivehive')  # acad-r1: "Study rooms" More-hub placeholder is intentional
-NAP = 'spot/nap_A_potted_drowsy_bud.png'
+NAP = 'ui/icons/nap_A_potted_drowsy_bud.png'
 
 
 def _html(c, path):
@@ -30,14 +30,15 @@ def test_zen_growth_frames_and_pick():
     html = _html(client_for(make_user()), '/zen')
     assert 'js/zenGrowth.js' in html and 'zen/tulip/tulip_0001.webp' in html   # yellow tulip is the default
     assert 'data-fl="tulip">Yellow tulip</button>' in html
-    assert 'data-fl="peony"' not in html and 'Pink peony' not in html and 'Pink rose' not in html
+    assert 'data-fl="camellia">Pink rose</button>' in html
+    assert 'data-fl="peony"' not in html and 'Pink peony' not in html
     assert '03_bloom_yellow_tulip' not in html and '04_bud_pink_rose' not in html
-    assert "if(f!=='tulip')f='tulip'" in html  # saved peony falls back
+    assert "f==='peony'" in html and "normalize(" in html  # old peony migrates to camellia
     here = os.path.dirname(__file__)
-    # peony frames stay on disk (unused by picker); tulip is the live set
-    for fl in ('tulip', 'peony'):
+    for fl in ('tulip', 'camellia'):
         d = os.path.join(here, '..', 'static', 'zen', fl)
         assert len([f for f in os.listdir(d) if f.endswith('.webp')]) == 220
+    assert not os.path.exists(os.path.join(here, '..', 'static', 'zen', 'peony'))
 
 
 def test_todo_all_done_uses_nap_art():
@@ -91,7 +92,7 @@ def test_zen_has_no_stage_pngs_or_streak_ui_and_hides_drawer():
     html = _html(client_for(make_user()), '/zen')
     assert 'zen_stage_' not in html and 'zFlower' not in html and 'class="zen-hero"' not in html
     assert 'Day streak' not in html and 'day streak' not in html
-    assert 'Pink peony' not in html and 'Pink rose' not in html and 'Yellow tulip' in html
+    assert 'Pink peony' not in html and 'Pink rose' in html and 'Yellow tulip' in html
     assert 'is-zen' in html
     assert 'zGrowImgB' in html and 'zfl-back' in html  # cross-fade pair
     assert 'js/zenGrowth.js' in html

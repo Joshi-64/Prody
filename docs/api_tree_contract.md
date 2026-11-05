@@ -92,7 +92,7 @@ It reuses logic already in `profiles.roots_data()` (`/roots/data`), `plant.py` (
   ],
   "overflow": [],
   "park": {
-    "layers": [{"key": "base", "light": "img/park/items/park_base_light.svg", "dark": "img/park/items/park_base_dark.svg"}],
+    "layers": [{"key": "base", "light": "ui/park/base-light.svg", "dark": "ui/park/base-dark.svg"}],
     "under_tree": null,
     "visitor_slots": ["v_jogger_grass"],
     "friends": [{"username": "sam", "display_name": "Sam", "avatar_url": "/static/uploads/avatars/sam.png", "slot": "v_jogger_grass"}],
@@ -122,7 +122,7 @@ It reuses logic already in `profiles.roots_data()` (`/roots/data`), `plant.py` (
 - Should `/roots/data` be retired in favour of `/api/tree` later?
 
 ---
-# v0.5: mapping to `lumen/oak_kit_v3_6c/kit.json` (`version: oak-kit-3`)
+# v0.5: mapping to `(removed) oak pixel kit` (`version: oak-kit-3`)
 Replaces v0.4. The server sends **logical choices only**; the client composes pixels from kit.json. Rules from the kit `notes`: each piece's `attach_px` goes on the previous `tip_px`, the first piece goes on `socket_px` (authoritative, 2048 canvas), and pieces rotate about `attach_px` (angle > 0 = clockwise). Draw order: roots, `trunk_flare`, `trunk`, branches (each chain drawn tip to base), canopy clumps, flowers.
 
 Top level adds `kit_version: "oak-kit-3"`, `stage` (1..3), `stage_scale` (1.0 / 1.1), `stage_boost` (bool).

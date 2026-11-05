@@ -5,14 +5,14 @@
     python3 scripts/build_webp.py static/img/new_kit --scale 0.5
     python3 scripts/build_webp.py --check         # exit 1 if any .webp is missing/stale
 
-Works on ANY kit: every *.png under the given dirs (default static/img/oak_kit, static/img/soil_v1f)
+Works on ANY kit: every *.png under the given dirs (pass dirs explicitly; oak pixel kit removed)
 becomes <name>.webp beside it, plus every kit.json is minified in place (same data, no whitespace).
 
 Why scale 0.5: pieces are laid out from kit.json `size` (world px) and drawn with explicit CSS
 width/height, so the file's pixel size never changes layout. Measured (perf_r1, WebKit 390@2x and
 1440@2x): the largest on-screen size of any kit piece is <=0.35 of its native PNG (trunk_core
 2048px -> 644 CSS px at 1440), i.e. 0.5 keeps >=2x phone and >=1.4x desktop-retina headroom.
-soil_v1f bands keep scale 1.0 (full-width CSS backgrounds). Pieces smaller than --min-px on their long side are left at native size. Alpha is kept
+Pieces smaller than --min-px on their long side are left at native size. Alpha is kept
 (alpha_quality 100, exact=True keeps RGB under transparent pixels for clean edges).
 Skips files whose .webp is newer than the .png (use --force to rebuild).
 """
@@ -21,7 +21,7 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # dir -> scale. Soil/grass bands are stretched full-width as CSS backgrounds, so they keep native size.
-DEFAULT_DIRS = {'static/img/oak_kit': 0.5, 'static/img/soil_v1f': 1.0}
+DEFAULT_DIRS = {}  # oak pixel kit removed
 
 
 def convert(src, dst, scale, quality, min_px):
@@ -48,7 +48,7 @@ def minify_json(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('dirs', nargs='*')
-    ap.add_argument('--scale', type=float, default=None, help='override (default 0.5, soil_v1f 1.0)')
+    ap.add_argument('--scale', type=float, default=None, help='override scale for all dirs')
     ap.add_argument('--quality', type=int, default=90)
     ap.add_argument('--min-px', type=int, default=64)
     ap.add_argument('--force', action='store_true')

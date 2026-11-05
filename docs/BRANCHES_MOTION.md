@@ -1,7 +1,7 @@
 # Branches: motion spec
 
 Two moments, both built on transform and opacity only (compositor-friendly on iPhone).
-Code: `static/js/garden.js` (Branches view section). Art: `static/garden/branch/`.
+Code: `static/ui/js/garden.js` (Branches view section). Art: `static/garden/branch/`.
 
 ## 1. Tree → Branches (once per visit)
 

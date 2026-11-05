@@ -1,0 +1,42 @@
+{
+ "id": "maple",
+ "leaf_color": "#C2401F",
+ "flower_color": "#E85A3A",
+ "bark_color": "#7A4B2C",
+ "leaf_shape": "trees/species/maple_leaf.svg",
+ "flower_shape": "trees/species/maple_flower.svg",
+ "bark": {
+  "lit": "#B07A4E",
+  "base": "#7A4B2C",
+  "shadow": "#3F2615"
+ },
+ "leaf": {
+  "path": "trees/species/maple_leaf.svg",
+  "symbol": "palmate",
+  "base": "#C2401F",
+  "tip": "#F08A3C",
+  "midrib": "#FFE2C2",
+  "scale": 1.0
+ },
+ "flower": {
+  "path": "trees/species/maple_flower.svg",
+  "symbol": "classic5",
+  "petal": "#E85A3A",
+  "center": "#F4C95D",
+  "density": 0.0,
+  "scale": 0.8
+ },
+ "leafDensity": 1.0,
+ "blooms": false,
+ "bloom_color": null,
+ "bloom_stages": [
+  "shop/bloom/maple_leaf_1.svg",
+  "shop/bloom/maple_leaf_2.svg",
+  "shop/bloom/maple_leaf_3.svg",
+  "shop/bloom/maple_leaf_4.svg"
+ ],
+ "mini": {
+  "leaf_scale_mult": 1.3,
+  "leaf_density_mult": 0.7
+ }
+}

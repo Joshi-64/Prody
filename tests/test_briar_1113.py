@@ -32,7 +32,7 @@ def test_11_rail_and_dot_use_class_colour():
     dot = class_dot_colour(COLOR)
     assert html.count(f'class="ct-rail" aria-hidden="true" style="background:{dot}"') == 2
     assert 'u-urgent' not in html
-    css = open(os.path.join(ROOT, 'static/css/caltodo.css')).read()
+    css = open(os.path.join(ROOT, 'static/ui/css/caltodo.css')).read()
     assert '.ct-dcard.u-urgent .ct-rail' not in css and re.search(r'caltodo\.css\?v=[0-9a-f]{10}', html)  # perf_r1: content-hashed URL
 
 

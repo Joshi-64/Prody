@@ -9,14 +9,14 @@ def _zen():
     return client_for(make_user()).get('/zen').get_data(as_text=True)
 
 
-def test_picker_offers_only_tulip():
+def test_picker_offers_tulip_and_pink_rose():
     html = _zen()
     pick = re.search(r'<div class="zfl-pick".*?</div>', html, re.S).group(0)
     labels = re.findall(r'role="radio"[^>]*>([^<]+)</button>', pick)
-    assert labels == ['Yellow tulip']
-    assert 'peony' not in pick.lower() and 'rose' not in pick.lower() and 'Pink' not in pick
-    # saved peony must fall back to tulip
-    assert "if(f!=='tulip')f='tulip'" in html
+    assert labels == ['Yellow tulip', 'Pink rose']
+    assert 'peony' not in pick.lower() and 'Pink peony' not in pick
+    # saved peony migrates to camellia; unknown falls back to tulip
+    assert "f==='peony'" in html and 'camellia' in html
 
 
 def test_fullscreen_hides_droplet_and_close_buttons():
@@ -91,3 +91,12 @@ def test_buddy_empty_has_no_welcome_bubble():
     html = client_for(uid).get('/buddy').get_data(as_text=True)
     assert 'class="msg-row"' not in html
     assert "Hi, I'm" not in html
+
+
+def test_fullscreen_zfl_win_no_square_frame():
+    """Design: flower sits on scene in fullscreen — transparent win, no rounded square."""
+    html = _zen()
+    rule = [ln for ln in html.splitlines() if 'html.zen-full .zfl-win,html.clay.is-zen.zen-full .zfl-win{' in ln][0]
+    assert 'background:transparent' in rule
+    assert 'border-radius:20px' not in rule
+    assert 'rgba(255,255,255,.06)' not in rule

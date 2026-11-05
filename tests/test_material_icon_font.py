@@ -5,8 +5,8 @@ import re
 import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FONT = os.path.join(ROOT, 'static', 'fonts', 'material-symbols-rounded-subset.woff2')
-CSS = os.path.join(ROOT, 'static', 'css', 'fonts.css')
+FONT = os.path.join(ROOT, 'static', 'ui', 'fonts', 'material-symbols-rounded-subset.woff2')
+CSS = os.path.join(ROOT, 'static', 'ui', 'css', 'fonts.css')
 
 
 def _icon_names_from_css():
