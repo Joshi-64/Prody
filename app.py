@@ -4,9 +4,8 @@ import re
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from calendar_routes import calendar_bp  # adds calendar functionality
 from user_courses import user_courses_bp  # adds course upload functionality
 from tasks import tasks_bp
@@ -218,6 +217,11 @@ def index():
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))  # landing.html parked per Leader
 
+@app.route('/sw.js')
+def service_worker():
+    resp = send_from_directory(app.static_folder, 'sw.js', mimetype='application/javascript')
+    resp.headers['Cache-Control'] = 'no-cache'
+    return resp
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
