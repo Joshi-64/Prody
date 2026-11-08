@@ -17,7 +17,14 @@ if(q){var f=function(e){if(!saved())apply(e.matches?'dark':'light');};q.addEvent
   <link rel="stylesheet" href="/static/ui/css/fonts.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='ui/css/app.css') }}?v=31">
   <link rel="stylesheet" href="{{ url_for('static', filename='ui/css/shell.css') }}?v=10">
-  <script src="/static/ui/vendor/canvas-confetti-1.9.3.min.js" defer></script>
+  <script src="/static/ui/vendor/canvas-confetti-1.9.3.min.js" defer></script> 
+  <style>
+  html,body{overflow-x:clip}
+  @media (display-mode:standalone){
+    html{scrollbar-width:none}
+    ::-webkit-scrollbar{display:none}
+  }
+  </style>
   {% block head %}{% endblock %}
 </head>
 <body>
